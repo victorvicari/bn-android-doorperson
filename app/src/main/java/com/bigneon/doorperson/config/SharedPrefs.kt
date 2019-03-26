@@ -9,12 +9,12 @@ import com.bigneon.doorperson.config.AppConstants.Companion.PREFS_FILENAME
  * Created by SRKI-ST on 22.03.2019..
  ****************************************************/
 object SharedPrefs {
-    fun getProperty(context: Context, key : String): String? {
+    fun getProperty(context: Context, key: String): String? {
         val prefs = context.getSharedPreferences(PREFS_FILENAME, 0)
         return prefs.getString(key, "")
     }
 
-    fun setProperty(context: Context, key: String, value : String) {
+    fun setProperty(context: Context, key: String, value: String) {
         val prefs = context.getSharedPreferences(PREFS_FILENAME, 0)
         val editor = prefs.edit()
         editor.putString(key, value)

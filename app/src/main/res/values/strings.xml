@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
     <string name="app_name">BigNeon - Door person</string>
     <string name="title_activity_main">Door person</string>
     <string name="welcome_back">Welcome back!</string>
@@ -8,4 +8,15 @@
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
     <string name="event_image">Event image</string>
     <string name="event_right_arrow">Event right arrow</string>
+    <string name="title_activity_scanning_event">ScanningEventActivity</string>
+    <string name="back_button">Back button</string>
+    <string name="back_button_events_title">Login</string>
+    <string name="back_button_scanning_event_title">Manage events</string>
+    <string name="events_back_button">Events back button</string>
+    <string name="manage_events">Manage events</string>
+    <string name="scanning_event">Scanning Event</string>
+    <string name="scan_tickets">Scan Tickets</string>
+    <string name="_1_d_of_2_d_redeemed">%1$d of %2$d redeemed</string>
+    <string name="scan_tickets_icon">Scan tickets icon</string>
+    <string name="calculating">Calculating…</string>
 </resources>

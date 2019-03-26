@@ -5,7 +5,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activity.EventsActivity">
+        tools:context=".activity.ScanningEventActivity">
 
     <android.support.design.widget.AppBarLayout
             android:layout_height="wrap_content"
@@ -13,26 +13,17 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-                android:id="@+id/events_toolbar"
+                android:id="@+id/scanning_events_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:contentInsetLeft="0dp"
                 app:contentInsetStart="0dp"
                 android:background="@color/colorWhite"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
-
-            <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="@string/manage_events"
-                    android:gravity="center"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="16sp"
-                    android:id="@+id/events_toolbar_title"/>
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_events"/>
+    <include layout="@layout/content_scanning_event"/>
 
 </android.support.design.widget.CoordinatorLayout>

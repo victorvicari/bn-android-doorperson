@@ -11,8 +11,8 @@ import com.bigneon.doorperson.config.AppConstants.Companion.ACCESS_TOKEN
 import com.bigneon.doorperson.config.AppConstants.Companion.REFRESH_TOKEN
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.model.AuthRequest
-import com.bigneon.doorperson.rest.model.AuthToken
+import com.bigneon.doorperson.rest.request.AuthRequest
+import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import kotlinx.android.synthetic.main.activity_login.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,7 +32,11 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-    fun btnLoginClick(view : View) {
+    fun btnLoginClick(view: View) {
+        btnLoginClick()
+    }
+
+    fun btnLoginClick() {
 
         try {
             val authRequest = AuthRequest()
@@ -40,11 +44,11 @@ class LoginActivity : AppCompatActivity() {
             authRequest.password = if (password.text != null) password.text.toString() else ""
             val authTokenCall = RestAPI.client().authenticate(authRequest)
 
-            val callbackAuthToken = object : Callback<AuthToken> {
-                override fun onResponse(call: Call<AuthToken>, response: Response<AuthToken>) {
+            val callbackAuthToken = object : Callback<AuthTokenResponse> {
+                override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
                     if (response.body() != null) {
-                        SharedPrefs.setProperty(getContext(), ACCESS_TOKEN, response.body()!!.access_token.orEmpty())
-                        SharedPrefs.setProperty(getContext(), REFRESH_TOKEN, response.body()!!.refresh_token.orEmpty())
+                        SharedPrefs.setProperty(getContext(), ACCESS_TOKEN, response.body()!!.accessToken.orEmpty())
+                        SharedPrefs.setProperty(getContext(), REFRESH_TOKEN, response.body()!!.refreshToken.orEmpty())
 
                         startActivity(Intent(getContext(), EventsActivity::class.java))
                     } else {
@@ -54,14 +58,10 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<AuthToken>, t: Throwable) {
+                override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
                     Snackbar
                         .make(login_layout, "Authentication error!", Snackbar.LENGTH_LONG)
-                        .setAction("RETRY", object : View.OnClickListener {
-                            override fun onClick(view: View) {
-                                btnLoginClick(view)
-                            }
-                        }).setDuration(5000).show()
+                        .setAction("RETRY") { btnLoginClick() }.setDuration(5000).show()
                 }
             }
 

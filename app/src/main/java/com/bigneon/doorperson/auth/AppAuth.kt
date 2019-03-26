@@ -10,7 +10,7 @@ import com.bigneon.doorperson.config.SharedPrefs
  * Created by SRKI-ST on 20.03.2019..
  ****************************************************/
 object AppAuth {
-    fun getAccessToken(context : Context) : String {
+    fun getAccessToken(context: Context): String {
         return "Bearer " + SharedPrefs.getProperty(context, AppConstants.ACCESS_TOKEN).orEmpty()
     }
 }

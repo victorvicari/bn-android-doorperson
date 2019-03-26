@@ -13,9 +13,6 @@ import retrofit2.converter.gson.GsonConverterFactory
  * Created by SRKI-ST on 20.03.2019..
  ****************************************************/
 class RestAPI private constructor() {
-//    internal var email: String? = null
-//    internal var password: String? = null
-
     private val client: RestClient
 
     private object Loader {

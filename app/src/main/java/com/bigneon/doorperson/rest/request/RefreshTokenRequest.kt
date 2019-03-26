@@ -1,4 +1,6 @@
-package com.bigneon.doorperson.rest.model
+package com.bigneon.doorperson.rest.request
+
+import com.google.gson.annotations.SerializedName
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -6,5 +8,6 @@ package com.bigneon.doorperson.rest.model
  * Created by SRKI-ST on 20.03.2019..
  ****************************************************/
 class RefreshTokenRequest {
-    internal var refresh_token: String? = null
+    @SerializedName("refresh_token")
+    internal var refreshToken: String? = null
 }

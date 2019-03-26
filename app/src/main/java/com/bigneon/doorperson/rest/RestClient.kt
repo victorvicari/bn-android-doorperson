@@ -1,14 +1,12 @@
 package com.bigneon.doorperson.rest
 
-import com.bigneon.doorperson.rest.model.AuthRequest
-import com.bigneon.doorperson.rest.model.AuthToken
-import com.bigneon.doorperson.rest.model.EventsResponse
-import com.bigneon.doorperson.rest.model.RefreshTokenRequest
+import com.bigneon.doorperson.rest.request.AuthRequest
+import com.bigneon.doorperson.rest.request.RefreshTokenRequest
+import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.GuestsResponse
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 
 
 /****************************************************
@@ -18,13 +16,19 @@ import retrofit2.http.POST
  ****************************************************/
 interface RestClient {
     @POST("auth/token")
-    fun authenticate(@Body authRequest: AuthRequest): Call<AuthToken>
+    fun authenticate(@Body authRequest: AuthRequest): Call<AuthTokenResponse>
 
     @POST("auth/token/refresh")
-    fun refreshToken(@Body refreshTokenRequest: RefreshTokenRequest): Call<AuthToken>
+    fun refreshToken(@Body refreshTokenRequest: RefreshTokenRequest): Call<AuthTokenResponse>
 
     @GET("events/checkins")
-    fun getScannableEvents(@Header("Authorization") token : String) : Call<EventsResponse>
+    fun getScannableEvents(@Header("Authorization") token: String): Call<EventsResponse>
+
+//    @GET("events/{eventId}/guests")
+//    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
+
+    @GET("events/{eventId}/guests?query=")
+    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
 
 //    @Headers("Content-Type: application/json;charset=UTF-8")
 //    @GET("tickets")
