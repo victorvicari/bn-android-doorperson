@@ -57,4 +57,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'exifinterface'
     })
 
+    implementation('me.dm7.barcodescanner:zxing:1.9', {
+        exclude module: 'support-v4'
+    })
+
 }

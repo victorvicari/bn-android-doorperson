@@ -20,6 +20,7 @@ import retrofit2.Response
 
 class ScanningEventActivity : AppCompatActivity() {
     private val TAG = ScanningEventActivity::class.java.simpleName
+    private var eventId: String = ""
 
     private fun getContext(): Context {
         return this
@@ -43,12 +44,19 @@ class ScanningEventActivity : AppCompatActivity() {
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
         }
-        val eventId: String = intent.getStringExtra("eventId")
-        getGuestsForEvent(eventId)
 
+        getGuestsForEvent()
+
+        scanning_events_button.setOnClickListener {
+            val intent = Intent(getContext(), ScanTicketsActivity::class.java)
+            intent.putExtra("eventId", eventId)
+            startActivity(intent)
+        }
     }
 
-    private fun getGuestsForEvent(eventId: String) {
+    private fun getGuestsForEvent() {
+        eventId = intent.getStringExtra("eventId")
+
         val getGuestsForEventCall =
             RestAPI.client().getGuestsForEvent(AppAuth.getAccessToken(getContext()), eventId, null)
         val callbackGetScannableEvents = object : Callback<GuestsResponse> {
