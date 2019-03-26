@@ -3,24 +3,45 @@
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:id="@+id/list_item_event_layout"
-                android:layout_height="match_parent">
-    <ImageView android:layout_width="100dp" android:layout_height="100dp"
-               android:id="@+id/event_image"
-               android:src="@drawable/heart_large"
-               android:contentDescription="@string/event_image"
-               android:padding="5dp"/>
-    <TextView android:layout_width="match_parent" android:layout_height="100dp"
-              android:text="TEST TEXT"
-              android:textSize="20sp"
-              android:id="@+id/event_name"
-              android:layout_toEndOf="@+id/event_image"
-              android:layout_toStartOf="@+id/event_right_arrow"
-              android:paddingStart="10dp"
-              android:paddingEnd="10dp"
-              android:gravity="center_vertical"/>
-    <ImageView android:layout_width="20dp" android:layout_height="100dp"
-               android:id="@+id/event_right_arrow"
-               android:contentDescription="@string/event_right_arrow"
-               android:src="@drawable/ic_right_arrow"
-               android:layout_alignParentEnd="true"/>
+                android:layout_height="match_parent"
+                android:background="@color/colorGray">
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/event_item_bg"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp">
+
+        <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:id="@+id/event_image"
+                android:src="@color/colorBlack"
+                android:contentDescription="@string/event_image"/>
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:id="@+id/event_name"
+                android:layout_toEndOf="@+id/event_image"
+                android:layout_toStartOf="@+id/event_right_arrow"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="10dp"
+                android:gravity="center_vertical"/>
+
+        <ImageView
+                android:layout_width="20dp"
+                android:layout_height="100dp"
+                android:id="@+id/event_right_arrow"
+                android:contentDescription="@string/event_right_arrow"
+                android:src="@drawable/right_arrow"
+                android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
 </RelativeLayout>
