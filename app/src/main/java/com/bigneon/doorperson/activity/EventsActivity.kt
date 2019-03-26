@@ -24,6 +24,7 @@ import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.content_events.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -123,7 +124,7 @@ class EventsActivity : AppCompatActivity() {
                         startActivity(Intent(getContext(), EventsActivity::class.java))
                     } else {
                         Snackbar
-                            .make(login_layout, "Refresh token is not valid!", Snackbar.LENGTH_LONG)
+                            .make(scanning_events_layout, "Refresh token is not valid!", Snackbar.LENGTH_LONG)
                             .setDuration(5000).show()
                         Log.e(TAG, "MSG:" + response.message() + ", CODE: " + response.code())
                     }

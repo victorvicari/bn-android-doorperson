@@ -19,4 +19,8 @@
     <string name="_1_d_of_2_d_redeemed">%1$d of %2$d redeemed</string>
     <string name="scan_tickets_icon">Scan tickets icon</string>
     <string name="calculating">Calculating…</string>
+    <string name="check_in_mode">Check-in Mode:</string>
+    <string name="manual">MANUAL</string>
+    <string name="automatic">AUTOMATIC</string>
+    <string name="guest_list">Guest List</string>
 </resources>
