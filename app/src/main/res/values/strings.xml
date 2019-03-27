@@ -1,0 +1,29 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
+    <string name="app_name">BigNeon - Door person</string>
+    <string name="title_activity_main">Door person</string>
+    <string name="welcome_back">Welcome back!</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="login_to_your_account_lowercase">Login to your account</string>
+    <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
+    <string name="event_image">Event image</string>
+    <string name="event_right_arrow">Event right arrow</string>
+    <string name="title_activity_scanning_event">ScanningEventActivity</string>
+    <string name="back_button">Back button</string>
+    <string name="back_button_events_title">Login</string>
+    <string name="back_button_scanning_event_title">Manage events</string>
+    <string name="back_button_login_title">Exit</string>
+    <string name="back_button_guest_list_title">Scan Tickets</string>
+    <string name="events_back_button">Events back button</string>
+    <string name="manage_events">Manage events</string>
+    <string name="scanning_event">Scanning Event</string>
+    <string name="scan_tickets">Scan Tickets</string>
+    <string name="_1_d_of_2_d_redeemed">%1$d of %2$d redeemed</string>
+    <string name="scan_tickets_icon">Scan tickets icon</string>
+    <string name="calculating">Calculating…</string>
+    <string name="check_in_mode">Check-in Mode:</string>
+    <string name="manual">MANUAL</string>
+    <string name="automatic">AUTOMATIC</string>
+    <string name="guest_list">Guest List</string>
+    <string name="exit_scan_tickets">Exit scan tickets</string>
+</resources>
