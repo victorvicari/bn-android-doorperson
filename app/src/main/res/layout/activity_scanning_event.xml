@@ -18,6 +18,9 @@
                 android:layout_height="match_parent"
                 app:contentInsetLeft="0dp"
                 app:contentInsetStart="0dp"
+                app:title="@string/back_button_scanning_event_title"
+                app:titleTextColor="@color/colorAccent"
+                app:titleTextAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
                 android:background="@color/colorWhite"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
         </android.support.v7.widget.Toolbar>

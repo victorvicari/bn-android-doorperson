@@ -12,6 +12,8 @@
     <string name="back_button">Back button</string>
     <string name="back_button_events_title">Login</string>
     <string name="back_button_scanning_event_title">Manage events</string>
+    <string name="back_button_login_title">Exit</string>
+    <string name="back_button_guest_list_title">Scan Tickets</string>
     <string name="events_back_button">Events back button</string>
     <string name="manage_events">Manage events</string>
     <string name="scanning_event">Scanning Event</string>
@@ -23,4 +25,5 @@
     <string name="manual">MANUAL</string>
     <string name="automatic">AUTOMATIC</string>
     <string name="guest_list">Guest List</string>
+    <string name="exit_scan_tickets">Exit scan tickets</string>
 </resources>

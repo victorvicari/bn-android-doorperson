@@ -2,11 +2,14 @@ package com.bigneon.doorperson.activity
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants.Companion.ACCESS_TOKEN
 import com.bigneon.doorperson.config.AppConstants.Companion.REFRESH_TOKEN
 import com.bigneon.doorperson.config.SharedPrefs
@@ -14,22 +17,34 @@ import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.content_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 class LoginActivity : AppCompatActivity() {
     private val TAG = LoginActivity::class.java.simpleName
 
-    fun getContext(): Context {
+    private fun getContext(): Context {
         return this
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_login)
+        setSupportActionBar(login_toolbar)
 
+        //this line shows back button
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        login_toolbar.navigationIcon!!.setColorFilter(
+            ContextCompat.getColor(getContext(), R.color.colorBlack),
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        login_toolbar.setNavigationOnClickListener {
+            finishAffinity() // Exit the app
+        }
     }
 
     fun btnLoginClick(view: View) {

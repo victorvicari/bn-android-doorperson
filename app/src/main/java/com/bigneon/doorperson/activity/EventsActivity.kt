@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -23,8 +24,8 @@ import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
 import kotlinx.android.synthetic.main.activity_events.*
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.content_events.*
+import kotlinx.android.synthetic.main.content_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -47,11 +48,9 @@ class EventsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         events_toolbar.navigationIcon!!.setColorFilter(
-            resources.getColor(com.bigneon.doorperson.R.color.colorAccent),
+            ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
-
-        events_toolbar.navigationContentDescription = getString(R.string.back_button_events_title)
 
         events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), LoginActivity::class.java))
