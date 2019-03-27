@@ -18,17 +18,20 @@
                 android:layout_height="match_parent"
                 app:contentInsetLeft="0dp"
                 app:contentInsetStart="0dp"
+                app:title="@string/back_button_events_title"
+                app:titleTextColor="@color/colorAccent"
+                app:titleTextAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
                 android:background="@color/colorWhite"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
             <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/manage_events"
-                    android:gravity="center"
                     android:textColor="@color/colorBlack"
                     android:textSize="16sp"
-                    android:id="@+id/events_toolbar_title"/>
+                    android:layout_gravity="center"
+                    android:background="@color/colorWhite"/>
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>

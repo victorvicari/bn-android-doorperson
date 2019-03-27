@@ -12,5 +12,9 @@ interface AppConstants {
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
         const val ACCESS_TOKEN = "access_token"
         const val REFRESH_TOKEN = "refresh_token"
+
+        const val CHECK_IN_MODE = "check_in_mode"
+        const val CHECK_IN_MODE_MANUAL = "M"
+        const val CHECK_IN_MODE_AUTOMATIC = "A"
     }
 }

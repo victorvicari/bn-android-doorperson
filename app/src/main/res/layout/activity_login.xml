@@ -1,74 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+<android.support.design.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activity.LoginActivity">
 
-    <LinearLayout
-            android:id="@+id/login_layout"
-            android:layout_width="match_parent"
+    <android.support.design.widget.AppBarLayout
+            android:id="@+id/login_appbar"
             android:layout_height="wrap_content"
-            android:background="@color/colorWhite"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.AppCompatTextView
+        <android.support.v7.widget.Toolbar
+                android:id="@+id/login_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:gravity="center"
-                android:text="@string/welcome_back"
-                android:textColor="@android:color/black"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:layout_height="match_parent"
+                app:contentInsetLeft="0dp"
+                app:contentInsetStart="0dp"
+                app:title="@string/back_button_login_title"
+                app:titleTextAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
+                app:titleTextColor="@color/colorBlack"
+                android:background="@color/colorWhite"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+        </android.support.v7.widget.Toolbar>
 
-        <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/email_address"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginStart="@dimen/fab_margin"
-                android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginBottom="30dp"
-                android:background="@color/edit_text_background"
-                android:hint="@string/email_address"
-                android:inputType="text"
-                android:paddingStart="30dp"
-                android:paddingEnd="0dp"
-                android:textSize="16sp"/>
+    </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/password"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginStart="@dimen/fab_margin"
-                android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginBottom="30dp"
-                android:background="@color/edit_text_background"
-                android:hint="@string/password"
-                android:inputType="text"
-                android:paddingStart="30dp"
-                android:paddingEnd="0dp"
-                android:textSize="16sp"/>
+    <include layout="@layout/content_login"/>
 
-        <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/loginBtn"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginLeft="@dimen/fab_margin"
-                android:layout_marginRight="@dimen/fab_margin"
-                android:background="@drawable/button_border_1"
-                android:gravity="center"
-                android:onClick="btnLoginClick"
-                android:text="@string/login_to_your_account_lowercase"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-        <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/reset_your_password"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:text="@string/reset_your_password"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
-    </LinearLayout>
-</ScrollView>
-
+</android.support.design.widget.CoordinatorLayout>
