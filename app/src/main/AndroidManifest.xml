@@ -18,6 +18,10 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
+                android:name=".activity.GuestActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
                 android:name=".activity.GuestListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
