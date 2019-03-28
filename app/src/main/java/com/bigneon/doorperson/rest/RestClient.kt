@@ -3,6 +3,7 @@ package com.bigneon.doorperson.rest
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.DashboardResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
 import com.bigneon.doorperson.rest.response.GuestsResponse
 import retrofit2.Call
@@ -23,6 +24,10 @@ interface RestClient {
 
     @GET("events/checkins")
     fun getScannableEvents(@Header("Authorization") token: String): Call<EventsResponse>
+
+    @GET("events/{eventId}/dashboard")
+    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String): Call<DashboardResponse>
+
 
 //    @GET("events/{eventId}/guests")
 //    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>

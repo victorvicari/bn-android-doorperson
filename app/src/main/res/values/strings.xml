@@ -24,6 +24,11 @@
     <string name="check_in_mode">Check-in Mode:</string>
     <string name="manual">MANUAL</string>
     <string name="automatic">AUTOMATIC</string>
-    <string name="guest_list">Guest List</string>
     <string name="exit_scan_tickets">Exit scan tickets</string>
+    <string name="search_for_guests">Search for guests</string>
+    <string name="redeemed">REDEEMED</string>
+    <string name="purchased">PURCHASED</string>
+    <string name="last_name_first_name">%1$s, %2$s</string>
+    <string name="price_ticket_type">$%1$d | %2$s</string>
+    <string name="guest_list">Guest List</string>
 </resources>

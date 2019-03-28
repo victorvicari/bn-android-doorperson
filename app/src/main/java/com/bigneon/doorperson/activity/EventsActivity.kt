@@ -75,8 +75,7 @@ class EventsActivity : AppCompatActivity() {
                         val eventsListView: RecyclerView = findViewById(com.bigneon.doorperson.R.id.events_list_view)
                         val eventList = response.body()!!.data
 
-                        val layoutManager = LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
-                        eventsListView.layoutManager = layoutManager
+                        eventsListView.layoutManager = LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
                         eventsListView.adapter = EventListAdapter(eventList!!)
 

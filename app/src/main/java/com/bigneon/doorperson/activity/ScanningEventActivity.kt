@@ -11,7 +11,7 @@ import android.util.Log
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.auth.AppAuth
 import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.response.GuestsResponse
+import com.bigneon.doorperson.rest.response.DashboardResponse
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 import retrofit2.Call
@@ -31,6 +31,8 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
+        eventId = intent.getStringExtra("eventId")
+
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -43,7 +45,7 @@ class ScanningEventActivity : AppCompatActivity() {
             startActivity(Intent(getContext(), EventsActivity::class.java))
         }
 
-        getGuestsForEvent()
+        getDashboardForEvent()
 
         scanning_events_button.setOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
@@ -52,31 +54,26 @@ class ScanningEventActivity : AppCompatActivity() {
         }
     }
 
-    private fun getGuestsForEvent() {
-        eventId = intent.getStringExtra("eventId")
-
-        val getGuestsForEventCall =
-            RestAPI.client().getGuestsForEvent(AppAuth.getAccessToken(getContext()), eventId, null)
-        val callbackGetScannableEvents = object : Callback<GuestsResponse> {
-            override fun onResponse(call: Call<GuestsResponse>, response: Response<GuestsResponse>) {
+    private fun getDashboardForEvent() {
+        val getDashboardForEventCall =
+            RestAPI.client().getDashboardForEvent(AppAuth.getAccessToken(getContext()), eventId)
+        val callbackGetDashboardForEvent = object : Callback<DashboardResponse> {
+            override fun onResponse(call: Call<DashboardResponse>, response: Response<DashboardResponse>) {
                 if (response.code() == 401) { //Unauthorized
                     Snackbar
                         .make(scanning_events_layout, "Unauthorized request!", Snackbar.LENGTH_LONG)
                         .setDuration(5000).show()
                     Log.e(TAG, "MSG:" + response.message() + ", CODE: " + response.code())
                 } else {
-                    val purNumber = response.body()!!.data?.stream()
-                        ?.filter { g -> g.status.equals("Purchased") }
-                        ?.count()
-                    val redNumber = response.body()!!.data?.stream()
-                        ?.filter { g -> g.status.equals("Redeemed") }
-                        ?.count()
-                    val purAndRedNumber = purNumber!!.plus(redNumber!!)
-                    number_of_redeemed.text = getString(R.string._1_d_of_2_d_redeemed, redNumber, purAndRedNumber)
+                    val ticketsRedeemed = response.body()!!.event?.ticketsRedeemed ?: 0
+                    val soldHeld = response.body()!!.event?.soldHeld ?: 0
+                    val soldUnreserved = response.body()!!.event?.soldUnreserved ?: 0
+                    number_of_redeemed.text =
+                        getString(R.string._1_d_of_2_d_redeemed, ticketsRedeemed, soldHeld + soldUnreserved)
                 }
             }
 
-            override fun onFailure(call: Call<GuestsResponse>, t: Throwable) {
+            override fun onFailure(call: Call<DashboardResponse>, t: Throwable) {
                 Snackbar
                     .make(scanning_events_layout, "Authentication error!", Snackbar.LENGTH_LONG)
                     .setAction(
@@ -85,6 +82,6 @@ class ScanningEventActivity : AppCompatActivity() {
                 Log.e(TAG, "Failure MSG:" + t.message)
             }
         }
-        getGuestsForEventCall.enqueue(callbackGetScannableEvents)
+        getDashboardForEventCall.enqueue(callbackGetDashboardForEvent)
     }
 }
