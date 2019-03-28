@@ -76,7 +76,14 @@ class GuestListActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        getGuestsForEvent()
+        val searchGuestText = intent.getStringExtra("searchGuestText")
+        if (searchGuestText != null) {
+            search_guest.setText(searchGuestText)
+            searchTextChanged = true
+            adaptListView()
+        } else {
+            getGuestsForEvent()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -107,8 +114,18 @@ class GuestListActivity : AppCompatActivity() {
 
                     guestListView?.addOnItemClickListener(object : OnItemClickListener {
                         override fun onItemClicked(position: Int, view: View) {
+
+                            val filteredList =
+                                if (finallyFilteredGuestList.size > 0) finallyFilteredGuestList else guestList
                             val intent = Intent(getContext(), GuestActivity::class.java)
                             intent.putExtra("eventId", eventId)
+                            intent.putExtra("searchGuestText", search_guest.text.toString())
+                            intent.putExtra("id", filteredList?.get(position)?.id)
+                            intent.putExtra("firstName", filteredList?.get(position)?.firstName)
+                            intent.putExtra("lastName", filteredList?.get(position)?.lastName)
+                            intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
+                            intent.putExtra("ticketType", filteredList?.get(position)?.ticketType)
+                            intent.putExtra("status", filteredList?.get(position)?.status)
                             startActivity(intent)
                         }
                     })
@@ -140,6 +157,7 @@ class GuestListActivity : AppCompatActivity() {
                 )
             } as ArrayList<GuestModel>
             filteredGuestList.forEach { if (it !in finallyFilteredGuestList) finallyFilteredGuestList.add(it) }
+            finallyFilteredGuestList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
         }
         searchTextChanged = true
         adaptListView()
