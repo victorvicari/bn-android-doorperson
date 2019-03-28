@@ -2,6 +2,7 @@ package com.bigneon.doorperson.activity
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -31,7 +32,13 @@ class GuestListActivity : AppCompatActivity() {
     private val TAG = GuestListActivity::class.java.simpleName
     private var eventId: String = ""
     private var guestListView: RecyclerView? = null
-    private var guestList: ArrayList<GuestModel>? = null
+
+    companion object {
+        private var searchTextChanged: Boolean = false
+        private var screenRotation: Boolean = false
+        private var guestList: ArrayList<GuestModel>? = null
+        private val finallyFilteredGuestList = ArrayList<GuestModel>()
+    }
 
     private fun getContext(): Context {
         return this
@@ -43,39 +50,20 @@ class GuestListActivity : AppCompatActivity() {
 
         setSupportActionBar(guest_list_toolbar)
 
-        eventId = intent.getStringExtra("eventId")
-
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        search_guest.addTextChangedListener(object : TextWatcher {
+        search_guest.post {
+            search_guest.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            override fun afterTextChanged(s: Editable) {}
-
-            override fun beforeTextChanged(
-                s: CharSequence, start: Int,
-                count: Int, after: Int
-            ) {
-            }
-
-            override fun onTextChanged(
-                charSequence: CharSequence, start: Int,
-                before: Int, count: Int
-            ) {
-                val searchWords = charSequence.split(" ")
-                val finallyFilteredGuestList = ArrayList<GuestModel>()
-
-                for (word in searchWords) {
-                    val filteredGuestList = guestList?.filter {
-                        it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
-                            word.toLowerCase()
-                        )
-                    } as ArrayList<GuestModel>
-                    filteredGuestList.forEach { if (it !in finallyFilteredGuestList) finallyFilteredGuestList.add(it) }
+                override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
+                    searchTextChanged(charSequence)
                 }
-                guestListView?.adapter = GuestListAdapter(finallyFilteredGuestList)
-            }
-        })
+
+                override fun afterTextChanged(s: Editable) {}
+            })
+        }
 
         guest_list_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
@@ -91,7 +79,14 @@ class GuestListActivity : AppCompatActivity() {
         getGuestsForEvent()
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        searchTextChanged(search_guest.text.toString())
+        screenRotation = true
+    }
+
     private fun getGuestsForEvent() {
+        eventId = intent.getStringExtra("eventId")
         val getGuestsForEventCall =
             RestAPI.client().getGuestsForEvent(AppAuth.getAccessToken(getContext()), eventId, null)
         val callbackGetScannableEvents = object : Callback<GuestsResponse> {
@@ -108,7 +103,7 @@ class GuestListActivity : AppCompatActivity() {
                     guestListView?.layoutManager =
                         LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-                    guestListView?.adapter = GuestListAdapter(guestList!!)
+                    adaptListView()
 
                     guestListView?.addOnItemClickListener(object : OnItemClickListener {
                         override fun onItemClicked(position: Int, view: View) {
@@ -132,5 +127,31 @@ class GuestListActivity : AppCompatActivity() {
             }
         }
         getGuestsForEventCall.enqueue(callbackGetScannableEvents)
+    }
+
+    private fun searchTextChanged(charSequence: CharSequence) {
+        val searchWords = charSequence.split(" ")
+        finallyFilteredGuestList.clear()
+
+        for (word in searchWords) {
+            val filteredGuestList = guestList?.filter {
+                it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
+                    word.toLowerCase()
+                )
+            } as ArrayList<GuestModel>
+            filteredGuestList.forEach { if (it !in finallyFilteredGuestList) finallyFilteredGuestList.add(it) }
+        }
+        searchTextChanged = true
+        adaptListView()
+    }
+
+    private fun adaptListView() {
+        if (screenRotation || searchTextChanged) {
+            guestListView?.adapter = GuestListAdapter(finallyFilteredGuestList)
+            screenRotation = false
+            searchTextChanged = false
+        } else {
+            guestListView?.adapter = GuestListAdapter(guestList!!)
+        }
     }
 }
