@@ -77,13 +77,14 @@ class GuestListActivity : AppCompatActivity() {
         }
 
         val searchGuestText = intent.getStringExtra("searchGuestText")
-        if (searchGuestText != null) {
+        if (searchGuestText.isNullOrEmpty()) {
+            finallyFilteredGuestList.clear()
+        } else {
             search_guest.setText(searchGuestText)
             searchTextChanged = true
-            adaptListView()
-        } else {
-            getGuestsForEvent()
         }
+
+        getGuestsForEvent()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
