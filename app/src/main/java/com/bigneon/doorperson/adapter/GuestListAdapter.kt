@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bigneon.doorperson.rest.model.GuestModel
+import com.bigneon.doorperson.viewholder.GuestViewHolder
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -23,4 +24,6 @@ class GuestListAdapter(private val list: ArrayList<GuestModel>) : RecyclerView.A
     }
 
     override fun getItemCount(): Int = list.size
+
+    fun getItem(position: Int): GuestModel = list[position]
 }

@@ -1,4 +1,4 @@
-package com.bigneon.doorperson.adapter
+package com.bigneon.doorperson.viewholder
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater

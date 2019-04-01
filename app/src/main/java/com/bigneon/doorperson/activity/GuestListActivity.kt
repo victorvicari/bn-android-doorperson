@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -18,6 +19,7 @@ import com.bigneon.doorperson.adapter.GuestListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.auth.AppAuth
+import com.bigneon.doorperson.controller.SwipeController
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.GuestModel
 import com.bigneon.doorperson.rest.response.GuestsResponse
@@ -32,6 +34,7 @@ class GuestListActivity : AppCompatActivity() {
     private val TAG = GuestListActivity::class.java.simpleName
     private var eventId: String = ""
     private var guestListView: RecyclerView? = null
+    private val swipeController : SwipeController = SwipeController()
 
     companion object {
         private var searchTextChanged: Boolean = false
@@ -52,6 +55,9 @@ class GuestListActivity : AppCompatActivity() {
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val itemTouchHelper = ItemTouchHelper(swipeController)
+        itemTouchHelper.attachToRecyclerView(guest_list_view);
 
         search_guest.post {
             search_guest.addTextChangedListener(object : TextWatcher {
@@ -110,6 +116,8 @@ class GuestListActivity : AppCompatActivity() {
 
                     guestListView?.layoutManager =
                         LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+
+                    loading_guests_progress_bar.visibility = View.GONE
 
                     adaptListView()
 
@@ -171,6 +179,14 @@ class GuestListActivity : AppCompatActivity() {
             searchTextChanged = false
         } else {
             guestListView?.adapter = GuestListAdapter(guestList!!)
+        }
+
+        if(guestListView?.adapter?.itemCount!! > 0) {
+            guest_list_view.visibility = View.VISIBLE
+            no_guests_found_placeholder.visibility = View.GONE
+        } else {
+            guest_list_view.visibility = View.GONE
+            no_guests_found_placeholder.visibility = View.VISIBLE
         }
     }
 }

@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bigneon.doorperson.rest.model.EventModel
+import com.bigneon.doorperson.viewholder.EventViewHolder
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
