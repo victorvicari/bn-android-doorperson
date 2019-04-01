@@ -1,4 +1,4 @@
-package com.bigneon.doorperson.adapter
+package com.bigneon.doorperson.viewholder
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
@@ -16,11 +16,12 @@ import com.bigneon.doorperson.rest.model.GuestModel
  ****************************************************/
 class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_guest, parent, false)) {
-    private var lastNameAndFirstNameTextView: TextView? = null
+    var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
     private var redeemedStatusTextView: TextView? = null
     private var purchasedStatusTextView: TextView? = null
     private var context: Context? = null
+    var checkedIn : Boolean = false
 
     init {
         context = parent.context
@@ -38,9 +39,11 @@ class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         if (guest.status?.toLowerCase() == "redeemed") {
             redeemedStatusTextView?.visibility = View.VISIBLE
             purchasedStatusTextView?.visibility = View.GONE
+            checkedIn = true
         } else {
             redeemedStatusTextView?.visibility = View.GONE
             purchasedStatusTextView?.visibility = View.VISIBLE
+            checkedIn = false
         }
     }
 }
