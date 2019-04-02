@@ -21,7 +21,6 @@ import kotlinx.android.synthetic.main.content_guest_list.*
 
 
 class GuestListActivity : AppCompatActivity() {
-    private val TAG = GuestListActivity::class.java.simpleName
     private var eventId: String = ""
     //private var guestListView: RecyclerView? = null
     private val swipeController : SwipeController = SwipeController()
@@ -47,7 +46,7 @@ class GuestListActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val itemTouchHelper = ItemTouchHelper(swipeController)
-        itemTouchHelper.attachToRecyclerView(guest_list_view);
+        itemTouchHelper.attachToRecyclerView(guest_list_view)
 
         search_guest.post {
             search_guest.addTextChangedListener(object : TextWatcher {

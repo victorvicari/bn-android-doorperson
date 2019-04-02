@@ -24,6 +24,4 @@ class GuestListAdapter(private val list: ArrayList<GuestModel>) : RecyclerView.A
     }
 
     override fun getItemCount(): Int = list.size
-
-    fun getItem(position: Int): GuestModel = list[position]
 }

@@ -19,7 +19,7 @@ import com.bigneon.doorperson.viewholder.GuestViewHolder
  ****************************************************/
 class SwipeController : ItemTouchHelper.SimpleCallback(0, RIGHT) {
     private val TAG = SwipeController::class.java.simpleName
-    var adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>? = null
+    private var adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>? = null
     var context: Context? = null
     private var swipeBack = false
 
@@ -64,10 +64,10 @@ class SwipeController : ItemTouchHelper.SimpleCallback(0, RIGHT) {
 
     override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
         if (swipeBack) {
-            swipeBack = false;
-            return 0;
+            swipeBack = false
+            return 0
         }
-        return super.convertToAbsoluteDirection(flags, layoutDirection);
+        return super.convertToAbsoluteDirection(flags, layoutDirection)
     }
 
     override fun onChildDraw(
@@ -100,9 +100,8 @@ class SwipeController : ItemTouchHelper.SimpleCallback(0, RIGHT) {
                 itemView.bottom.toFloat(), p
             )
 
-            val myViewHolder = viewHolder as GuestViewHolder
             ItemTouchHelper.Callback.getDefaultUIUtil()
-                .onDraw(c, recyclerView, myViewHolder.itemView, dX, dY, actionState, isCurrentlyActive)
+                .onDraw(c, recyclerView, viewHolder.itemView, dX, dY, actionState, isCurrentlyActive)
         }
     }
 }
