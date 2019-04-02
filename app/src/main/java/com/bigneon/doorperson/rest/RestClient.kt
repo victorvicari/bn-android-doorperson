@@ -35,4 +35,7 @@ interface RestClient {
 
     @POST("events/{event_id}/redeem/{ticket_id}")
     fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<RedeemResponse>
+
+    @GET("tickets/{ticket_id}")
+    fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>
 }

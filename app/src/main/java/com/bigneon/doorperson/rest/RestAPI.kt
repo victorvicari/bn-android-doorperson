@@ -20,6 +20,7 @@ import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.*
+import kotlinx.android.synthetic.main.content_guest.view.*
 import kotlinx.android.synthetic.main.content_guest_list.view.*
 import kotlinx.android.synthetic.main.content_login.view.*
 import kotlinx.android.synthetic.main.content_scanning_event.view.*
@@ -230,6 +231,8 @@ class RestAPI private constructor() {
             context: Context,
             view: View,
             eventId: String,
+            position: Int,
+            searchGuestText: String,
             adaptListView: (guestListView: RecyclerView) -> Unit
         ) {
 
@@ -251,6 +254,10 @@ class RestAPI private constructor() {
 
                         adaptListView(guestListView)
 
+                        if (position >= 0) {
+                            (guestListView.layoutManager as LinearLayoutManager).scrollToPosition(position)
+                        }
+
                         guestListView.addOnItemClickListener(object : OnItemClickListener {
                             override fun onItemClicked(position: Int, view: View) {
 
@@ -260,12 +267,13 @@ class RestAPI private constructor() {
                                 intent.putExtra("id", filteredList?.get(position)?.id)
                                 intent.putExtra("eventId", eventId)
                                 intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
-                                intent.putExtra("searchGuestText", view.search_guest.text.toString())
+                                intent.putExtra("searchGuestText", searchGuestText)
                                 intent.putExtra("firstName", filteredList?.get(position)?.firstName)
                                 intent.putExtra("lastName", filteredList?.get(position)?.lastName)
                                 intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
-                                intent.putExtra("ticketType", filteredList?.get(position)?.ticketType)
+                                intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
                                 intent.putExtra("status", filteredList?.get(position)?.status)
+                                intent.putExtra("position", position)
                                 context.startActivity(intent)
                             }
                         })
@@ -279,6 +287,47 @@ class RestAPI private constructor() {
                 }
             }
             getGuestsForEventCall.enqueue(callbackGetScannableEvents)
+        }
+
+        fun getTicket(context: Context, view: View, ticketId: String) {
+            try {
+                val getTicketCall = client().getTicket(AppAuth.getAccessToken(context), ticketId)
+                val callbackGetTicket = object : Callback<TicketResponse> {
+                    override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
+                        if (response.code() == 401) { //Unauthorized
+                            refreshToken(context, view)
+                        } else {
+                            val ticketResponse = response.body()
+
+                            if (ticketResponse != null) {
+                                val intent = Intent(context, GuestActivity::class.java)
+                                intent.putExtra("id", ticketResponse.ticket?.id)
+                                intent.putExtra("eventId", ticketResponse.event?.id)
+                                intent.putExtra("redeemKey", ticketResponse.ticket?.redeemKey)
+                                intent.putExtra("searchGuestText", "")
+                                intent.putExtra("firstName", ticketResponse.user?.firstName)
+                                intent.putExtra("lastName", ticketResponse.user?.lastName)
+                                intent.putExtra("priceInCents", ticketResponse.ticket?.priceInCents)
+                                intent.putExtra("ticketTypeName", ticketResponse.ticket?.ticketTypeName)
+                                intent.putExtra("status", ticketResponse.ticket?.status)
+                                intent.putExtra("position", -1)
+                                context.startActivity(intent)
+                            } else {
+
+                            }
+
+                            Log.d(TAG, "SUCCESS")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<TicketResponse>, t: Throwable) {
+
+                    }
+                }
+                getTicketCall.enqueue(callbackGetTicket)
+            } catch (e: Exception) {
+                Log.e(TAG, e.message)
+            }
         }
 
         fun redeemTicketForEvent(context: Context, view: View, eventId: String, ticketId: String, redeemKey: String) {
@@ -295,6 +344,10 @@ class RestAPI private constructor() {
                             val redeemResponse = response.body()
 
                             if (redeemResponse != null) {
+                                view.redeemed_status?.visibility = View.VISIBLE
+                                view.purchased_status?.visibility = View.GONE
+                                view.complete_check_in?.visibility = View.GONE
+
                                 Snackbar
                                     .make(
                                         view,

@@ -134,17 +134,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val ticketId = jsonObjectData.getString("id")
 
             if(checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
-                val intent = Intent(getContext(), GuestActivity::class.java)
-//                intent.putExtra("id", filteredList?.get(position)?.id)
-//                intent.putExtra("eventId", eventId)
-//                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
-//                intent.putExtra("searchGuestText", search_guest.text.toString())
-//                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
-//                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
-//                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
-//                intent.putExtra("ticketType", filteredList?.get(position)?.ticketType)
-//                intent.putExtra("status", filteredList?.get(position)?.status)
-                startActivity(intent)
+                RestAPI.getTicket(getContext(), scan_tickets_layout, ticketId)
             } else {
                 RestAPI.redeemTicketForEvent(getContext(), scan_tickets_layout, eventId, ticketId, redeemKey)
             }
