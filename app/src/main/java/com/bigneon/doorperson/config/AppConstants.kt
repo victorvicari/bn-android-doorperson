@@ -8,6 +8,7 @@ package com.bigneon.doorperson.config
 interface AppConstants {
     companion object {
         const val BASE_URL = "https://beta.bigneon.com/api/"
+        //const val BASE_URL = "https://api.staging.bigneon.com/"
 
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
         const val ACCESS_TOKEN = "access_token"

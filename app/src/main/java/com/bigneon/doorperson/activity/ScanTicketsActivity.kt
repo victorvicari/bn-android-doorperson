@@ -16,9 +16,11 @@ import android.widget.TextView.BufferType
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.rest.RestAPI
 import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
+import org.json.JSONObject
 
 
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
@@ -125,8 +127,30 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
     override fun handleResult(rawResult: Result) {
         if (cameraPermissionGranted) {
+            val json = rawResult.text
+            val jsonObj = JSONObject(json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1))
+            val jsonObjectData = jsonObj.getJSONObject("data")
+            val redeemKey = jsonObjectData.getString("redeem_key")
+            val ticketId = jsonObjectData.getString("id")
+
+            if(checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
+                val intent = Intent(getContext(), GuestActivity::class.java)
+//                intent.putExtra("id", filteredList?.get(position)?.id)
+//                intent.putExtra("eventId", eventId)
+//                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
+//                intent.putExtra("searchGuestText", search_guest.text.toString())
+//                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
+//                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
+//                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
+//                intent.putExtra("ticketType", filteredList?.get(position)?.ticketType)
+//                intent.putExtra("status", filteredList?.get(position)?.status)
+                startActivity(intent)
+            } else {
+                RestAPI.redeemTicketForEvent(getContext(), scan_tickets_layout, eventId, ticketId, redeemKey)
+            }
+
             Snackbar
-                .make(scan_tickets_layout, rawResult.text, Snackbar.LENGTH_LONG)
+                .make(scan_tickets_layout, "redeemKey: $redeemKey - ticketId: $ticketId", Snackbar.LENGTH_LONG)
                 .setDuration(5000).show()
 
             Log.v(TAG, rawResult.text) // Prints scan results
@@ -155,6 +179,5 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         )
         // shove our styled text into the Button
         check_in_mode_button.setText(text, BufferType.SPANNABLE)
-
     }
 }

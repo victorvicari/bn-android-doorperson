@@ -9,12 +9,10 @@
     <string name="event_image">Event image</string>
     <string name="event_right_arrow">Event right arrow</string>
     <string name="title_activity_scanning_event">ScanningEventActivity</string>
-    <string name="back_button">Back button</string>
     <string name="back_button_events_title">Login</string>
     <string name="back_button_scanning_event_title">Manage events</string>
     <string name="back_button_login_title">Exit</string>
     <string name="back_button_guest_list_title">Scan Tickets</string>
-    <string name="events_back_button">Events back button</string>
     <string name="manage_events">Manage events</string>
     <string name="scanning_event">Scanning Event</string>
     <string name="scan_tickets">Scan Tickets</string>
