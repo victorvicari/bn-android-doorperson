@@ -298,7 +298,7 @@ class RestAPI private constructor() {
                                 Snackbar
                                     .make(
                                         view,
-                                        "Checked in ${redeemResponse.last_name + ", " + redeemResponse.first_name}",
+                                        "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
                                         Snackbar.LENGTH_LONG
                                     )
                                     .setDuration(5000).show()

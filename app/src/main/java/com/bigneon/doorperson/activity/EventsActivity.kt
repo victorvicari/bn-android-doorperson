@@ -15,8 +15,6 @@ import kotlinx.android.synthetic.main.content_events.*
 
 
 class EventsActivity : AppCompatActivity() {
-    private val TAG = EventsActivity::class.java.simpleName
-
     private fun getContext(): Context {
         return this
     }

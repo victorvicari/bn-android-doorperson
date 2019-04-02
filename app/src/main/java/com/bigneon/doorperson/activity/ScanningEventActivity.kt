@@ -12,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
 class ScanningEventActivity : AppCompatActivity() {
-    private val TAG = ScanningEventActivity::class.java.simpleName
     private var eventId: String = ""
 
     private fun getContext(): Context {

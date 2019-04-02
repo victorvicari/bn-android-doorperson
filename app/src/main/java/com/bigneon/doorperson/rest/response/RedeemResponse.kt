@@ -13,51 +13,51 @@ class RedeemResponse {
     @SerializedName("ticket_type")
     internal var ticketType: String? = null
 
-    @SerializedName("userId")
-    internal var user_id: String? = null
+    @SerializedName("user_id")
+    internal var userId: String? = null
 
-    @SerializedName("orderId")
-    internal var order_id: String? = null
+    @SerializedName("order_id")
+    internal var orderId: String? = null
 
-    @SerializedName("orderItemId")
-    internal var order_item_id: String? = null
+    @SerializedName("order_item_id")
+    internal var orderItemId: String? = null
 
-    @SerializedName("priceInCents")
-    internal var price_in_cents: Int? = null
+    @SerializedName("price_in_cents")
+    internal var priceInCents: Int? = null
 
-    @SerializedName("firstName")
-    internal var first_name: String? = null
+    @SerializedName("first_name")
+    internal var firstName: String? = null
 
-    @SerializedName("lastName")
-    internal var last_name: String? = null
+    @SerializedName("last_name")
+    internal var lastName: String? = null
 
     internal var email: String? = null
 
     internal var phone: String? = null
 
-    @SerializedName("redeemKey")
-    internal var redeem_key: String? = null
+    @SerializedName("redeem_key")
+    internal var redeemKey: String? = null
 
-    @SerializedName("redeemDate")
-    internal var redeem_date: String? = null
+    @SerializedName("redeem_date")
+    internal var redeemDate: String? = null
 
     internal var status: String? = null
 
-    @SerializedName("eventId")
-    internal var event_id: String? = null
+    @SerializedName("event_id")
+    internal var eventId: String? = null
 
-    @SerializedName("eventName")
-    internal var event_name: String? = null
+    @SerializedName("event_name")
+    internal var eventName: String? = null
 
-    @SerializedName("doorTime")
-    internal var door_time: String? = null
+    @SerializedName("door_time")
+    internal var doorTime: String? = null
 
-    @SerializedName("eventStart")
-    internal var event_start: String? = null
+    @SerializedName("event_start")
+    internal var eventStart: String? = null
 
-    @SerializedName("venueId")
-    internal var venue_id: String? = null
+    @SerializedName("venue_id")
+    internal var venueId: String? = null
 
-    @SerializedName("venueName")
-    internal var venue_name: String? = null
+    @SerializedName("venue_name")
+    internal var venueName: String? = null
 }
