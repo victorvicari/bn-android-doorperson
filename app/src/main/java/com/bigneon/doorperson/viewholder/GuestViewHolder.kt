@@ -34,9 +34,7 @@ class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     fun bind(guest: GuestModel) {
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, guest.lastName, guest.firstName)
-//        priceAndTicketTypeTextView?.text =
-//            context!!.getString(R.string.price_ticket_type, guest.priceInCents?.div(100), guest.ticketType)
-        priceAndTicketTypeTextView?.text = "${guest.redeemKey} - ${guest.id}"
+        priceAndTicketTypeTextView?.text =
             context!!.getString(R.string.price_ticket_type, guest.priceInCents?.div(100), guest.ticketType)
         if (guest.status?.toLowerCase() == "redeemed") {
             redeemedStatusTextView?.visibility = View.VISIBLE
