@@ -34,13 +34,14 @@ class GuestActivity : AppCompatActivity() {
         val firstName = intent.getStringExtra("firstName")
         val lastName = intent.getStringExtra("lastName")
         val priceInCents = intent.getIntExtra("priceInCents", 0)
-        val ticketType = intent.getStringExtra("ticketType")
+        val ticketTypeName = intent.getStringExtra("ticketTypeName")
         val status = intent.getStringExtra("status")
+        val position = intent.getIntExtra("position", -1)
 
         last_name_and_first_name?.text =
             getContext().getString(R.string.last_name_first_name, lastName, firstName)
         price_and_ticket_type?.text =
-            getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketType)
+            getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketTypeName)
 
         if (status?.toLowerCase() == "redeemed") {
             redeemed_status?.visibility = View.VISIBLE
@@ -68,6 +69,7 @@ class GuestActivity : AppCompatActivity() {
             val intent = Intent(getContext(), GuestListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
+            intent.putExtra("position", position)
             startActivity(intent)
         }
 

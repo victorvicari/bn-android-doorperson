@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.content_guest_list.*
 
 class GuestListActivity : AppCompatActivity() {
     private var eventId: String = ""
+    private var position: Int = -1
     //private var guestListView: RecyclerView? = null
     private val swipeController : SwipeController = SwipeController()
 
@@ -71,15 +72,17 @@ class GuestListActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val searchGuestText = intent.getStringExtra("searchGuestText")
-        if (searchGuestText.isNullOrEmpty()) {
+        val searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
+        if (searchGuestText.isEmpty()) {
             finallyFilteredGuestList.clear()
         } else {
             search_guest.setText(searchGuestText)
             searchTextChanged = true
         }
         eventId = intent.getStringExtra("eventId")
-        RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, ::adaptListView)
+        position = intent.getIntExtra("position", -1)
+
+        RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, position, searchGuestText, ::adaptListView)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
