@@ -6,25 +6,29 @@ import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.GuestListAdapter
-import com.bigneon.doorperson.controller.SwipeController
+import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.GuestModel
+import com.bigneon.doorperson.viewholder.GuestViewHolder
 import kotlinx.android.synthetic.main.activity_guest_list.*
 import kotlinx.android.synthetic.main.content_guest_list.*
 
 
-class GuestListActivity : AppCompatActivity() {
+class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+    private val TAG = GuestListActivity::class.java.simpleName
     private var eventId: String = ""
     private var position: Int = -1
     //private var guestListView: RecyclerView? = null
-    private val swipeController : SwipeController = SwipeController()
+    private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper(this)
 
     companion object {
         private var searchTextChanged: Boolean = false
@@ -46,7 +50,7 @@ class GuestListActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val itemTouchHelper = ItemTouchHelper(swipeController)
+        val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         itemTouchHelper.attachToRecyclerView(guest_list_view)
 
         search_guest.post {
@@ -117,12 +121,60 @@ class GuestListActivity : AppCompatActivity() {
             guestListView.adapter = GuestListAdapter(guestList!!)
         }
 
-        if(guestListView.adapter?.itemCount!! > 0) {
+        if (guestListView.adapter?.itemCount!! > 0) {
             guest_list_view.visibility = View.VISIBLE
             no_guests_found_placeholder.visibility = View.GONE
         } else {
             guest_list_view.visibility = View.GONE
             no_guests_found_placeholder.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int, position: Int) {
+        if (viewHolder is GuestViewHolder) {
+            if (!viewHolder.checkedIn) {
+                // build alert dialog
+                val dialogBuilder = AlertDialog.Builder(this)
+
+                // set message of alert dialog
+                dialogBuilder.setMessage("Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}")
+                    .setCancelable(false)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        run {
+                            Log.d(
+                                TAG,
+                                "ACTION: CHECK-IN: ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}"
+                            )
+                            dialog.cancel()
+                            ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
+                        }
+                    }
+                val alert = dialogBuilder.create()
+                alert.setTitle("Alert")
+                alert.show()
+            } else {
+                viewHolder.swipeBack = true
+            }
+
+//            // get the removed item name to display it in snack bar
+//            val name = finallyFilteredGuestList.get(viewHolder.adapterPosition).getName()
+//
+//            // backup of removed item for undo purpose
+//            val deletedItem = finallyFilteredGuestList.get(viewHolder.adapterPosition)
+//            val deletedIndex = viewHolder.adapterPosition
+//
+//            // remove the item from recycler view
+//            mAdapter.removeItem(viewHolder.adapterPosition)
+//
+//            // showing snack bar with Undo option
+//            val snackbar = Snackbar
+//                .make(coordinatorLayout, name + " removed from cart!", Snackbar.LENGTH_LONG)
+//            snackbar.setAction("UNDO", View.OnClickListener {
+//                // undo is selected, restore the deleted item
+//                mAdapter.restoreItem(deletedItem, deletedIndex)
+//            })
+//            snackbar.setActionTextColor(Color.YELLOW)
+//            snackbar.show()
         }
     }
 }
