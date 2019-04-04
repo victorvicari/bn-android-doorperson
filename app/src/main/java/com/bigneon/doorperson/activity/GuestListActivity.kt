@@ -6,8 +6,8 @@ import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
@@ -15,20 +15,23 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.GuestListAdapter
+import com.bigneon.doorperson.adapter.OnItemClickListener
+import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.GuestModel
-import com.bigneon.doorperson.viewholder.GuestViewHolder
 import kotlinx.android.synthetic.main.activity_guest_list.*
 import kotlinx.android.synthetic.main.content_guest_list.*
+import kotlinx.android.synthetic.main.content_guest_list.view.*
 
 
-class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+class GuestListActivity : AppCompatActivity() {
     private val TAG = GuestListActivity::class.java.simpleName
+
     private var eventId: String = ""
     private var position: Int = -1
-    //private var guestListView: RecyclerView? = null
-    private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper(this)
+    private var searchGuestText: String = ""
+    private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
 
     companion object {
         private var searchTextChanged: Boolean = false
@@ -51,6 +54,7 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
+        recyclerItemTouchHelper.parentLayout = guests_layout
         itemTouchHelper.attachToRecyclerView(guest_list_view)
 
         search_guest.post {
@@ -58,7 +62,8 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
                 override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
-                    searchTextChanged(charSequence)
+                    searchTextChanged = true
+                    adaptListView(findViewById(com.bigneon.doorperson.R.id.guest_list_view))
                 }
 
                 override fun afterTextChanged(s: Editable) {}
@@ -76,7 +81,7 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
             startActivity(intent)
         }
 
-        val searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
+        searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
         if (searchGuestText.isEmpty()) {
             finallyFilteredGuestList.clear()
         } else {
@@ -86,17 +91,50 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
         eventId = intent.getStringExtra("eventId")
         position = intent.getIntExtra("position", -1)
 
-        RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, position, searchGuestText, ::adaptListView)
+        RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, ::populateGuestList)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
-        searchTextChanged(search_guest.text.toString())
         screenRotation = true
     }
 
-    private fun searchTextChanged(charSequence: CharSequence) {
-        val searchWords = charSequence.split(" ")
+    private fun populateGuestList(guestModelList: ArrayList<GuestModel>?) {
+        guestList = guestModelList
+        guest_list_view.layoutManager =
+            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+        guests_layout.loading_guests_progress_bar.visibility = View.GONE
+        adaptListView(guest_list_view)
+
+        if (position >= 0) {
+            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPosition(position)
+        }
+
+        guest_list_view.addOnItemClickListener(object : OnItemClickListener {
+            override fun onItemClicked(position: Int, view: View) {
+
+                val filteredList =
+                    if (GuestListActivity.finallyFilteredGuestList.size > 0) GuestListActivity.finallyFilteredGuestList else GuestListActivity.guestList
+                val intent = Intent(getContext(), GuestActivity::class.java)
+                intent.putExtra("id", filteredList?.get(position)?.id)
+                intent.putExtra("eventId", eventId)
+                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
+                intent.putExtra("searchGuestText", searchGuestText)
+                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
+                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
+                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
+                intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
+                intent.putExtra("status", filteredList?.get(position)?.status)
+                intent.putExtra("position", position)
+                startActivity(intent)
+            }
+        })
+
+        Log.d(TAG, "SUCCESS")
+    }
+
+    private fun adaptListView(guestListView: RecyclerView) {
+        val searchWords = search_guest.text.toString().split(" ")
         finallyFilteredGuestList.clear()
 
         for (word in searchWords) {
@@ -108,17 +146,20 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
             filteredGuestList.forEach { if (it !in finallyFilteredGuestList) finallyFilteredGuestList.add(it) }
             finallyFilteredGuestList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
         }
-        searchTextChanged = true
-        adaptListView(findViewById(com.bigneon.doorperson.R.id.guest_list_view))
-    }
 
-    private fun adaptListView(guestListView: RecyclerView) {
         if (screenRotation || searchTextChanged) {
-            guestListView.adapter = GuestListAdapter(finallyFilteredGuestList)
+            guestListView.adapter =
+                GuestListAdapter(finallyFilteredGuestList)
+            recyclerItemTouchHelper.guestList = finallyFilteredGuestList
+            recyclerItemTouchHelper.adapter = guestListView.adapter as GuestListAdapter
+
             screenRotation = false
             searchTextChanged = false
         } else {
-            guestListView.adapter = GuestListAdapter(guestList!!)
+            guestListView.adapter =
+                GuestListAdapter(guestList!!)
+            recyclerItemTouchHelper.guestList = guestList
+            recyclerItemTouchHelper.adapter = guestListView.adapter as GuestListAdapter
         }
 
         if (guestListView.adapter?.itemCount!! > 0) {
@@ -127,54 +168,6 @@ class GuestListActivity : AppCompatActivity(), RecyclerItemTouchHelper.RecyclerI
         } else {
             guest_list_view.visibility = View.GONE
             no_guests_found_placeholder.visibility = View.VISIBLE
-        }
-    }
-
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int, position: Int) {
-        if (viewHolder is GuestViewHolder) {
-            if (!viewHolder.checkedIn) {
-                // build alert dialog
-                val dialogBuilder = AlertDialog.Builder(this)
-
-                // set message of alert dialog
-                dialogBuilder.setMessage("Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}")
-                    .setCancelable(false)
-                    .setPositiveButton("OK") { dialog, _ ->
-                        run {
-                            Log.d(
-                                TAG,
-                                "ACTION: CHECK-IN: ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}"
-                            )
-                            dialog.cancel()
-                            ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
-                        }
-                    }
-                val alert = dialogBuilder.create()
-                alert.setTitle("Alert")
-                alert.show()
-            } else {
-                viewHolder.swipeBack = true
-            }
-
-//            // get the removed item name to display it in snack bar
-//            val name = finallyFilteredGuestList.get(viewHolder.adapterPosition).getName()
-//
-//            // backup of removed item for undo purpose
-//            val deletedItem = finallyFilteredGuestList.get(viewHolder.adapterPosition)
-//            val deletedIndex = viewHolder.adapterPosition
-//
-//            // remove the item from recycler view
-//            mAdapter.removeItem(viewHolder.adapterPosition)
-//
-//            // showing snack bar with Undo option
-//            val snackbar = Snackbar
-//                .make(coordinatorLayout, name + " removed from cart!", Snackbar.LENGTH_LONG)
-//            snackbar.setAction("UNDO", View.OnClickListener {
-//                // undo is selected, restore the deleted item
-//                mAdapter.restoreItem(deletedItem, deletedIndex)
-//            })
-//            snackbar.setActionTextColor(Color.YELLOW)
-//            snackbar.show()
         }
     }
 }
