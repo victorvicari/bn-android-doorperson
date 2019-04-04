@@ -8,7 +8,10 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.activity.*
+import com.bigneon.doorperson.activity.EventsActivity
+import com.bigneon.doorperson.activity.GuestActivity
+import com.bigneon.doorperson.activity.LoginActivity
+import com.bigneon.doorperson.activity.ScanningEventActivity
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
@@ -16,12 +19,12 @@ import com.bigneon.doorperson.auth.AppAuth
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.rest.model.GuestModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.*
 import kotlinx.android.synthetic.main.content_guest.view.*
-import kotlinx.android.synthetic.main.content_guest_list.view.*
 import kotlinx.android.synthetic.main.content_login.view.*
 import kotlinx.android.synthetic.main.content_scanning_event.view.*
 import okhttp3.Interceptor
@@ -231,11 +234,8 @@ class RestAPI private constructor() {
             context: Context,
             view: View,
             eventId: String,
-            position: Int,
-            searchGuestText: String,
-            adaptListView: (guestListView: RecyclerView) -> Unit
+            populateGuestList: (guestList: ArrayList<GuestModel>?) -> Unit
         ) {
-
             val getGuestsForEventCall =
                 client().getGuestsForEvent(AppAuth.getAccessToken(context), eventId, null)
             val callbackGetScannableEvents = object : Callback<GuestsResponse> {
@@ -243,42 +243,7 @@ class RestAPI private constructor() {
                     if (response.code() == 401) { //Unauthorized
                         refreshToken(context, view)
                     } else {
-                        val guestListView =
-                            view.findViewById(com.bigneon.doorperson.R.id.guest_list_view) as RecyclerView
-                        GuestListActivity.guestList = response.body()!!.data
-
-                        guestListView.layoutManager =
-                            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-
-                        view.loading_guests_progress_bar.visibility = View.GONE
-
-                        adaptListView(guestListView)
-
-                        if (position >= 0) {
-                            (guestListView.layoutManager as LinearLayoutManager).scrollToPosition(position)
-                        }
-
-                        guestListView.addOnItemClickListener(object : OnItemClickListener {
-                            override fun onItemClicked(position: Int, view: View) {
-
-                                val filteredList =
-                                    if (GuestListActivity.finallyFilteredGuestList.size > 0) GuestListActivity.finallyFilteredGuestList else GuestListActivity.guestList
-                                val intent = Intent(context, GuestActivity::class.java)
-                                intent.putExtra("id", filteredList?.get(position)?.id)
-                                intent.putExtra("eventId", eventId)
-                                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
-                                intent.putExtra("searchGuestText", searchGuestText)
-                                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
-                                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
-                                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
-                                intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
-                                intent.putExtra("status", filteredList?.get(position)?.status)
-                                intent.putExtra("position", position)
-                                context.startActivity(intent)
-                            }
-                        })
-
-                        Log.d(TAG, "SUCCESS")
+                        populateGuestList(response.body()!!.data)
                     }
                 }
 

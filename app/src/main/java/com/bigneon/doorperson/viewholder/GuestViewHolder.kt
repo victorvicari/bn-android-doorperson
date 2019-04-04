@@ -23,8 +23,7 @@ class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     private var guestItemBackgroundRedeemed: TextView? = null
     private var guestItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
-    var checkedIn : Boolean = false
-    var swipeBack = false
+    var checkedIn: Boolean = false
 
     init {
         context = parent.context
@@ -39,9 +38,11 @@ class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     fun bind(guest: GuestModel) {
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, guest.lastName, guest.firstName)
-        priceAndTicketTypeTextView?.text =
-            context!!.getString(R.string.price_ticket_type, guest.priceInCents?.div(100), guest.ticketType)
-        if (guest.status?.toLowerCase() == "redeemed") {
+        // TODO - Uncomment after test!
+//        priceAndTicketTypeTextView?.text =
+//            context!!.getString(R.string.price_ticket_type, guest.priceInCents?.div(100), guest.ticketType)
+        priceAndTicketTypeTextView?.text = guest.redeemKey
+        if (guest.status?.toLowerCase() == context!!.getString(R.string.redeemed).toLowerCase()) {
             redeemedStatusTextView?.visibility = View.VISIBLE
             purchasedStatusTextView?.visibility = View.GONE
             guestItemBackgroundRedeemed?.visibility = View.VISIBLE

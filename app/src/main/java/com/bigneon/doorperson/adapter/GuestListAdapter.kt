@@ -11,7 +11,9 @@ import com.bigneon.doorperson.viewholder.GuestViewHolder
  * All right reserved!
  * Created by SRKI-ST on 21.03.2019..
  ****************************************************/
-class GuestListAdapter(private val list: ArrayList<GuestModel>) : RecyclerView.Adapter<GuestViewHolder>() {
+class GuestListAdapter(
+    private val list: ArrayList<GuestModel>
+) : RecyclerView.Adapter<GuestViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GuestViewHolder {
         val inflater = LayoutInflater.from(parent.context)
