@@ -101,6 +101,10 @@ class GuestListActivity : AppCompatActivity() {
         screenRotation = true
     }
 
+//    fun guestItemBackgroundPurchasedClick(view : View) {
+//        Log.d(TAG, "OnClick")
+//    }
+
     private fun populateGuestList(guestModelList: ArrayList<GuestModel>?) {
         guestList = guestModelList
         guest_list_view.layoutManager =
@@ -109,7 +113,6 @@ class GuestListActivity : AppCompatActivity() {
         adaptListView(guest_list_view)
 
         if (position >= 0) {
-//            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPosition(position)
             (guest_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
         }
 

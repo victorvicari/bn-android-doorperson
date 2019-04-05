@@ -18,7 +18,6 @@ import com.bigneon.doorperson.rest.model.GuestModel
 import com.bigneon.doorperson.viewholder.GuestViewHolder
 import kotlinx.android.synthetic.main.list_item_guest.view.*
 
-
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
@@ -78,8 +77,11 @@ class RecyclerItemTouchHelper :
         if (actionState == ACTION_STATE_SWIPE) {
             recyclerView.setOnTouchListener(object : View.OnTouchListener {
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    if (viewHolder is GuestViewHolder && viewHolder.checkedIn) {
-                        swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
+                    if (viewHolder is GuestViewHolder) {
+                        if (viewHolder.checkedIn) {
+                            swipeBack =
+                                event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
+                        }
                     }
                     return false
                 }
@@ -113,6 +115,7 @@ class RecyclerItemTouchHelper :
                                 val pos = viewHolder.getAdapterPosition()
                                 val guest = guestList!!.get(pos)
                                 guest.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                                adapter!!.notifyItemChanged(pos)
 
                                 RestAPI.redeemTicketForEvent(
                                     viewHolder.itemView.context, this.parentLayout!!,
