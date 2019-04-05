@@ -30,6 +30,7 @@ class GuestListActivity : AppCompatActivity() {
 
     private var eventId: String = ""
     private var position: Int = -1
+    private var offset: Int = 0
     private var searchGuestText: String = ""
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
 
@@ -90,6 +91,7 @@ class GuestListActivity : AppCompatActivity() {
         }
         eventId = intent.getStringExtra("eventId")
         position = intent.getIntExtra("position", -1)
+        offset = intent.getIntExtra("offset", 0)
 
         RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, ::populateGuestList)
     }
@@ -107,7 +109,8 @@ class GuestListActivity : AppCompatActivity() {
         adaptListView(guest_list_view)
 
         if (position >= 0) {
-            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPosition(position)
+//            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPosition(position)
+            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
         }
 
         guest_list_view.addOnItemClickListener(object : OnItemClickListener {
@@ -126,6 +129,10 @@ class GuestListActivity : AppCompatActivity() {
                 intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
                 intent.putExtra("status", filteredList?.get(position)?.status)
                 intent.putExtra("position", position)
+                intent.putExtra(
+                    "offset",
+                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(position)!!.top
+                )
                 startActivity(intent)
             }
         })
