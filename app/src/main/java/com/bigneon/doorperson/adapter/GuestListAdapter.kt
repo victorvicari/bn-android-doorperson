@@ -26,4 +26,6 @@ class GuestListAdapter(
     }
 
     override fun getItemCount(): Int = list.size
+
+
 }
