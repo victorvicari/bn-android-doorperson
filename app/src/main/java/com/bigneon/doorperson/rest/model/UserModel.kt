@@ -16,4 +16,5 @@ class UserModel {
     @SerializedName("last_name")
     internal var lastName: String? = null
 
+    internal var email: String? = null
 }

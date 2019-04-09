@@ -28,10 +28,10 @@ interface RestClient {
 
 
 //    @GET("events/{eventId}/guests")
-//    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
+//    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 
     @GET("events/{event_id}/guests?query=")
-    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
+    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 
     @POST("events/{event_id}/redeem/{ticket_id}")
     fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<RedeemResponse>

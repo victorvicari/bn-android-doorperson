@@ -8,7 +8,6 @@ package com.bigneon.doorperson.config
 interface AppConstants {
     companion object {
         const val BASE_URL = "https://beta.bigneon.com/api/"
-        //const val BASE_URL = "https://api.staging.bigneon.com/"
 
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
         const val ACCESS_TOKEN = "access_token"
@@ -17,5 +16,19 @@ interface AppConstants {
         const val CHECK_IN_MODE = "check_in_mode"
         const val CHECK_IN_MODE_MANUAL = "M"
         const val CHECK_IN_MODE_AUTOMATIC = "A"
+
+        // DB const
+        const val DATABASE_NAME = "doorperson.db"
+        const val DATABASE_VERSION = 1
+
+    }
+
+    enum class SyncTableName constructor(private val tableName: String) {
+        EVENTS("events"),
+        TICKETS("tickets");
+
+        override fun toString(): String {
+            return this.tableName
+        }
     }
 }
