@@ -12,8 +12,15 @@ import java.util.*
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
 class TicketsDS : BaseDS() {
+    init {
+        open()
+    }
+
     private val allColumns = arrayOf(
         TableTicketsDML.TICKET_ID,
+        TableTicketsDML.EVENT_ID,
+        TableTicketsDML.FIRST_NAME,
+        TableTicketsDML.LAST_NAME,
         TableTicketsDML.PRICE_IN_CENTS,
         TableTicketsDML.TICKET_TYPE_NAME,
         TableTicketsDML.REDEEM_KEY,
@@ -24,7 +31,7 @@ class TicketsDS : BaseDS() {
         val cursor = database?.query(
             TableTicketsDML.TABLE_TICKETS,
             allColumns,
-            TableTicketsDML.TICKET_ID + " = " + ticketId,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
             null,
             null,
             null,
@@ -54,7 +61,32 @@ class TicketsDS : BaseDS() {
         return model
     }
 
-    fun getAllTickets(): List<TicketModel>? {
+    fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
+
+        val cursor =
+            database?.query(
+                TableTicketsDML.TABLE_TICKETS,
+                allColumns,
+                TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
+                null,
+                null,
+                null,
+                null
+            ) ?: return null
+
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val projectModel = cursorToTicket(cursor)
+            ticketModels.add(projectModel)
+            cursor.moveToNext()
+        }
+        // make sure to close the cursor
+        cursor.close()
+        return ticketModels
+    }
+
+    fun getAllTickets(): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
         val cursor =
@@ -85,6 +117,9 @@ class TicketsDS : BaseDS() {
 
     fun createTicket(
         ticketId: String,
+        eventId: String,
+        firstName: String,
+        lastName: String,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
@@ -92,6 +127,9 @@ class TicketsDS : BaseDS() {
     ) {
         val values = ContentValues()
         values.put(TableTicketsDML.TICKET_ID, ticketId)
+        values.put(TableTicketsDML.EVENT_ID, eventId)
+        values.put(TableTicketsDML.FIRST_NAME, firstName)
+        values.put(TableTicketsDML.LAST_NAME, lastName)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
@@ -102,6 +140,9 @@ class TicketsDS : BaseDS() {
 
     fun updateTicket(
         ticketId: String,
+        eventId: String,
+        firstName: String,
+        lastName: String,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
@@ -109,25 +150,36 @@ class TicketsDS : BaseDS() {
     ) {
         val values = ContentValues()
         values.put(TableTicketsDML.TICKET_ID, ticketId)
+        values.put(TableTicketsDML.EVENT_ID, eventId)
+        values.put(TableTicketsDML.FIRST_NAME, firstName)
+        values.put(TableTicketsDML.LAST_NAME, lastName)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
         values.put(TableTicketsDML.STATUS, status)
 
-        database?.update(TableTicketsDML.TABLE_TICKETS, values, TableTicketsDML.TICKET_ID + " = " + ticketId, null)
+        database?.update(
+            TableTicketsDML.TABLE_TICKETS,
+            values,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            null
+        )
     }
 
     fun deleteTicket(ticketId: String) {
         println("TicketModel deleted with pk: $ticketId")
-        database?.delete(TableTicketsDML.TABLE_TICKETS, TableTicketsDML.TICKET_ID + " = " + ticketId, null)
+        database?.delete(TableTicketsDML.TABLE_TICKETS, TableTicketsDML.TICKET_ID + " = '" + ticketId + "'", null)
     }
 
     private fun cursorToTicket(cursor: Cursor): TicketModel {
         val ticketModel = TicketModel()
         var index = 0
-        ticketModel.id = cursor.getString(index++)
+        ticketModel.ticketId = cursor.getString(index++)
+        ticketModel.eventId = cursor.getString(index++)
+        ticketModel.firstName = cursor.getString(index++)
+        ticketModel.lastName = cursor.getString(index++)
         ticketModel.priceInCents = cursor.getInt(index++)
-        ticketModel.ticketTypeName = cursor.getString(index++)
+        ticketModel.ticketType = cursor.getString(index++)
         ticketModel.redeemKey = cursor.getString(index++)
         ticketModel.status = cursor.getString(index)
         return ticketModel

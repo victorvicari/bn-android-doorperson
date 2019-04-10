@@ -12,7 +12,6 @@
     <uses-permission-sdk-23 android:name="android.permission.CAMERA"/>
 
     <application
-            android:name=".DoorpersonApplication"
             android:allowBackup="true"
             android:fullBackupContent="@xml/backup_descriptor"
             android:icon="@drawable/heart_large"
@@ -21,11 +20,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name=".activity.GuestActivity"
+                android:name=".activity.TicketActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".activity.GuestListActivity"
+                android:name=".activity.TicketListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity

@@ -8,20 +8,30 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.widget.Toast
-import com.bigneon.doorperson.config.AppConstants.Companion.REFRESH_TOKEN
+import com.bigneon.doorperson.adapter.EventListAdapter
+import com.bigneon.doorperson.adapter.OnItemClickListener
+import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.db.SQLiteHelper
+import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.db.sync.SyncController
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
 class EventsActivity : AppCompatActivity() {
+    private var eventsDS: EventsDS? = null
     private var networkStateReceiver: NetworkStateReceiver = NetworkStateReceiver()
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
                 Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
+                SyncController().synchronizeAllTables()
             }
 
             override fun networkUnavailable() {
@@ -37,30 +47,51 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        networkStateReceiver.addListener(networkStateReceiverListener)
-        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        SharedPrefs.setContext(this);
+        SyncController.setContext(this);
+        SQLiteHelper.setContext(this);
 
-        val refreshToken = SharedPrefs.getProperty(REFRESH_TOKEN)
+        eventsDS = EventsDS()
 
-        setSupportActionBar(events_toolbar)
-        //this line shows back button
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        fun setAccessToken(accessToken: String?) {
+            if (accessToken == null) {
+                startActivity(Intent(getContext(), LoginActivity::class.java))
+            } else {
+                networkStateReceiver.addListener(networkStateReceiverListener)
+                registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
 
-        events_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
-            PorterDuff.Mode.SRC_ATOP
-        )
+                setSupportActionBar(events_toolbar)
+                //this line shows back button
+                supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        events_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), LoginActivity::class.java))
+                events_toolbar.navigationIcon!!.setColorFilter(
+                    ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
+                    PorterDuff.Mode.SRC_ATOP
+                )
+
+                events_toolbar.setNavigationOnClickListener {
+                    startActivity(Intent(getContext(), LoginActivity::class.java))
+                }
+
+                val eventsListView: RecyclerView =
+                    events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
+                val eventList = eventsDS!!.getAllEvents()
+                eventsListView.layoutManager =
+                    LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+
+                eventsListView.adapter = EventListAdapter(eventList!!)
+
+                eventsListView.addOnItemClickListener(object : OnItemClickListener {
+                    override fun onItemClicked(position: Int, view: View) {
+                        val eventId = eventList[position].id
+                        val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                        intent.putExtra("eventId", eventId)
+                        startActivity(intent)
+                    }
+                })
+            }
         }
-
-        // If there is no refresh token, then user isn't logged in
-        if (refreshToken.equals("")) {
-            startActivity(Intent(getContext(), LoginActivity::class.java))
-        } else {
-            RestAPI.getScannableEvents(getContext(), events_layout)
-        }
+        RestAPI.accessToken(::setAccessToken)
     }
 
     override fun onDestroy() {

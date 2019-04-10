@@ -1,11 +1,16 @@
 package com.bigneon.doorperson.db.sync
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import android.widget.Toast
-import com.bigneon.doorperson.DoorpersonApplication
+import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.rest.RestAPISync
+import com.bigneon.doorperson.rest.RestAPI
+import com.bigneon.doorperson.rest.model.EventModel
+import com.bigneon.doorperson.rest.model.TicketModel
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -13,72 +18,128 @@ import com.bigneon.doorperson.rest.RestAPISync
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
 class SyncController {
-    //    val syncDS: SyncDS = SyncDS()
-    val eventsDS: EventsDS = EventsDS()
-    val ticketsDS: TicketsDS = TicketsDS()
+    companion object {
+
+        @SuppressLint("StaticFieldLeak")
+        private lateinit var context: Context
+
+        fun setContext(con: Context) {
+            context = con
+        }
+    }
 
     fun synchronizeAllTables() {
+        SynchronizeAllTablesTask(context).execute()
+    }
+}
+
+class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val context: Context) :
+    AsyncTask<Unit, Unit, Unit>() {
+    private val eventsDS: EventsDS = EventsDS()
+    private val ticketsDS: TicketsDS = TicketsDS()
+
+    override fun doInBackground(vararg params: Unit?) {
         // Download synchronization
-        EventDownloadSynchronizationTask().execute()
-        GuestDownloadSynchronizationTask().execute()
+        eventDownloadSynchronization()
+        ticketDownloadSynchronization()
 
         // Upload synchronization
-        GuestUploadSynchronizationTask().execute()
+//        ticketUploadSynchronization()
     }
 
-    // Download synchronization
-    inner class EventDownloadSynchronizationTask : AsyncTask<Unit, Unit, Unit>() {
-        override fun doInBackground(vararg params: Unit?) {
-            // get all events from remote DB
-            val events = RestAPISync.getScannableEvents()
-
-            // for all events
-            events?.forEach {
-                if (eventsDS.eventExists(it.id!!)) {
-                    eventsDS.updateEvent(it.id!!, it.name!!, it.promoImageURL!!)
-                } else {
-                    eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
-                }
-            }
-            Toast.makeText(
-                DoorpersonApplication.applicationContext(),
-                "Events has been synchronized",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    inner class GuestDownloadSynchronizationTask : AsyncTask<Unit, Unit, Unit>() {
-        override fun doInBackground(vararg params: Unit?) {
-            val events = RestAPISync.getScannableEvents()
-            events?.forEach {e ->
-                val eventId = e.id ?: ""
-                val tickets = RestAPISync.getTicketsForEvent(eventId)
-
-                // for all events
-                tickets?.forEach {
-                    if (ticketsDS.ticketExists(it.id!!)) {
-                        ticketsDS.updateTicket(it.id!!, it.priceInCents!!, it.ticketTypeName!!, it.redeemKey!!, it.status!!)
-                    } else {
-                        ticketsDS.createTicket(it.id!!, it.priceInCents!!, it.ticketTypeName!!, it.redeemKey!!, it.status!!)
+    private fun eventDownloadSynchronization() {
+        fun setAccessTokenForEvent(accessToken: String?) {
+            if (accessToken == null)
+                context.startActivity(
+                    Intent(
+                        context,
+                        LoginActivity::class.java
+                    )
+                )
+            else {
+                fun setEvents(events: ArrayList<EventModel>?) {
+                    // for all events
+                    events?.forEach {
+                        if (eventsDS.eventExists(it.id!!)) {
+                            eventsDS.updateEvent(it.id!!, it.name!!, it.promoImageURL!!)
+                        } else {
+                            eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
+                        }
                     }
+                    Toast.makeText(
+                        context,
+                        "Events has been synchronized",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                Toast.makeText(
-                    DoorpersonApplication.applicationContext(),
-                    "Tickets for event $eventId has been synchronized",
-                    Toast.LENGTH_LONG
-                ).show()
+                RestAPI.getScannableEvents(accessToken, ::setEvents)
             }
-
         }
+        RestAPI.accessToken(::setAccessTokenForEvent)
     }
 
-    // Upload synchronization
-    inner class GuestUploadSynchronizationTask : AsyncTask<Unit, Unit, Unit>() {
-        override fun doInBackground(vararg params: Unit?) {
+    private fun ticketDownloadSynchronization() {
+        fun setAccessTokenForTicket(accessToken: String?) {
+            if (accessToken == null)
+                context.startActivity(
+                    Intent(
+                        context,
+                        LoginActivity::class.java
+                    )
+                )
+            else {
+                fun setEvents(events: ArrayList<EventModel>?) {
+                    // for all events
+                    events?.forEach { e ->
+                        fun setTickets(tickets: ArrayList<TicketModel>?) {
+                            // for all events
+                            tickets?.forEach { t ->
+                                if (ticketsDS.ticketExists(t.ticketId!!)) {
+                                    ticketsDS.updateTicket(
+                                        t.ticketId!!,
+                                        t.eventId!!,
+                                        t.firstName!!,
+                                        t.lastName!!,
+                                        t.priceInCents!!,
+                                        t.ticketType!!,
+                                        t.redeemKey!!,
+                                        t.status!!
+                                    )
+                                } else {
+                                    ticketsDS.createTicket(
+                                        t.ticketId!!,
+                                        t.eventId!!,
+                                        t.firstName!!,
+                                        t.lastName!!,
+                                        t.priceInCents!!,
+                                        t.ticketType!!,
+                                        t.redeemKey!!,
+                                        t.status!!
+                                    )
+                                }
+                            }
+                        }
+                        RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
 
+                        Toast.makeText(
+                            context,
+                            "Tickets for event ${e.id} has been synchronized",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    Toast.makeText(
+                        context,
+                        "All tickets has been synchronized!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                RestAPI.getScannableEvents(accessToken, ::setEvents)
+            }
         }
+        RestAPI.accessToken(::setAccessTokenForTicket)
     }
 
+    private fun ticketUploadSynchronization() {
 
+    }
 }

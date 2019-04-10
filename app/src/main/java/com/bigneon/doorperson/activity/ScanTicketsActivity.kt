@@ -12,13 +12,15 @@ import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.view.View
 import android.widget.TextView.BufferType
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.rest.RestAPI
 import com.google.zxing.Result
+import kotlinx.android.synthetic.main.activity_guest.*
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
+import kotlinx.android.synthetic.main.content_guest.view.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
 
@@ -80,7 +82,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         }
 
         guest_list_layout.setOnClickListener {
-            val intent = Intent(getContext(), GuestListActivity::class.java)
+            val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             startActivity(intent)
         }
@@ -133,9 +135,31 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val ticketId = jsonObjectData.getString("id")
 
             if(checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
-                RestAPI.getTicket(getContext(), scan_tickets_layout, ticketId)
+//                RestAPI.getTicket(getContext(), scan_tickets_layout, ticketId)
             } else {
-                RestAPI.redeemTicketForEvent(getContext(), scan_tickets_layout, eventId, ticketId, redeemKey)
+//                val redeemResponse = RestAPISync.redeemTicketForEvent(eventId, ticketId, redeemKey)
+//
+//                if (redeemResponse != null) {
+//                    scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
+//                    scanning_guest_layout.purchased_status?.visibility = View.GONE
+//                    scanning_guest_layout.complete_check_in?.visibility = View.GONE
+//
+//                    Snackbar
+//                        .make(
+//                            scanning_guest_layout,
+//                            "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
+//                            Snackbar.LENGTH_LONG
+//                        )
+//                        .setDuration(5000).show()
+//                } else {
+//                    Snackbar
+//                        .make(
+//                            scanning_guest_layout,
+//                            "User ticket already redeemed! Redeem key: $redeemKey",
+//                            Snackbar.LENGTH_LONG
+//                        )
+//                        .setDuration(5000).show()
+//                }
             }
 
             Snackbar
