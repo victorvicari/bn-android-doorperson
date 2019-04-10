@@ -7,19 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.rest.model.GuestModel
+import com.bigneon.doorperson.rest.model.TicketModel
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 22.03.2019..
  ****************************************************/
-class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
+class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_guest, parent, false)) {
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
-    private var redeemedStatusTextView: TextView? = null
-    private var purchasedStatusTextView: TextView? = null
+    var redeemedStatusTextView: TextView? = null
+    var purchasedStatusTextView: TextView? = null
     private var guestItemBackgroundRedeemed: TextView? = null
     private var guestItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
@@ -35,14 +35,14 @@ class GuestViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         guestItemBackgroundPurchased = itemView.findViewById(R.id.guest_item_background_purchased)
     }
 
-    fun bind(guest: GuestModel) {
+    fun bind(ticket: TicketModel) {
         lastNameAndFirstNameTextView?.text =
-            context!!.getString(R.string.last_name_first_name, guest.lastName, guest.firstName)
+            context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
         // TODO - Uncomment after test!
 //        priceAndTicketTypeTextView?.text =
-//            context!!.getString(R.string.price_ticket_type, guest.priceInCents?.div(100), guest.ticketType)
-        priceAndTicketTypeTextView?.text = guest.redeemKey
-        if (guest.status?.toLowerCase() == context!!.getString(R.string.redeemed).toLowerCase()) {
+//            context!!.getString(R.string.price_ticket_type, ticket.priceInCents?.div(100), ticket.ticketType)
+        priceAndTicketTypeTextView?.text = ticket.redeemKey
+        if (ticket.status?.toLowerCase() == context!!.getString(R.string.redeemed).toLowerCase()) {
             redeemedStatusTextView?.visibility = View.VISIBLE
             purchasedStatusTextView?.visibility = View.GONE
             guestItemBackgroundRedeemed?.visibility = View.VISIBLE

@@ -8,13 +8,23 @@ import com.google.gson.annotations.SerializedName
  * Created by SRKI-ST on 02.04.2019..
  ****************************************************/
 class TicketModel {
-    internal var id: String? = null
+    @SerializedName("id")
+    internal var ticketId: String? = null
+
+    @SerializedName("event_id")
+    internal var eventId: String? = null
+
+    @SerializedName("first_name")
+    internal var firstName: String? = null
+
+    @SerializedName("last_name")
+    internal var lastName: String? = null
 
     @SerializedName("price_in_cents")
     internal var priceInCents: Int? = null
 
-    @SerializedName("ticket_type_name")
-    internal var ticketTypeName: String? = null
+    @SerializedName("ticket_type")
+    internal var ticketType: String? = null
 
     @SerializedName("redeem_key")
     internal var redeemKey: String? = null

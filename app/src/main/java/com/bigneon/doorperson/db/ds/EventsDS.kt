@@ -12,6 +12,10 @@ import java.util.*
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
 class EventsDS : BaseDS() {
+    init {
+        open()
+    }
+
     private val allColumns = arrayOf(
         TableEventsDML.EVENT_ID,
         TableEventsDML.NAME,
@@ -52,7 +56,7 @@ class EventsDS : BaseDS() {
         return model
     }
 
-    fun getAllEvents(): List<EventModel>? {
+    fun getAllEvents(): ArrayList<EventModel>? {
         val eventModels = ArrayList<EventModel>()
 
         val cursor =
@@ -104,12 +108,12 @@ class EventsDS : BaseDS() {
         values.put(TableEventsDML.NAME, name)
         values.put(TableEventsDML.PROMO_IMAGE_URL, promoImageURL)
 
-        database?.update(TableEventsDML.TABLE_EVENTS, values, TableEventsDML.EVENT_ID + " = " + eventId, null)
+        database?.update(TableEventsDML.TABLE_EVENTS, values, TableEventsDML.EVENT_ID + " = '" + eventId + "'", null)
     }
 
     fun deleteEvent(eventId: String) {
         println("EventModel deleted with pk: $eventId")
-        database?.delete(TableEventsDML.TABLE_EVENTS, TableEventsDML.EVENT_ID + " = " + eventId, null)
+        database?.delete(TableEventsDML.TABLE_EVENTS, TableEventsDML.EVENT_ID + " = '" + eventId + "'", null)
     }
 
     private fun cursorToEvent(cursor: Cursor): EventModel {

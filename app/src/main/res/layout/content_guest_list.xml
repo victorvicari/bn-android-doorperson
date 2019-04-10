@@ -9,7 +9,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/activity_guest_list"
         android:orientation="vertical"
-        tools:context=".activity.GuestListActivity">
+        tools:context=".activity.TicketListActivity">
 
     <TextView
             android:id="@+id/guest_list_label"

@@ -12,10 +12,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.adapter.GuestListAdapter
-import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.model.GuestModel
-import com.bigneon.doorperson.viewholder.GuestViewHolder
+import com.bigneon.doorperson.adapter.TicketListAdapter
+import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.list_item_guest.view.*
 
 /****************************************************
@@ -26,8 +25,8 @@ import kotlinx.android.synthetic.main.list_item_guest.view.*
 class RecyclerItemTouchHelper :
     ItemTouchHelper.SimpleCallback(0, RIGHT) {
     private val TAG = RecyclerItemTouchHelper::class.java.simpleName
-    var guestList: ArrayList<GuestModel>? = null
-    var adapter: GuestListAdapter? = null
+    var ticketList: ArrayList<TicketModel>? = null
+    var adapter: TicketListAdapter? = null
     var parentLayout: LinearLayout? = null
     private var swipeBack = false
 
@@ -77,7 +76,7 @@ class RecyclerItemTouchHelper :
         if (actionState == ACTION_STATE_SWIPE) {
             recyclerView.setOnTouchListener(object : View.OnTouchListener {
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    if (viewHolder is GuestViewHolder) {
+                    if (viewHolder is TicketViewHolder) {
                         if (viewHolder.checkedIn) {
                             swipeBack =
                                 event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
@@ -94,7 +93,7 @@ class RecyclerItemTouchHelper :
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        if (viewHolder is GuestViewHolder) {
+        if (viewHolder is TicketViewHolder) {
             // TODO - Move this dialog on background item click instead of on swiped!
             if (!viewHolder.checkedIn) {
                 // build alert dialog
@@ -111,16 +110,46 @@ class RecyclerItemTouchHelper :
                             )
                             dialog.cancel()
                             ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
-                            if (guestList != null && adapter != null) {
+                            if (ticketList != null && adapter != null) {
                                 val pos = viewHolder.getAdapterPosition()
-                                val guest = guestList!!.get(pos)
-                                guest.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                                val ticket = ticketList!!.get(pos)
+                                ticket.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                 adapter!!.notifyItemChanged(pos)
 
-                                RestAPI.redeemTicketForEvent(
-                                    viewHolder.itemView.context, this.parentLayout!!,
-                                    guest.eventId!!, guest.id!!, guest.redeemKey!!
-                                )
+//                                RestAPI.redeemTicketForEvent(
+//                                    viewHolder.itemView.context, this.parentLayout!!,
+//                                    guest.eventId!!, guest.id!!, guest.redeemKey!!
+//                                )
+
+//                                val redeemResponse = RestAPISync.redeemTicketForEvent(
+//                                    ticket.eventId!!,
+//                                    ticket.ticketId!!,
+//                                    ticket.redeemKey!!
+//                                )
+//
+//                                if (redeemResponse != null) {
+//                                    viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
+//                                    viewHolder.purchasedStatusTextView?.visibility = View.GONE
+////                                    this.parentLayout!!.redeemed_status.visibility = View.VISIBLE
+////                                    this.parentLayout!!.purchased_status.visibility = View.GONE
+//                                    this.parentLayout!!.complete_check_in?.visibility = View.GONE
+//
+//                                    Snackbar
+//                                        .make(
+//                                            this.parentLayout!!,
+//                                            "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
+//                                            Snackbar.LENGTH_LONG
+//                                        )
+//                                        .setDuration(5000).show()
+//                                } else {
+//                                    Snackbar
+//                                        .make(
+//                                            this.parentLayout!!,
+//                                            "User ticket already redeemed! Redeem key: ${ticket.redeemKey!!}",
+//                                            Snackbar.LENGTH_LONG
+//                                        )
+//                                        .setDuration(5000).show()
+//                                }
                             }
                         }
                     }

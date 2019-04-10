@@ -4,15 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.rest.RestAPI
 import kotlinx.android.synthetic.main.activity_guest.*
 import kotlinx.android.synthetic.main.content_guest.*
+import kotlinx.android.synthetic.main.content_guest.view.*
 
-class GuestActivity : AppCompatActivity() {
+class TicketActivity : AppCompatActivity() {
 
     private fun getContext(): Context {
         return this
@@ -27,7 +28,7 @@ class GuestActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val ticketId = intent.getStringExtra("id")
+        val ticketId = intent.getStringExtra("ticketId")
         val eventId = intent.getStringExtra("eventId")
         val redeemKey = intent.getStringExtra("redeemKey")
         val searchGuestText = intent.getStringExtra("searchGuestText")
@@ -60,7 +61,7 @@ class GuestActivity : AppCompatActivity() {
         )
 
         guest_toolbar.setNavigationOnClickListener {
-            val intent = Intent(getContext(), GuestListActivity::class.java)
+            val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
             intent.putExtra("position", position)
@@ -69,7 +70,7 @@ class GuestActivity : AppCompatActivity() {
         }
 
         back_to_list.setOnClickListener {
-            val intent = Intent(getContext(), GuestListActivity::class.java)
+            val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
             intent.putExtra("position", position)
@@ -78,7 +79,29 @@ class GuestActivity : AppCompatActivity() {
         }
 
         complete_check_in.setOnClickListener {
-            RestAPI.redeemTicketForEvent(getContext(), scanning_guest_layout, eventId, ticketId, redeemKey)
+//            val redeemResponse = RestAPISync.redeemTicketForEvent(eventId, ticketId, redeemKey)
+//
+//            if (redeemResponse != null) {
+//                scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
+//                scanning_guest_layout.purchased_status?.visibility = View.GONE
+//                scanning_guest_layout.complete_check_in?.visibility = View.GONE
+//
+//                Snackbar
+//                    .make(
+//                        scanning_guest_layout,
+//                        "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
+//                        Snackbar.LENGTH_LONG
+//                    )
+//                    .setDuration(5000).show()
+//            } else {
+//                Snackbar
+//                    .make(
+//                        scanning_guest_layout,
+//                        "User ticket already redeemed! Redeem key: $redeemKey",
+//                        Snackbar.LENGTH_LONG
+//                    )
+//                    .setDuration(5000).show()
+//            }
         }
     }
 }

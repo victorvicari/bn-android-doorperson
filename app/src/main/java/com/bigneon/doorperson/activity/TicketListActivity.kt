@@ -12,33 +12,33 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
-import com.bigneon.doorperson.adapter.GuestListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
+import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
-import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.model.GuestModel
+import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.rest.model.TicketModel
 import kotlinx.android.synthetic.main.activity_guest_list.*
 import kotlinx.android.synthetic.main.content_guest_list.*
 import kotlinx.android.synthetic.main.content_guest_list.view.*
 
 
-class GuestListActivity : AppCompatActivity() {
-    private val TAG = GuestListActivity::class.java.simpleName
+class TicketListActivity : AppCompatActivity() {
+    private val TAG = TicketListActivity::class.java.simpleName
 
     private var eventId: String = ""
     private var position: Int = -1
     private var offset: Int = 0
     private var searchGuestText: String = ""
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
+    private var ticketsDS: TicketsDS? = null
 
     companion object {
         private var searchTextChanged: Boolean = false
         private var screenRotation: Boolean = false
-        var guestList: ArrayList<GuestModel>? = null
-        val finallyFilteredGuestList = ArrayList<GuestModel>()
+        var ticketList: ArrayList<TicketModel>? = null
+        val finallyFilteredTicketList = ArrayList<TicketModel>()
     }
 
     private fun getContext(): Context {
@@ -48,6 +48,8 @@ class GuestListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_guest_list)
+
+        ticketsDS = TicketsDS()
 
         setSupportActionBar(guest_list_toolbar)
 
@@ -84,7 +86,7 @@ class GuestListActivity : AppCompatActivity() {
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
         if (searchGuestText.isEmpty()) {
-            finallyFilteredGuestList.clear()
+            finallyFilteredTicketList.clear()
         } else {
             search_guest.setText(searchGuestText)
             searchTextChanged = true
@@ -93,20 +95,8 @@ class GuestListActivity : AppCompatActivity() {
         position = intent.getIntExtra("position", -1)
         offset = intent.getIntExtra("offset", 0)
 
-        RestAPI.getGuestsForEvent(getContext(), guests_layout, eventId, ::populateGuestList)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration?) {
-        super.onConfigurationChanged(newConfig)
-        screenRotation = true
-    }
-
-//    fun guestItemBackgroundPurchasedClick(view : View) {
-//        Log.d(TAG, "OnClick")
-//    }
-
-    private fun populateGuestList(guestModelList: ArrayList<GuestModel>?) {
-        guestList = guestModelList
+        //ticketList = RestAPISync.getTicketsForEvent(eventId)
+        ticketList = ticketsDS!!.getAllTicketsForEvent(eventId)
         guest_list_view.layoutManager =
             LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
         guests_layout.loading_guests_progress_bar.visibility = View.GONE
@@ -120,9 +110,9 @@ class GuestListActivity : AppCompatActivity() {
             override fun onItemClicked(position: Int, view: View) {
 
                 val filteredList =
-                    if (GuestListActivity.finallyFilteredGuestList.size > 0) GuestListActivity.finallyFilteredGuestList else GuestListActivity.guestList
-                val intent = Intent(getContext(), GuestActivity::class.java)
-                intent.putExtra("id", filteredList?.get(position)?.id)
+                    if (TicketListActivity.finallyFilteredTicketList.size > 0) TicketListActivity.finallyFilteredTicketList else ticketList
+                val intent = Intent(getContext(), TicketActivity::class.java)
+                intent.putExtra("ticketId", filteredList?.get(position)?.ticketId)
                 intent.putExtra("eventId", eventId)
                 intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
                 intent.putExtra("searchGuestText", searchGuestText)
@@ -139,37 +129,40 @@ class GuestListActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         })
+    }
 
-        Log.d(TAG, "SUCCESS")
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        screenRotation = true
     }
 
     private fun adaptListView(guestListView: RecyclerView) {
         val searchWords = search_guest.text.toString().split(" ")
-        finallyFilteredGuestList.clear()
+        finallyFilteredTicketList.clear()
 
         for (word in searchWords) {
-            val filteredGuestList = guestList?.filter {
+            val filteredGuestList = ticketList?.filter {
                 it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
                     word.toLowerCase()
                 )
-            } as ArrayList<GuestModel>
-            filteredGuestList.forEach { if (it !in finallyFilteredGuestList) finallyFilteredGuestList.add(it) }
-            finallyFilteredGuestList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
+            } as ArrayList<TicketModel>
+            filteredGuestList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
+            finallyFilteredTicketList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
         }
 
         if (screenRotation || searchTextChanged) {
             guestListView.adapter =
-                GuestListAdapter(finallyFilteredGuestList)
-            recyclerItemTouchHelper.guestList = finallyFilteredGuestList
-            recyclerItemTouchHelper.adapter = guestListView.adapter as GuestListAdapter
+                TicketListAdapter(finallyFilteredTicketList)
+            recyclerItemTouchHelper.ticketList = finallyFilteredTicketList
+            recyclerItemTouchHelper.adapter = guestListView.adapter as TicketListAdapter
 
             screenRotation = false
             searchTextChanged = false
         } else {
             guestListView.adapter =
-                GuestListAdapter(guestList!!)
-            recyclerItemTouchHelper.guestList = guestList
-            recyclerItemTouchHelper.adapter = guestListView.adapter as GuestListAdapter
+                TicketListAdapter(ticketList!!)
+            recyclerItemTouchHelper.ticketList = ticketList
+            recyclerItemTouchHelper.adapter = guestListView.adapter as TicketListAdapter
         }
 
         if (guestListView.adapter?.itemCount!! > 0) {
