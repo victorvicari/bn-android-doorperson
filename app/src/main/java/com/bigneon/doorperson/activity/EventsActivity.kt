@@ -60,18 +60,18 @@ class EventsActivity : AppCompatActivity() {
                 networkStateReceiver.addListener(networkStateReceiverListener)
                 registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
 
-                setSupportActionBar(events_toolbar)
+//                setSupportActionBar(events_toolbar)
                 //this line shows back button
-                supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//                supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-                events_toolbar.navigationIcon!!.setColorFilter(
-                    ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
-                    PorterDuff.Mode.SRC_ATOP
-                )
+//                events_toolbar.navigationIcon!!.setColorFilter(
+//                    ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
+//                    PorterDuff.Mode.SRC_ATOP
+//                )
 
-                events_toolbar.setNavigationOnClickListener {
-                    startActivity(Intent(getContext(), LoginActivity::class.java))
-                }
+//                events_toolbar.setNavigationOnClickListener {
+//                    startActivity(Intent(getContext(), LoginActivity::class.java))
+//                }
 
                 val eventsListView: RecyclerView =
                     events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
