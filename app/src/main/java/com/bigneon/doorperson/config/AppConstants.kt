@@ -11,6 +11,7 @@ interface AppConstants {
 
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
         const val REFRESH_TOKEN = "refresh_token"
+        const val ACCESS_TOKEN = "access_token"
 
         const val CHECK_IN_MODE = "check_in_mode"
         const val CHECK_IN_MODE_MANUAL = "M"
@@ -18,7 +19,7 @@ interface AppConstants {
 
         // DB const
         const val DATABASE_NAME = "doorperson.db"
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 1
 
     }
 

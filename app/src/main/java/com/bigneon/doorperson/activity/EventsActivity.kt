@@ -2,9 +2,7 @@ package com.bigneon.doorperson.activity
 
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.PorterDuff
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -21,12 +19,13 @@ import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.sync.SyncController
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
+import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
+
 class EventsActivity : AppCompatActivity() {
     private var eventsDS: EventsDS? = null
-    private var networkStateReceiver: NetworkStateReceiver = NetworkStateReceiver()
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
@@ -48,18 +47,29 @@ class EventsActivity : AppCompatActivity() {
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
         SharedPrefs.setContext(this);
+        RestAPI.setContext(this);
         SyncController.setContext(this);
         SQLiteHelper.setContext(this);
 
         eventsDS = EventsDS()
 
+        // TODO - If we need synchronization every minute
+//        val filter = IntentFilter()
+//        // Run every 1 minute!
+//        filter.addAction("android.intent.action.TIME_TICK")
+//        val receiver = object : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                SyncController().synchronizeAllTables()
+//            }
+//        }
+//        registerReceiver(receiver, filter)
+
+        NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
+
         fun setAccessToken(accessToken: String?) {
             if (accessToken == null) {
                 startActivity(Intent(getContext(), LoginActivity::class.java))
             } else {
-                networkStateReceiver.addListener(networkStateReceiverListener)
-                registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
-
                 setSupportActionBar(events_toolbar)
                 //this line shows back button
                 supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -94,9 +104,8 @@ class EventsActivity : AppCompatActivity() {
         RestAPI.accessToken(::setAccessToken)
     }
 
-    override fun onDestroy() {
-        networkStateReceiver.removeListener(this.networkStateReceiverListener)
-        unregisterReceiver(networkStateReceiver)
-        super.onDestroy()
+    override fun onPause() {
+        NetworkUtils.instance().removeNetworkStateListener(getContext(), networkStateReceiverListener)
+        super.onPause()
     }
 }
