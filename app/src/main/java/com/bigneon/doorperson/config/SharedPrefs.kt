@@ -30,5 +30,12 @@ class SharedPrefs {
             editor.putString(key, value)
             editor.apply()
         }
+
+        fun removeProperty(key: String) {
+            val prefs = context.getSharedPreferences(PREFS_FILENAME, 0)
+            val editor = prefs.edit()
+            editor.remove(key)
+            editor.apply()
+        }
     }
 }
