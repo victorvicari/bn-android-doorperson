@@ -69,7 +69,7 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                     Toast.makeText(
                         context,
                         "Events has been synchronized",
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
                 RestAPI.getScannableEvents(accessToken, ::setEvents)
@@ -92,7 +92,7 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                     // for all events
                     events?.forEach { e ->
                         fun setTickets(tickets: ArrayList<TicketModel>?) {
-                            // for all events
+                            // for all tickets in the event
                             tickets?.forEach { t ->
                                 if (ticketsDS.ticketExists(t.ticketId!!)) {
                                     ticketsDS.updateTicket(
@@ -124,13 +124,13 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                         Toast.makeText(
                             context,
                             "Tickets for event ${e.id} has been synchronized",
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_SHORT
                         ).show()
                     }
                     Toast.makeText(
                         context,
                         "All tickets has been synchronized!",
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
                 RestAPI.getScannableEvents(accessToken, ::setEvents)
