@@ -61,4 +61,6 @@ dependencies {
         exclude module: 'support-v4'
     })
 
+    implementation('com.squareup.okhttp3:logging-interceptor:3.8.0')
+
 }
