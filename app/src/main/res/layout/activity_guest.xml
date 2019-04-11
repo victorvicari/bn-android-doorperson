@@ -9,7 +9,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/activity_guest"
         android:orientation="vertical"
-        tools:context=".activity.GuestActivity">
+        tools:context=".activity.TicketActivity">
 
     <android.support.design.widget.AppBarLayout
             android:layout_height="wrap_content"

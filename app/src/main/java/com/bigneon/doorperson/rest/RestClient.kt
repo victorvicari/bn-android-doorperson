@@ -1,11 +1,9 @@
 package com.bigneon.doorperson.rest
 
 import com.bigneon.doorperson.rest.request.AuthRequest
+import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.AuthTokenResponse
-import com.bigneon.doorperson.rest.response.DashboardResponse
-import com.bigneon.doorperson.rest.response.EventsResponse
-import com.bigneon.doorperson.rest.response.GuestsResponse
+import com.bigneon.doorperson.rest.response.*
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -25,17 +23,19 @@ interface RestClient {
     @GET("events/checkins")
     fun getScannableEvents(@Header("Authorization") token: String): Call<EventsResponse>
 
-    @GET("events/{eventId}/dashboard")
-    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String): Call<DashboardResponse>
+    @GET("events/{event_id}/dashboard")
+    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String): Call<DashboardResponse>
 
 
 //    @GET("events/{eventId}/guests")
-//    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
+//    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 
-    @GET("events/{eventId}/guests?query=")
-    fun getGuestsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<GuestsResponse>
+    @GET("events/{event_id}/guests?query=")
+    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 
-//    @Headers("Content-Type: application/json;charset=UTF-8")
-//    @GET("tickets")
-//    fun getTickets(@Header("Authorization") authHeader: String): Call<List<Ticket>>
+    @POST("events/{event_id}/redeem/{ticket_id}")
+    fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<RedeemResponse>
+
+    @GET("tickets/{ticket_id}")
+    fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>
 }
