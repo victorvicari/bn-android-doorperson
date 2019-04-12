@@ -1,5 +1,7 @@
 package com.bigneon.doorperson.rest
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
@@ -11,6 +13,7 @@ import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
 import com.bigneon.doorperson.rest.response.TicketsResponse
+import com.bigneon.doorperson.util.NetworkUtils
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -29,6 +32,7 @@ class RestAPI private constructor() {
     private val client: RestClient
 
     private object Loader {
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         internal var INSTANCE = RestAPI()
     }
@@ -66,6 +70,13 @@ class RestAPI private constructor() {
             return Loader.INSTANCE.client
         }
 
+        @SuppressLint("StaticFieldLeak")
+        private lateinit var context: Context
+
+        fun setContext(con: Context) {
+            context = con
+        }
+
         fun authenticate(email: String, password: String, setAccessToken: (accessToken: String?) -> Unit) {
             val authRequest = AuthRequest()
             authRequest.email = email
@@ -93,30 +104,39 @@ class RestAPI private constructor() {
         }
 
         fun accessToken(setAccessToken: (accessToken: String?) -> Unit) {
-            val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
-            if (refreshToken == "") setAccessToken(null)
+            if (NetworkUtils.instance().isNetworkAvailable(context)) {
+                val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
+                if (refreshToken == "") setAccessToken(null)
 
-            val refreshTokenRequest = RefreshTokenRequest()
-            refreshTokenRequest.refreshToken = refreshToken
-            val refreshTokenCall = client().refreshToken(refreshTokenRequest)
+                val refreshTokenRequest = RefreshTokenRequest()
+                refreshTokenRequest.refreshToken = refreshToken
+                val refreshTokenCall = client().refreshToken(refreshTokenRequest)
 
-            val refreshTokenCallback = object : Callback<AuthTokenResponse> {
-                override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
-                    if (response.body() != null) {
-                        SharedPrefs.setProperty(AppConstants.REFRESH_TOKEN, response.body()?.refreshToken)
-                        setAccessToken("Bearer " + response.body()?.accessToken)
-                    } else {
+                val refreshTokenCallback = object : Callback<AuthTokenResponse> {
+                    override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
+                        if (response.body() != null) {
+                            SharedPrefs.setProperty(AppConstants.REFRESH_TOKEN, response.body()?.refreshToken)
+                            SharedPrefs.setProperty(AppConstants.ACCESS_TOKEN, response.body()?.accessToken)
+                            setAccessToken("Bearer " + response.body()?.accessToken)
+                        } else {
+                            setAccessToken(null)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
                         setAccessToken(null)
+                        Log.e(TAG, "Refresh token failed")
                     }
                 }
 
-                override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
+                refreshTokenCall.enqueue(refreshTokenCallback)
+            } else { // Not connected
+                val accessToken = SharedPrefs.getProperty(AppConstants.ACCESS_TOKEN) ?: ""
+                if (accessToken == "")
                     setAccessToken(null)
-                    Log.e(TAG, "Refresh token failed")
-                }
+                else
+                    setAccessToken("Bearer $accessToken")
             }
-
-            refreshTokenCall.enqueue(refreshTokenCallback)
         }
 
         fun getScannableEvents(accessToken: String, setEvents: (ArrayList<EventModel>?) -> Unit) {
@@ -158,174 +178,9 @@ class RestAPI private constructor() {
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
         }
 
+
 /*
-        fun authenticateOLD(context: Context, view: View) {
-            val authRequest = AuthRequest()
-            authRequest.email = if (view.email_address.text != null) view.email_address.text.toString() else ""
-            authRequest.password = if (view.password.text != null) view.password.text.toString() else ""
 
-            val authTokenCall = client().authenticate(authRequest)
-
-            val callbackAuthToken = object : Callback<AuthTokenResponse> {
-                override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
-                    if (response.body() != null) {
-                        SharedPrefs.setProperty(
-                            AppConstants.ACCESS_TOKEN,
-                            response.body()!!.accessToken.orEmpty()
-                        )
-                        SharedPrefs.setProperty(
-                            AppConstants.REFRESH_TOKEN,
-                            response.body()!!.refreshToken.orEmpty()
-                        )
-
-                        context.startActivity(Intent(context, EventsActivity::class.java))
-                    } else {
-                        Snackbar
-                            .make(view, "Username and/or password does not match!", Snackbar.LENGTH_LONG)
-                            .setDuration(5000).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
-                    Snackbar
-                        .make(view, "Authentication error!", Snackbar.LENGTH_LONG)
-                        .setAction("RETRY") { authenticate(context, view) }.setDuration(5000).show()
-                }
-            }
-
-            authTokenCall.enqueue(callbackAuthToken)
-        }
-
-        fun refreshTokenOLD(context: Context, view: View) {
-            try {
-                val refreshTokenRequest = RefreshTokenRequest()
-                refreshTokenRequest.refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN)
-                val refreshTokenCall = client().refreshToken(refreshTokenRequest)
-
-                val callbackRefreshToken = object : Callback<AuthTokenResponse> {
-                    override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
-                        if (response.body() != null) {
-                            SharedPrefs.setProperty(
-                                AppConstants.ACCESS_TOKEN,
-                                response.body()!!.accessToken.orEmpty()
-                            )
-                            SharedPrefs.setProperty(
-                                AppConstants.REFRESH_TOKEN,
-                                response.body()!!.refreshToken.orEmpty()
-                            )
-
-                            context.startActivity(Intent(context, EventsActivity::class.java))
-                        } else {
-                            Snackbar
-                                .make(view, "Refresh token is not valid!", Snackbar.LENGTH_LONG)
-                                .setDuration(5000).show()
-                            Log.e(TAG, "MSG:" + response.message() + ", CODE: " + response.code())
-                        }
-                    }
-
-                    override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
-                        Snackbar
-                            .make(view, "Authentication error!", Snackbar.LENGTH_LONG)
-                            .setAction(
-                                "RETRY"
-                            ) { context.startActivity(Intent(context, LoginActivity::class.java)) }.setDuration(5000)
-                            .show()
-                        Log.e(TAG, "Failure MSG:" + t.message)
-                    }
-                }
-
-                refreshTokenCall.enqueue(callbackRefreshToken)
-            } catch (e: Exception) {
-                Log.e(TAG, e.message)
-            }
-        }
-
-        fun getDashboardForEventOLD(context: Context, view: View, eventId: String) {
-            val getDashboardForEventCall =
-                client().getDashboardForEvent(AppAuth.getAccessToken(context), eventId)
-            val callbackGetDashboardForEvent = object : Callback<DashboardResponse> {
-                override fun onResponse(call: Call<DashboardResponse>, response: Response<DashboardResponse>) {
-                    if (response.code() == 401) { //Unauthorized
-                        refreshToken(context, view)
-                    } else {
-                        val ticketsRedeemed = response.body()!!.event?.ticketsRedeemed ?: 0
-                        val soldHeld = response.body()!!.event?.soldHeld ?: 0
-                        val soldUnreserved = response.body()!!.event?.soldUnreserved ?: 0
-                        view.number_of_redeemed.text =
-                            context.getString(R.string._1_d_of_2_d_redeemed, ticketsRedeemed, soldHeld + soldUnreserved)
-                    }
-                }
-
-                override fun onFailure(call: Call<DashboardResponse>, t: Throwable) {
-                    refreshToken(context, view)
-                }
-            }
-            getDashboardForEventCall.enqueue(callbackGetDashboardForEvent)
-        }
-
-        fun getScannableEventsOLD(context: Context, view: View) {
-            try {
-                val getScannableEventsCall = client().getScannableEvents(AppAuth.getAccessToken(context))
-                val callbackGetScannableEvents = object : Callback<EventsResponse> {
-                    override fun onResponse(call: Call<EventsResponse>, response: Response<EventsResponse>) {
-                        if (response.code() == 401) { //Unauthorized
-                            refreshToken(context, view)
-                        } else {
-                            val eventsListView: RecyclerView =
-                                view.findViewById(com.bigneon.doorperson.R.id.events_list_view)
-                            val eventList = response.body()!!.data
-
-                            eventsListView.layoutManager =
-                                LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-
-                            eventsListView.adapter = EventListAdapter(eventList!!)
-
-                            eventsListView.addOnItemClickListener(object : OnItemClickListener {
-                                override fun onItemClicked(position: Int, view: View) {
-                                    val eventId = eventList[position].id
-                                    val intent = Intent(context, ScanningEventActivity::class.java)
-                                    intent.putExtra("eventId", eventId)
-                                    context.startActivity(intent)
-                                }
-                            })
-
-                            Log.d(TAG, "SUCCESS")
-                        }
-                    }
-
-                    override fun onFailure(call: Call<EventsResponse>, t: Throwable) {
-                        refreshToken(context, view)
-                    }
-                }
-                getScannableEventsCall.enqueue(callbackGetScannableEvents)
-            } catch (e: Exception) {
-                Log.e(TAG, e.message)
-            }
-        }
-
-        fun getTicketsForEventOLD(
-            context: Context,
-            view: View,
-            eventId: String,
-            populateGuestList: (ticketList: ArrayList<GuestModel>?) -> Unit
-        ) {
-            val getGuestsForEventCall =
-                client().getTicketsForEvent(AppAuth.getAccessToken(context), eventId, null)
-            val callbackGetScannableEvents = object : Callback<TicketsResponse> {
-                override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
-                    if (response.code() == 401) { //Unauthorized
-                        refreshToken(context, view)
-                    } else {
-                        populateGuestList(response.body()!!.data)
-                    }
-                }
-
-                override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
-                    refreshToken(context, view)
-                }
-            }
-            getGuestsForEventCall.enqueue(callbackGetScannableEvents)
-        }
 
         fun getTicketOLD(context: Context, view: View, ticketId: String) {
             try {
@@ -368,53 +223,6 @@ class RestAPI private constructor() {
             }
         }
 
-        fun redeemTicketForEventOLD(context: Context, view: View, eventId: String, ticketId: String, redeemKey: String) {
-            try {
-                val redeemRequest = RedeemRequest()
-                redeemRequest.redeemKey = redeemKey
-                val redeemTicketForEventCall = client()
-                    .redeemTicketForEvent(AppAuth.getAccessToken(context), eventId, ticketId, redeemRequest)
-                val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
-                    override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
-                        if (response.code() == 401) { //Unauthorized
-                            refreshToken(context, view)
-                        } else {
-                            val redeemResponse = response.body()
-
-                            if (redeemResponse != null) {
-                                view.redeemed_status?.visibility = View.VISIBLE
-                                view.purchased_status?.visibility = View.GONE
-                                view.complete_check_in?.visibility = View.GONE
-
-                                Snackbar
-                                    .make(
-                                        view,
-                                        "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
-                            } else {
-                                Snackbar
-                                    .make(
-                                        view,
-                                        "User ticket already redeemed! Redeem key: $redeemKey",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
-                            }
-
-                            Log.d(TAG, "SUCCESS")
-                        }
-                    }
-
-                    override fun onFailure(call: Call<RedeemResponse>, t: Throwable) {
-                        refreshToken(context, view)
-                    }
-                }
-                redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
-            } catch (e: Exception) {
-                Log.e(TAG, e.message)
-            }
-        }*/
+        */
     }
 }
