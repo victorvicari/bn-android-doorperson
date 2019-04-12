@@ -9,11 +9,14 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.ds.TicketsDS
 import kotlinx.android.synthetic.main.activity_guest.*
 import kotlinx.android.synthetic.main.content_guest.*
 import kotlinx.android.synthetic.main.content_guest.view.*
 
 class TicketActivity : AppCompatActivity() {
+
+    private var ticketsDS: TicketsDS? = null
 
     private fun getContext(): Context {
         return this
@@ -22,6 +25,8 @@ class TicketActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_guest)
+
+        ticketsDS = TicketsDS()
 
         setSupportActionBar(guest_toolbar)
 
@@ -79,29 +84,28 @@ class TicketActivity : AppCompatActivity() {
         }
 
         complete_check_in.setOnClickListener {
-//            val redeemResponse = RestAPISync.redeemTicketForEvent(eventId, ticketId, redeemKey)
-//
-//            if (redeemResponse != null) {
-//                scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
-//                scanning_guest_layout.purchased_status?.visibility = View.GONE
-//                scanning_guest_layout.complete_check_in?.visibility = View.GONE
-//
-//                Snackbar
-//                    .make(
-//                        scanning_guest_layout,
-//                        "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
-//                        Snackbar.LENGTH_LONG
-//                    )
-//                    .setDuration(5000).show()
-//            } else {
-//                Snackbar
-//                    .make(
-//                        scanning_guest_layout,
-//                        "User ticket already redeemed! Redeem key: $redeemKey",
-//                        Snackbar.LENGTH_LONG
-//                    )
-//                    .setDuration(5000).show()
-//            }
+            val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
+            if (redeemedTicket != null) {
+                scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
+                scanning_guest_layout.purchased_status?.visibility = View.GONE
+                scanning_guest_layout.complete_check_in?.visibility = View.GONE
+
+                Snackbar
+                    .make(
+                        scanning_guest_layout,
+                        "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                        Snackbar.LENGTH_LONG
+                    )
+                    .setDuration(5000).show()
+            } else {
+                Snackbar
+                    .make(
+                        scanning_guest_layout,
+                        "User ticket already redeemed! Redeem key: $redeemKey",
+                        Snackbar.LENGTH_LONG
+                    )
+                    .setDuration(5000).show()
+            }
         }
     }
 }
