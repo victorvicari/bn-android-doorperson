@@ -34,4 +34,7 @@
     <string name="already_checked_in">Already checked-in</string>
     <string name="no_guests_found">No guests found.</string>
     <string name="no_guests_found_placeholder_icon">No guests found placeholder icon</string>
+    <string name="turn_on_wifi">Turn ON WiFi</string>
+    <string name="turn_on_mobile_network">Mobile network</string>
+    <string name="turn_on">Turn On</string>
 </resources>

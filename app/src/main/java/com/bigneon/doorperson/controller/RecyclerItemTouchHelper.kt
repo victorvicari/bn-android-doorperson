@@ -2,6 +2,7 @@ package com.bigneon.doorperson.controller
 
 import android.annotation.SuppressLint
 import android.graphics.Canvas
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -13,8 +14,10 @@ import android.view.View
 import android.widget.LinearLayout
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.adapter.TicketListAdapter
+import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.viewholder.TicketViewHolder
+import kotlinx.android.synthetic.main.content_guest.view.*
 import kotlinx.android.synthetic.main.list_item_guest.view.*
 
 /****************************************************
@@ -29,6 +32,7 @@ class RecyclerItemTouchHelper :
     var adapter: TicketListAdapter? = null
     var parentLayout: LinearLayout? = null
     private var swipeBack = false
+    private var ticketsDS: TicketsDS? = null
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -112,44 +116,33 @@ class RecyclerItemTouchHelper :
                             ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
                             if (ticketList != null && adapter != null) {
                                 val pos = viewHolder.getAdapterPosition()
-                                val ticket = ticketList!!.get(pos)
+                                val ticket = ticketList!![pos]
                                 ticket.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                 adapter!!.notifyItemChanged(pos)
 
-//                                RestAPI.redeemTicketForEvent(
-//                                    viewHolder.itemView.context, this.parentLayout!!,
-//                                    guest.eventId!!, guest.id!!, guest.redeemKey!!
-//                                )
+                                ticketsDS = TicketsDS()
+                                val redeemedTicket = ticketsDS!!.setRedeemTicket(ticket.ticketId!!)
+                                if (redeemedTicket != null) {
+                                    viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
+                                    viewHolder.purchasedStatusTextView?.visibility = View.GONE
+                                    this.parentLayout!!.complete_check_in?.visibility = View.GONE
 
-//                                val redeemResponse = RestAPISync.redeemTicketForEvent(
-//                                    ticket.eventId!!,
-//                                    ticket.ticketId!!,
-//                                    ticket.redeemKey!!
-//                                )
-//
-//                                if (redeemResponse != null) {
-//                                    viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
-//                                    viewHolder.purchasedStatusTextView?.visibility = View.GONE
-////                                    this.parentLayout!!.redeemed_status.visibility = View.VISIBLE
-////                                    this.parentLayout!!.purchased_status.visibility = View.GONE
-//                                    this.parentLayout!!.complete_check_in?.visibility = View.GONE
-//
-//                                    Snackbar
-//                                        .make(
-//                                            this.parentLayout!!,
-//                                            "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
-//                                            Snackbar.LENGTH_LONG
-//                                        )
-//                                        .setDuration(5000).show()
-//                                } else {
-//                                    Snackbar
-//                                        .make(
-//                                            this.parentLayout!!,
-//                                            "User ticket already redeemed! Redeem key: ${ticket.redeemKey!!}",
-//                                            Snackbar.LENGTH_LONG
-//                                        )
-//                                        .setDuration(5000).show()
-//                                }
+                                    Snackbar
+                                        .make(
+                                            this.parentLayout!!,
+                                            "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
+                                } else {
+                                    Snackbar
+                                        .make(
+                                            this.parentLayout!!,
+                                            "User ticket already redeemed! Redeem key: ${ticket.redeemKey!!}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
+                                }
                             }
                         }
                     }
