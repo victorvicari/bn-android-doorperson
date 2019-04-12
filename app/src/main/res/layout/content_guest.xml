@@ -30,7 +30,8 @@
                     android:text="@string/last_name_first_name"
                     android:gravity="center_vertical"
                     android:textSize="20sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    tools:ignore="NestedWeights"/>
 
             <TextView
                     android:id="@+id/redeemed_status"

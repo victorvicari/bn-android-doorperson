@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
-    <string name="app_name">BigNeon - Door person</string>
+    <string name="app_name">Door person</string>
     <string name="title_activity_main">Door person</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email_address">Email Address</string>
