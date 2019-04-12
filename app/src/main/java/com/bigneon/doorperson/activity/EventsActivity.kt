@@ -4,9 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -73,17 +71,6 @@ class EventsActivity : AppCompatActivity() {
                 startActivity(Intent(getContext(), LoginActivity::class.java))
             } else {
                 setSupportActionBar(events_toolbar)
-                //this line shows back button
-                supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-                events_toolbar.navigationIcon!!.setColorFilter(
-                    ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
-                    PorterDuff.Mode.SRC_ATOP
-                )
-
-                events_toolbar.setNavigationOnClickListener {
-                    startActivity(Intent(getContext(), LoginActivity::class.java))
-                }
 
                 // Refresh event list every minute
                 val intentFilter = IntentFilter()
