@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.widget.Toast
+import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
@@ -66,9 +67,10 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                             eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
                         }
                     }
+
                     Toast.makeText(
                         context,
-                        "Events has been synchronized",
+                        context.resources.getString(R.string.events_synchronized),
                         Toast.LENGTH_SHORT
                     ).show()
                 }

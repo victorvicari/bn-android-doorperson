@@ -8,6 +8,7 @@
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
     <string name="event_image">Event image</string>
     <string name="event_right_arrow">Event right arrow</string>
+    <string name="events_synchronized">Events have been synchronized</string>
     <string name="title_activity_scanning_event">ScanningEventActivity</string>
     <string name="back_button_events_title">Login</string>
     <string name="back_button_scanning_event_title">Manage events</string>

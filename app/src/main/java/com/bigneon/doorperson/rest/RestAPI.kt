@@ -3,6 +3,7 @@ package com.bigneon.doorperson.rest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.auth0.jwt.JWT
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.SharedPrefs
@@ -116,8 +117,12 @@ class RestAPI private constructor() {
                     override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
                         if (response.body() != null) {
                             SharedPrefs.setProperty(AppConstants.REFRESH_TOKEN, response.body()?.refreshToken)
-                            SharedPrefs.setProperty(AppConstants.ACCESS_TOKEN, response.body()?.accessToken)
-                            setAccessToken("Bearer " + response.body()?.accessToken)
+                            val accessToken = response.body()?.accessToken
+                            val jwt = JWT.decode(accessToken)
+                            //TODO store this expires at and re-use this access token unless it has expired. Then call refresh.
+                            //println(jwt.expiresAt)
+                            SharedPrefs.setProperty(AppConstants.ACCESS_TOKEN, accessToken)
+                            setAccessToken("Bearer " + accessToken)
                         } else {
                             setAccessToken(null)
                         }

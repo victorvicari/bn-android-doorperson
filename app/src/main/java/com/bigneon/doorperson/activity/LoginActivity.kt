@@ -40,29 +40,14 @@ class LoginActivity : AppCompatActivity() {
         SharedPrefs.setContext(this)
         super.onCreate(savedInstanceState)
 
-        SharedPrefs.removeProperty(AppConstants.REFRESH_TOKEN)
         NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
         val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
 
         if (refreshToken != "") {
             startActivity(Intent(getContext(), EventsActivity::class.java))
+            finish()
         } else {
             setContentView(com.bigneon.doorperson.R.layout.activity_login)
-            setSupportActionBar(login_toolbar)
-            //this line shows back button
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-
-
-            login_toolbar.navigationIcon!!.setColorFilter(
-                ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorBlack),
-                PorterDuff.Mode.SRC_ATOP
-            )
-
-            login_toolbar.setNavigationOnClickListener {
-                finishAffinity() // Exit the app
-            }
-
             turn_on_wifi.setOnClickListener {
                 NetworkUtils.instance().setWiFiEnabled(getContext(), true)
             }
@@ -83,6 +68,7 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(Intent(getContext(), LoginActivity::class.java))
                 } else {
                     startActivity(Intent(getContext(), EventsActivity::class.java))
+                    finish()
                 }
             }
             RestAPI.authenticate(email, password, ::setAccessToken)
