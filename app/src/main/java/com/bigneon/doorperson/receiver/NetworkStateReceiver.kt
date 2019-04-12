@@ -23,10 +23,10 @@ class NetworkStateReceiver : BroadcastReceiver() {
 
         if (activeNetwork != null) {
             // connected to the internet
-            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+            if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
                 // connected to wifi
                 connected = true
-            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+            } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
                 // connected to mobile data
                 connected = true
             }

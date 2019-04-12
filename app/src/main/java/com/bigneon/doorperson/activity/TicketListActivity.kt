@@ -22,8 +22,8 @@ import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
 import kotlinx.android.synthetic.main.activity_ticket_list.*
-import kotlinx.android.synthetic.main.content_guest_list.*
-import kotlinx.android.synthetic.main.content_guest_list.view.*
+import kotlinx.android.synthetic.main.content_ticket_list.*
+import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
 
 class TicketListActivity : AppCompatActivity() {
@@ -49,14 +49,14 @@ class TicketListActivity : AppCompatActivity() {
 
         ticketsDS = TicketsDS()
 
-        setSupportActionBar(guest_list_toolbar)
+        setSupportActionBar(ticket_list_toolbar)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
-        recyclerItemTouchHelper.parentLayout = guests_layout
-        itemTouchHelper.attachToRecyclerView(guest_list_view)
+        recyclerItemTouchHelper.parentLayout = tickets_layout
+        itemTouchHelper.attachToRecyclerView(ticket_list_view)
 
         search_guest.post {
             search_guest.addTextChangedListener(object : TextWatcher {
@@ -64,19 +64,19 @@ class TicketListActivity : AppCompatActivity() {
 
                 override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
                     searchTextChanged = true
-                    adaptListView(findViewById(com.bigneon.doorperson.R.id.guest_list_view))
+                    adaptListView(findViewById(com.bigneon.doorperson.R.id.ticket_list_view))
                 }
 
                 override fun afterTextChanged(s: Editable) {}
             })
         }
 
-        guest_list_toolbar.navigationIcon!!.setColorFilter(
+        ticket_list_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 
-        guest_list_toolbar.setNavigationOnClickListener {
+        ticket_list_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)
             startActivity(intent)
@@ -101,9 +101,9 @@ class TicketListActivity : AppCompatActivity() {
             override fun onReceive(context: Context, intent: Intent) {
                 // Recover scroll position after refresh
                 val firstVisiblePosition =
-                    (guest_list_view.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    (ticket_list_view.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                 val firstVisibleOffset =
-                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(firstVisiblePosition)?.top
+                    (ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(firstVisiblePosition)?.top
                 refreshTicketList(firstVisiblePosition, firstVisibleOffset ?: 0)
             }
         }
@@ -118,56 +118,56 @@ class TicketListActivity : AppCompatActivity() {
         screenRotation = true
     }
 
-    private fun adaptListView(guestListView: RecyclerView) {
+    private fun adaptListView(ticketListView: RecyclerView) {
         val searchWords = search_guest.text.toString().split(" ")
         finallyFilteredTicketList.clear()
 
         for (word in searchWords) {
-            val filteredGuestList = ticketList?.filter {
+            val filteredTicketList = ticketList?.filter {
                 it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
                     word.toLowerCase()
                 )
             } as ArrayList<TicketModel>
-            filteredGuestList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
+            filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
         }
 
         if (screenRotation || searchTextChanged) {
-            guestListView.adapter =
+            ticketListView.adapter =
                 TicketListAdapter(finallyFilteredTicketList)
             recyclerItemTouchHelper.ticketList = finallyFilteredTicketList
-            recyclerItemTouchHelper.adapter = guestListView.adapter as TicketListAdapter
+            recyclerItemTouchHelper.adapter = ticketListView.adapter as TicketListAdapter
 
             screenRotation = false
             searchTextChanged = false
         } else {
-            guestListView.adapter =
+            ticketListView.adapter =
                 TicketListAdapter(ticketList!!)
             recyclerItemTouchHelper.ticketList = ticketList
-            recyclerItemTouchHelper.adapter = guestListView.adapter as TicketListAdapter
+            recyclerItemTouchHelper.adapter = ticketListView.adapter as TicketListAdapter
         }
 
-        if (guestListView.adapter?.itemCount!! > 0) {
-            guest_list_view.visibility = View.VISIBLE
+        if (ticketListView.adapter?.itemCount!! > 0) {
+            ticket_list_view.visibility = View.VISIBLE
             no_guests_found_placeholder.visibility = View.GONE
         } else {
-            guest_list_view.visibility = View.GONE
+            ticket_list_view.visibility = View.GONE
             no_guests_found_placeholder.visibility = View.VISIBLE
         }
     }
 
     private fun refreshTicketList(position: Int, offset: Int) {
         ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
-        guest_list_view.layoutManager =
+        ticket_list_view.layoutManager =
             LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-        guests_layout.loading_guests_progress_bar.visibility = View.GONE
-        adaptListView(guest_list_view)
+        tickets_layout.loading_guests_progress_bar.visibility = View.GONE
+        adaptListView(ticket_list_view)
 
         if (position >= 0) {
-            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
+            (ticket_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
         }
 
-        guest_list_view.addOnItemClickListener(object : OnItemClickListener {
+        ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
 
                 val filteredList =
@@ -185,7 +185,7 @@ class TicketListActivity : AppCompatActivity() {
                 intent.putExtra("position", position)
                 intent.putExtra(
                     "offset",
-                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(position)!!.top
+                    (ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(position)!!.top
                 )
                 startActivity(intent)
             }

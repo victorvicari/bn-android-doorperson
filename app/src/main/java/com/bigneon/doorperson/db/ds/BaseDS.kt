@@ -19,7 +19,7 @@ open class BaseDS {
     }
 
     // TODO - Analyze where to close DS
-    protected fun close() {
-        dbHelper.close()
-    }
+//    protected fun close() {
+//        dbHelper.close()
+//    }
 }

@@ -23,7 +23,7 @@ class EventsDS : BaseDS() {
     )
 
     fun getEvent(eventId: String): EventModel? {
-        val cursor = database?.query(
+        database?.query(
             TableEventsDML.TABLE_EVENTS,
             allColumns,
             TableEventsDML.EVENT_ID + " = '" + eventId + "'",
@@ -31,41 +31,42 @@ class EventsDS : BaseDS() {
             null,
             null,
             null
-        ) ?: return null
-
-        cursor.moveToFirst()
-        val model = cursorToEvent(cursor)
-        cursor.close()
-        return model
+        )?.use {
+            if (it.moveToFirst()) {
+                return cursorToEvent(it)
+            }
+        } ?: return null
+        return null
     }
 
     fun getAllEvents(): ArrayList<EventModel>? {
         val eventModels = ArrayList<EventModel>()
 
-        val cursor =
-            database?.query(TableEventsDML.TABLE_EVENTS, allColumns, null, null, null, null, null) ?: return null
-
-        cursor.moveToFirst()
-        while (!cursor.isAfterLast) {
-            val projectModel = cursorToEvent(cursor)
-            eventModels.add(projectModel)
-            cursor.moveToNext()
-        }
-        // make sure to close the cursor
-        cursor.close()
-        return eventModels
+        database?.query(TableEventsDML.TABLE_EVENTS, allColumns, null, null, null, null, null)?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val projectModel = cursorToEvent(it)
+                    eventModels.add(projectModel)
+                    it.moveToNext()
+                }
+                return eventModels
+            }
+        } ?: return null
+        return null
     }
 
     fun eventExists(eventId: String): Boolean {
-        val cursor = database?.rawQuery(
+        database?.rawQuery(
             "select count(*) from " + TableEventsDML.TABLE_EVENTS + " where " + TableEventsDML.EVENT_ID + " = '" + eventId + "'",
             null
-        ) ?: return false
+        )?.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                return count > 0
+            }
+        } ?: return false
 
-        cursor.moveToFirst()
-        val count = cursor.getInt(0)
-        cursor.close()
-        return count > 0
+        return false
     }
 
     fun createEvent(

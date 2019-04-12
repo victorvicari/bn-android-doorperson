@@ -82,7 +82,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             cameraPermissionGranted = true
         }
 
-        guest_list_layout.setOnClickListener {
+        ticket_list_layout.setOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             startActivity(intent)
@@ -139,7 +139,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 val ticket = ticketsDS!!.getTicket(ticketId)
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("id", ticket?.ticketId)
+                intent.putExtra("ticketId", ticket?.ticketId)
                 intent.putExtra("eventId", ticket?.eventId)
                 intent.putExtra("redeemKey", ticket?.redeemKey)
                 intent.putExtra("searchGuestText", "")
@@ -175,8 +175,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             Log.v(TAG, rawResult.text) // Prints scan results
             Log.v(TAG, rawResult.barcodeFormat.toString()) // Prints the scan format (qrcode, pdf417 etc.)
 
-            // Uncomment if want to resume using camera
-            // mScannerView!!.resumeCameraPreview(this)
+            mScannerView?.resumeCameraPreview(this)
         }
     }
 

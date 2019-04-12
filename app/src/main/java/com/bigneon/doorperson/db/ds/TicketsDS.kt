@@ -28,7 +28,7 @@ class TicketsDS : BaseDS() {
     )
 
     fun getTicket(ticketId: String): TicketModel? {
-        val cursor = database?.query(
+        database?.query(
             TableTicketsDML.TABLE_TICKETS,
             allColumns,
             TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
@@ -36,102 +36,111 @@ class TicketsDS : BaseDS() {
             null,
             null,
             null
-        ) ?: return null
-
-        cursor.moveToFirst()
-        val model = cursorToTicket(cursor)
-        cursor.close()
-        return model
+        )?.use {
+            if (it.moveToFirst()) {
+                val ticket= cursorToTicket(it)
+                it.close()
+                return ticket
+            }
+        } ?: return null
+        return null
     }
 
     fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
-        val cursor =
-            database?.query(
-                TableTicketsDML.TABLE_TICKETS,
-                allColumns,
-                TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
-                null,
-                null,
-                null,
-                null
-            ) ?: return null
-
-        cursor.moveToFirst()
-        while (!cursor.isAfterLast) {
-            val projectModel = cursorToTicket(cursor)
-            ticketModels.add(projectModel)
-            cursor.moveToNext()
-        }
-        // make sure to close the cursor
-        cursor.close()
-        return ticketModels
+        database?.query(
+            TableTicketsDML.TABLE_TICKETS,
+            allColumns,
+            TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val ticket = cursorToTicket(it)
+                    ticketModels.add(ticket)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
     }
 
     fun getAllTickets(): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
-        val cursor =
-            database?.query(TableTicketsDML.TABLE_TICKETS, allColumns, null, null, null, null, null) ?: return null
-
-        cursor.moveToFirst()
-        while (!cursor.isAfterLast) {
-            val projectModel = cursorToTicket(cursor)
-            ticketModels.add(projectModel)
-            cursor.moveToNext()
-        }
-        // make sure to close the cursor
-        cursor.close()
-        return ticketModels
+        database?.query(TableTicketsDML.TABLE_TICKETS, allColumns, null, null, null, null, null)?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val projectModel = cursorToTicket(it)
+                    ticketModels.add(projectModel)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
     }
 
     fun ticketExists(ticketId: String): Boolean {
-        val cursor = database?.rawQuery(
+        database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
             null
-        ) ?: return false
-
-        cursor.moveToFirst()
-        val count = cursor.getInt(0)
-        cursor.close()
-        return count > 0
+        )?.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                it.close()
+                return count > 0
+            }
+        } ?: return false
+        return false
     }
 
     fun getRedeemedTicketNumberForEvent(eventId: String): Int {
-        val cursor = database?.rawQuery(
+        database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
                     TableTicketsDML.STATUS + " = 'Redeemed'",
             null
-        ) ?: return 0
-
-        cursor.moveToFirst()
-        val count = cursor.getInt(0)
-        cursor.close()
-        return count
+        )?.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                it.close()
+                return count
+            }
+        } ?: return 0
+        return 0
     }
 
     fun getAllTicketNumberForEvent(eventId: String): Int {
-        val cursor = database?.rawQuery(
+        database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
             null
-        ) ?: return 0
-
-        cursor.moveToFirst()
-        val count = cursor.getInt(0)
-        cursor.close()
-        return count
+        )?.use {
+            if (it.moveToFirst()) {
+                it.moveToFirst()
+                val count = it.getInt(0)
+                it.close()
+                return count
+            }
+        } ?: return 0
+        return 0
     }
 
     fun setRedeemTicket(ticketId: String): TicketModel? {
         val values = ContentValues()
         values.put(TableTicketsDML.STATUS, "Redeemed")
-        val rowsUpdated = database?.update(
+        database?.update(
             TableTicketsDML.TABLE_TICKETS,
             values,
             TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
             null
-        ) ?: 0
+        )
         return getTicket(ticketId)
     }
 

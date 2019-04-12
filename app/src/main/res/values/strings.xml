@@ -12,7 +12,7 @@
     <string name="back_button_events_title">Login</string>
     <string name="back_button_scanning_event_title">Manage events</string>
     <string name="back_button_login_title">Exit</string>
-    <string name="back_button_guest_list_title">Scan Tickets</string>
+    <string name="back_button_ticket_list_title">Scan Tickets</string>
     <string name="manage_events">Manage events</string>
     <string name="scanning_event">Scanning Event</string>
     <string name="scan_tickets">Scan Tickets</string>
@@ -35,6 +35,4 @@
     <string name="no_guests_found">No guests found.</string>
     <string name="no_guests_found_placeholder_icon">No guests found placeholder icon</string>
     <string name="turn_on_wifi">Turn ON WiFi</string>
-    <string name="turn_on_mobile_network">Mobile network</string>
-    <string name="turn_on">Turn On</string>
 </resources>

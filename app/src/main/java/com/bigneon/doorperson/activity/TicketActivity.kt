@@ -11,8 +11,8 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.ds.TicketsDS
 import kotlinx.android.synthetic.main.activity_ticket.*
-import kotlinx.android.synthetic.main.content_guest.*
-import kotlinx.android.synthetic.main.content_guest.view.*
+import kotlinx.android.synthetic.main.content_ticket.*
+import kotlinx.android.synthetic.main.content_ticket.view.*
 
 
 class TicketActivity : AppCompatActivity() {
@@ -29,7 +29,7 @@ class TicketActivity : AppCompatActivity() {
 
         ticketsDS = TicketsDS()
 
-        setSupportActionBar(guest_toolbar)
+        setSupportActionBar(ticket_toolbar)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -61,12 +61,12 @@ class TicketActivity : AppCompatActivity() {
             complete_check_in?.visibility = View.VISIBLE
         }
 
-        guest_toolbar.navigationIcon!!.setColorFilter(
+        ticket_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 
-        guest_toolbar.setNavigationOnClickListener {
+        ticket_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)

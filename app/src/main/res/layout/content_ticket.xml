@@ -2,7 +2,7 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/guest_layout"
+        android:id="@+id/ticket_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="10dp"
@@ -11,7 +11,7 @@
         tools:context=".activity.TicketActivity">
 
     <LinearLayout
-            android:id="@+id/guest_item_data"
+            android:id="@+id/ticket_item_data"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:orientation="vertical">
