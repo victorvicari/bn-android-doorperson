@@ -13,12 +13,12 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-                android:id="@+id/guest_list_toolbar"
+                android:id="@+id/ticket_list_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:contentInsetLeft="0dp"
                 app:contentInsetStart="0dp"
-                app:title="@string/back_button_guest_list_title"
+                app:title="@string/back_button_ticket_list_title"
                 app:titleTextColor="@color/colorAccent"
                 app:titleTextAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
                 android:background="@color/colorWhite"
@@ -27,6 +27,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_guest_list"/>
+    <include layout="@layout/content_ticket_list"/>
 
 </android.support.design.widget.CoordinatorLayout>

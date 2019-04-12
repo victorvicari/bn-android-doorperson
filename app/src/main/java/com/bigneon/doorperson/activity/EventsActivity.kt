@@ -48,10 +48,10 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        SharedPrefs.setContext(this);
-        RestAPI.setContext(this);
-        SyncController.setContext(this);
-        SQLiteHelper.setContext(this);
+        SharedPrefs.setContext(this)
+        RestAPI.setContext(this)
+        SyncController.setContext(this)
+        SQLiteHelper.setContext(this)
 
         eventsDS = EventsDS()
 
@@ -112,18 +112,20 @@ class EventsActivity : AppCompatActivity() {
         val eventsListView: RecyclerView =
             events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
         val eventList = eventsDS!!.getAllEvents()
-        eventsListView.layoutManager =
-            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+        if(eventList != null) {
+            eventsListView.layoutManager =
+                LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-        eventsListView.adapter = EventListAdapter(eventList!!)
+            eventsListView.adapter = EventListAdapter(eventList)
 
-        eventsListView.addOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClicked(position: Int, view: View) {
-                val eventId = eventList[position].id
-                val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                intent.putExtra("eventId", eventId)
-                startActivity(intent)
-            }
-        })
+            eventsListView.addOnItemClickListener(object : OnItemClickListener {
+                override fun onItemClicked(position: Int, view: View) {
+                    val eventId = eventList[position].id
+                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                    intent.putExtra("eventId", eventId)
+                    startActivity(intent)
+                }
+            })
+        }
     }
 }

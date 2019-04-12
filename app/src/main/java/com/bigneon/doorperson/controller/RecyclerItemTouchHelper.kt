@@ -17,8 +17,8 @@ import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.viewholder.TicketViewHolder
-import kotlinx.android.synthetic.main.content_guest.view.*
-import kotlinx.android.synthetic.main.list_item_guest.view.*
+import kotlinx.android.synthetic.main.content_ticket.view.*
+import kotlinx.android.synthetic.main.list_item_ticket.view.*
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -44,7 +44,7 @@ class RecyclerItemTouchHelper :
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         if (viewHolder != null) {
-            ItemTouchHelper.Callback.getDefaultUIUtil().onSelected(viewHolder.itemView.guest_item_foreground)
+            ItemTouchHelper.Callback.getDefaultUIUtil().onSelected(viewHolder.itemView.ticket_item_foreground)
         }
     }
 
@@ -58,13 +58,13 @@ class RecyclerItemTouchHelper :
         isCurrentlyActive: Boolean
     ) {
         ItemTouchHelper.Callback.getDefaultUIUtil().onDrawOver(
-            c, recyclerView, viewHolder?.itemView?.guest_item_foreground, dX, dY,
+            c, recyclerView, viewHolder?.itemView?.ticket_item_foreground, dX, dY,
             actionState, isCurrentlyActive
         )
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-        ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView.guest_item_foreground)
+        ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView.ticket_item_foreground)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -90,7 +90,7 @@ class RecyclerItemTouchHelper :
                 }
             })
             ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(
-                c, recyclerView, viewHolder.itemView.guest_item_foreground, dX, dY,
+                c, recyclerView, viewHolder.itemView.ticket_item_foreground, dX, dY,
                 actionState, isCurrentlyActive
             )
         }
@@ -155,8 +155,8 @@ class RecyclerItemTouchHelper :
 
     override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
         if (swipeBack) {
-            swipeBack = false;
-            return 0;
+            swipeBack = false
+            return 0
         }
         return super.convertToAbsoluteDirection(flags, layoutDirection)
     }
