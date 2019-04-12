@@ -177,52 +177,5 @@ class RestAPI private constructor() {
 
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
         }
-
-
-/*
-
-
-        fun getTicketOLD(context: Context, view: View, ticketId: String) {
-            try {
-                val getTicketCall = client().getTicket(AppAuth.getAccessToken(context), ticketId)
-                val callbackGetTicket = object : Callback<TicketResponse> {
-                    override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
-                        if (response.code() == 401) { //Unauthorized
-                            refreshToken(context, view)
-                        } else {
-                            val ticketResponse = response.body()
-
-                            if (ticketResponse != null) {
-                                val intent = Intent(context, TicketActivity::class.java)
-                                intent.putExtra("id", ticketResponse.ticket?.id)
-                                intent.putExtra("eventId", ticketResponse.event?.id)
-                                intent.putExtra("redeemKey", ticketResponse.ticket?.redeemKey)
-                                intent.putExtra("searchGuestText", "")
-                                intent.putExtra("firstName", ticketResponse.user?.firstName)
-                                intent.putExtra("lastName", ticketResponse.user?.lastName)
-                                intent.putExtra("priceInCents", ticketResponse.ticket?.priceInCents)
-                                intent.putExtra("ticketTypeName", ticketResponse.ticket?.ticketTypeName)
-                                intent.putExtra("status", ticketResponse.ticket?.status)
-                                intent.putExtra("position", -1)
-                                context.startActivity(intent)
-                            } else {
-
-                            }
-
-                            Log.d(TAG, "SUCCESS")
-                        }
-                    }
-
-                    override fun onFailure(call: Call<TicketResponse>, t: Throwable) {
-
-                    }
-                }
-                getTicketCall.enqueue(callbackGetTicket)
-            } catch (e: Exception) {
-                Log.e(TAG, e.message)
-            }
-        }
-
-        */
     }
 }

@@ -3,11 +3,11 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/scanning_guest_layout"
+        android:id="@+id/scanning_ticket_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_guest"
+        tools:showIn="@layout/activity_ticket"
         android:orientation="vertical"
         tools:context=".activity.TicketActivity">
 

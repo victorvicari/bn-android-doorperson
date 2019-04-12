@@ -7,6 +7,8 @@ package com.bigneon.doorperson.rest.model
  ****************************************************/
 class SyncModel {
     internal var tableName: String? = null
-    internal var upload: String? = null
+
+    internal var syncDirection: String? = null
+
     internal var lastSyncTime: String? = null
 }

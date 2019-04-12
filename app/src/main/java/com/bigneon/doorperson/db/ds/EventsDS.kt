@@ -26,23 +26,6 @@ class EventsDS : BaseDS() {
         val cursor = database?.query(
             TableEventsDML.TABLE_EVENTS,
             allColumns,
-            TableEventsDML.EVENT_ID + " = " + eventId,
-            null,
-            null,
-            null,
-            null
-        ) ?: return null
-
-        cursor.moveToFirst()
-        val model = cursorToEvent(cursor)
-        cursor.close()
-        return model
-    }
-
-    fun getEventByPk(eventId: String): EventModel? {
-        val cursor = database?.query(
-            TableEventsDML.TABLE_EVENTS,
-            allColumns,
             TableEventsDML.EVENT_ID + " = '" + eventId + "'",
             null,
             null,

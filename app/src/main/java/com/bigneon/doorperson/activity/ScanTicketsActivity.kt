@@ -12,23 +12,20 @@ import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
-import android.view.View
 import android.widget.TextView.BufferType
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.google.zxing.Result
-import kotlinx.android.synthetic.main.activity_guest.*
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
-import kotlinx.android.synthetic.main.content_guest.view.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
 
 
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     private val TAG = ScanTicketsActivity::class.java.simpleName
-    private var eventId: String = ""
+    private var eventId: String? = null
 
     private var mScannerView: ZXingScannerView? = null
     private var cameraPermissionGranted: Boolean = false
@@ -155,14 +152,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 startActivity(intent)
             } else {
                 val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
-                if (redeemedTicket != null) {
-                    scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
-                    scanning_guest_layout.purchased_status?.visibility = View.GONE
-                    scanning_guest_layout.complete_check_in?.visibility = View.GONE
 
+                if (redeemedTicket != null) {
                     Snackbar
                         .make(
-                            scanning_guest_layout,
+                            scan_tickets_layout,
                             "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
                             Snackbar.LENGTH_LONG
                         )
@@ -170,7 +164,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 } else {
                     Snackbar
                         .make(
-                            scanning_guest_layout,
+                            scan_tickets_layout,
                             "User ticket already redeemed! Redeem key: $redeemKey",
                             Snackbar.LENGTH_LONG
                         )
@@ -178,14 +172,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 }
             }
 
-            Snackbar
-                .make(scan_tickets_layout, "redeemKey: $redeemKey - ticketId: $ticketId", Snackbar.LENGTH_LONG)
-                .setDuration(5000).show()
-
             Log.v(TAG, rawResult.text) // Prints scan results
             Log.v(TAG, rawResult.barcodeFormat.toString()) // Prints the scan format (qrcode, pdf417 etc.)
 
-            mScannerView!!.resumeCameraPreview(this)
+            // Uncomment if want to resume using camera
+            // mScannerView!!.resumeCameraPreview(this)
         }
     }
 

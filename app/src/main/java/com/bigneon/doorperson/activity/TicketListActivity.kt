@@ -1,7 +1,9 @@
 package com.bigneon.doorperson.activity
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -19,18 +21,14 @@ import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
-import kotlinx.android.synthetic.main.activity_guest_list.*
+import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_guest_list.*
 import kotlinx.android.synthetic.main.content_guest_list.view.*
 
 
 class TicketListActivity : AppCompatActivity() {
-    private val TAG = TicketListActivity::class.java.simpleName
-
-    private var eventId: String = ""
-    private var position: Int = -1
-    private var offset: Int = 0
-    private var searchGuestText: String = ""
+    private var eventId: String? = null
+    private var searchGuestText: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
 
@@ -47,7 +45,7 @@ class TicketListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.bigneon.doorperson.R.layout.activity_guest_list)
+        setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
 
         ticketsDS = TicketsDS()
 
@@ -85,49 +83,34 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
-        if (searchGuestText.isEmpty()) {
+        if (searchGuestText!!.isEmpty()) {
             finallyFilteredTicketList.clear()
         } else {
             search_guest.setText(searchGuestText)
             searchTextChanged = true
         }
         eventId = intent.getStringExtra("eventId")
-        position = intent.getIntExtra("position", -1)
-        offset = intent.getIntExtra("offset", 0)
+        val position = intent.getIntExtra("position", -1)
+        val offset = intent.getIntExtra("offset", 0)
 
-        ticketList = ticketsDS!!.getAllTicketsForEvent(eventId)
-        guest_list_view.layoutManager =
-            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-        guests_layout.loading_guests_progress_bar.visibility = View.GONE
-        adaptListView(guest_list_view)
-
-        if (position >= 0) {
-            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
-        }
-
-        guest_list_view.addOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClicked(position: Int, view: View) {
-
-                val filteredList =
-                    if (TicketListActivity.finallyFilteredTicketList.size > 0) TicketListActivity.finallyFilteredTicketList else ticketList
-                val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", filteredList?.get(position)?.ticketId)
-                intent.putExtra("eventId", eventId)
-                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
-                intent.putExtra("searchGuestText", searchGuestText)
-                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
-                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
-                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
-                intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
-                intent.putExtra("status", filteredList?.get(position)?.status)
-                intent.putExtra("position", position)
-                intent.putExtra(
-                    "offset",
-                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(position)!!.top
-                )
-                startActivity(intent)
+        // Refresh ticket list every minute
+        val intentFilter = IntentFilter()
+        // Run every 1 minute!
+        intentFilter.addAction("android.intent.action.TIME_TICK")
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                // Recover scroll position after refresh
+                val firstVisiblePosition =
+                    (guest_list_view.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                val firstVisibleOffset =
+                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(firstVisiblePosition)?.top
+                refreshTicketList(firstVisiblePosition, firstVisibleOffset ?: 0)
             }
-        })
+        }
+        registerReceiver(receiver, intentFilter)
+
+        // Refresh/load ticket list initially
+        refreshTicketList(position, offset)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -171,5 +154,41 @@ class TicketListActivity : AppCompatActivity() {
             guest_list_view.visibility = View.GONE
             no_guests_found_placeholder.visibility = View.VISIBLE
         }
+    }
+
+    private fun refreshTicketList(position: Int, offset: Int) {
+        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
+        guest_list_view.layoutManager =
+            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+        guests_layout.loading_guests_progress_bar.visibility = View.GONE
+        adaptListView(guest_list_view)
+
+        if (position >= 0) {
+            (guest_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, offset)
+        }
+
+        guest_list_view.addOnItemClickListener(object : OnItemClickListener {
+            override fun onItemClicked(position: Int, view: View) {
+
+                val filteredList =
+                    if (TicketListActivity.finallyFilteredTicketList.size > 0) TicketListActivity.finallyFilteredTicketList else ticketList
+                val intent = Intent(getContext(), TicketActivity::class.java)
+                intent.putExtra("ticketId", filteredList?.get(position)?.ticketId)
+                intent.putExtra("eventId", eventId)
+                intent.putExtra("redeemKey", filteredList?.get(position)?.redeemKey)
+                intent.putExtra("searchGuestText", searchGuestText)
+                intent.putExtra("firstName", filteredList?.get(position)?.firstName)
+                intent.putExtra("lastName", filteredList?.get(position)?.lastName)
+                intent.putExtra("priceInCents", filteredList?.get(position)?.priceInCents)
+                intent.putExtra("ticketTypeName", filteredList?.get(position)?.ticketType)
+                intent.putExtra("status", filteredList?.get(position)?.status)
+                intent.putExtra("position", position)
+                intent.putExtra(
+                    "offset",
+                    (guest_list_view.layoutManager as LinearLayoutManager).findViewByPosition(position)!!.top
+                )
+                startActivity(intent)
+            }
+        })
     }
 }

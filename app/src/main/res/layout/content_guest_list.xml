@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_guest_list"
+        tools:showIn="@layout/activity_ticket_list"
         android:orientation="vertical"
         tools:context=".activity.TicketListActivity">
 
@@ -36,7 +36,8 @@
             android:hint="@string/search_for_guests"
             android:maxLines="1"
             android:inputType="text"
-            android:background="@drawable/search_button_background"/>
+            android:background="@drawable/search_button_background"
+            tools:ignore="Autofill"/>
 
     <android.support.v7.widget.RecyclerView
             xmlns:android="http://schemas.android.com/apk/res/android"

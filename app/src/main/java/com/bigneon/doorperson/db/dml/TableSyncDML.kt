@@ -7,12 +7,12 @@ package com.bigneon.doorperson.db.dml
  ****************************************************/
 object TableSyncDML {
     const val TABLE_SYNC = "sync"
-    const val SYN_TABLE_NAME = "syn_table_name"
-    const val SYN_UPLOAD = "syn_upload"
-    const val SYN_LAST_SYNC_TIME = "syn_last_sync_time"
+    const val TABLE_NAME = "table_name"
+    const val SYNC_DIRECTION = "syn_direction"
+    const val LAST_SYNC_TIME = "last_sync_time"
 
     const val TABLE_SYNC_CREATE =
-        ("create table $TABLE_SYNC($SYN_TABLE_NAME text not null, $SYN_UPLOAD text not null, $SYN_LAST_SYNC_TIME text null);")
+        ("create table $TABLE_SYNC($TABLE_NAME text not null, $SYNC_DIRECTION text not null, $LAST_SYNC_TIME text null);")
 
     const val TABLE_SYNC_DELETE = "drop table if exists $TABLE_SYNC"
 }

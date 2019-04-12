@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -20,12 +19,21 @@ class NetworkStateReceiver : BroadcastReceiver() {
             return
 
         val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo = manager.activeNetworkInfo
+        val activeNetwork = manager.activeNetworkInfo
 
-        if (networkInfo != null && networkInfo.state == NetworkInfo.State.CONNECTED)
-            connected = true
-        else if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, java.lang.Boolean.FALSE))
+        if (activeNetwork != null) {
+            // connected to the internet
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+                // connected to wifi
+                connected = true
+            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                // connected to mobile data
+                connected = true
+            }
+        } else {
+            // not connected to the internet
             connected = false
+        }
 
         for (listener in this.listeners)
             if (connected)
