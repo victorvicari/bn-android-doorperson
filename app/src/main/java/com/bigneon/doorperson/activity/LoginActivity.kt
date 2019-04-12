@@ -2,17 +2,14 @@ package com.bigneon.doorperson.activity
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.NetworkUtils
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.content_login.*
 
 
@@ -33,24 +30,32 @@ class LoginActivity : AppCompatActivity() {
         return this
     }
 
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        SharedPrefs.setContext(this)
+//        super.onCreate(savedInstanceState)
+//
+//        NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
+//        val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
+//
+//        if (refreshToken != "") {
+//            startActivity(Intent(getContext(), EventsActivity::class.java))
+//            finish()
+//        } else {
+//            setContentView(com.bigneon.doorperson.R.layout.activity_login)
+//            turn_on_wifi.setOnClickListener {
+//                NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+//            }
+//        }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_login)
-        setSupportActionBar(login_toolbar)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
-
-        login_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorBlack),
-            PorterDuff.Mode.SRC_ATOP
-        )
-
-        login_toolbar.setNavigationOnClickListener {
-            finishAffinity() // Exit the app
-        }
 
         turn_on_wifi.setOnClickListener {
             NetworkUtils.instance().setWiFiEnabled(getContext(), true)
@@ -69,6 +74,7 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(Intent(getContext(), LoginActivity::class.java))
                 } else {
                     startActivity(Intent(getContext(), EventsActivity::class.java))
+                    finish()
                 }
             }
             RestAPI.authenticate(email, password, ::setAccessToken)
