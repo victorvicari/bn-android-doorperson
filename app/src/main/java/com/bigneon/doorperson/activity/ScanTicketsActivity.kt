@@ -17,6 +17,7 @@ import android.widget.TextView.BufferType
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.db.ds.TicketsDS
 import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_guest.*
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
@@ -32,6 +33,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
     private var mScannerView: ZXingScannerView? = null
     private var cameraPermissionGranted: Boolean = false
     private var checkInMode: String? = null
+    private var ticketsDS: TicketsDS? = null
 
     private fun getContext(): Context {
         return this
@@ -42,6 +44,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
         // Set the scanner view as the content view
         setContentView(R.layout.activity_scan_tickets)
+
+        ticketsDS = TicketsDS()
 
         eventId = intent.getStringExtra("eventId")
 
@@ -134,32 +138,44 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val redeemKey = jsonObjectData.getString("redeem_key")
             val ticketId = jsonObjectData.getString("id")
 
-            if(checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
-//                RestAPI.getTicket(getContext(), scan_tickets_layout, ticketId)
+            if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
+                val ticket = ticketsDS!!.getTicket(ticketId)
+
+                val intent = Intent(getContext(), TicketActivity::class.java)
+                intent.putExtra("id", ticket?.ticketId)
+                intent.putExtra("eventId", ticket?.eventId)
+                intent.putExtra("redeemKey", ticket?.redeemKey)
+                intent.putExtra("searchGuestText", "")
+                intent.putExtra("firstName", ticket?.firstName)
+                intent.putExtra("lastName", ticket?.lastName)
+                intent.putExtra("priceInCents", ticket?.priceInCents)
+                intent.putExtra("ticketTypeName", ticket?.ticketType)
+                intent.putExtra("status", ticket?.status)
+                intent.putExtra("position", -1)
+                startActivity(intent)
             } else {
-//                val redeemResponse = RestAPISync.redeemTicketForEvent(eventId, ticketId, redeemKey)
-//
-//                if (redeemResponse != null) {
-//                    scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
-//                    scanning_guest_layout.purchased_status?.visibility = View.GONE
-//                    scanning_guest_layout.complete_check_in?.visibility = View.GONE
-//
-//                    Snackbar
-//                        .make(
-//                            scanning_guest_layout,
-//                            "Checked in ${redeemResponse.lastName + ", " + redeemResponse.firstName}",
-//                            Snackbar.LENGTH_LONG
-//                        )
-//                        .setDuration(5000).show()
-//                } else {
-//                    Snackbar
-//                        .make(
-//                            scanning_guest_layout,
-//                            "User ticket already redeemed! Redeem key: $redeemKey",
-//                            Snackbar.LENGTH_LONG
-//                        )
-//                        .setDuration(5000).show()
-//                }
+                val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
+                if (redeemedTicket != null) {
+                    scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
+                    scanning_guest_layout.purchased_status?.visibility = View.GONE
+                    scanning_guest_layout.complete_check_in?.visibility = View.GONE
+
+                    Snackbar
+                        .make(
+                            scanning_guest_layout,
+                            "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                            Snackbar.LENGTH_LONG
+                        )
+                        .setDuration(5000).show()
+                } else {
+                    Snackbar
+                        .make(
+                            scanning_guest_layout,
+                            "User ticket already redeemed! Redeem key: $redeemKey",
+                            Snackbar.LENGTH_LONG
+                        )
+                        .setDuration(5000).show()
+                }
             }
 
             Snackbar

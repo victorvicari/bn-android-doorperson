@@ -44,23 +44,6 @@ class TicketsDS : BaseDS() {
         return model
     }
 
-    fun getTicketByPk(ticketId: String): TicketModel? {
-        val cursor = database?.query(
-            TableTicketsDML.TABLE_TICKETS,
-            allColumns,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null,
-            null,
-            null,
-            null
-        ) ?: return null
-
-        cursor.moveToFirst()
-        val model = cursorToTicket(cursor)
-        cursor.close()
-        return model
-    }
-
     fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
@@ -114,6 +97,44 @@ class TicketsDS : BaseDS() {
         cursor.close()
         return count > 0
     }
+
+    fun getRedeemedTicketNumberForEvent(eventId: String): Int {
+        val cursor = database?.rawQuery(
+            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
+                    TableTicketsDML.STATUS + " = 'Redeemed'",
+            null
+        ) ?: return 0
+
+        cursor.moveToFirst()
+        val count = cursor.getInt(0)
+        cursor.close()
+        return count
+    }
+
+    fun getAllTicketNumberForEvent(eventId: String): Int {
+        val cursor = database?.rawQuery(
+            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
+            null
+        ) ?: return 0
+
+        cursor.moveToFirst()
+        val count = cursor.getInt(0)
+        cursor.close()
+        return count
+    }
+
+    fun setRedeemTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(TableTicketsDML.STATUS, "Redeemed")
+        val rowsUpdated = database?.update(
+            TableTicketsDML.TABLE_TICKETS,
+            values,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            null
+        ) ?: 0
+        return getTicket(ticketId)
+    }
+
 
     fun createTicket(
         ticketId: String,

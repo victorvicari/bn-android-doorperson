@@ -95,7 +95,6 @@ class TicketListActivity : AppCompatActivity() {
         position = intent.getIntExtra("position", -1)
         offset = intent.getIntExtra("offset", 0)
 
-        //ticketList = RestAPISync.getTicketsForEvent(eventId)
         ticketList = ticketsDS!!.getAllTicketsForEvent(eventId)
         guest_list_view.layoutManager =
             LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
