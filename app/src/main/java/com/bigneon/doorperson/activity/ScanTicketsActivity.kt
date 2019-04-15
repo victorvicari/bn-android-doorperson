@@ -151,7 +151,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 intent.putExtra("position", -1)
                 startActivity(intent)
             } else {
-                val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
+                val redeemedTicket = ticketsDS!!.setCheckedTicket(ticketId)
 
                 if (redeemedTicket != null) {
                     Snackbar
