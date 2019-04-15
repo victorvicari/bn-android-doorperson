@@ -18,7 +18,8 @@ open class BaseDS {
         database = dbHelper.writableDatabase
     }
 
-    protected fun close() {
-        dbHelper.close()
-    }
+    // TODO - Analyze where to close DS
+//    protected fun close() {
+//        dbHelper.close()
+//    }
 }

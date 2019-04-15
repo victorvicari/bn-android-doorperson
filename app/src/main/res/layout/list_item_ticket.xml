@@ -6,18 +6,18 @@
                 android:background="@color/colorWhite">
 
     <FrameLayout
-            android:id="@+id/guest_item_content"
+            android:id="@+id/ticket_item_content"
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:layout_height="wrap_content">
 
         <RelativeLayout
-                android:id="@+id/guest_item_background"
+                android:id="@+id/ticket_item_background"
                 android:layout_width="match_parent"
                 android:layout_height="100dp">
 
             <TextView
-                    android:id="@+id/guest_item_background_purchased"
+                    android:id="@+id/ticket_item_background_purchased"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="20dp"
@@ -31,7 +31,7 @@
                     android:visibility="gone"/>
 
             <TextView
-                    android:id="@+id/guest_item_background_redeemed"
+                    android:id="@+id/ticket_item_background_redeemed"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="20dp"
@@ -45,13 +45,13 @@
         </RelativeLayout>
 
         <RelativeLayout
-                android:id="@+id/guest_item_foreground"
+                android:id="@+id/ticket_item_foreground"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:background="@color/colorWhite">
 
             <LinearLayout
-                    android:id="@+id/guest_item_data"
+                    android:id="@+id/ticket_item_data"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
@@ -124,6 +124,6 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="@color/colorGray"
-            android:layout_below="@+id/guest_item_content"/>
+            android:layout_below="@+id/ticket_item_content"/>
 
 </RelativeLayout>

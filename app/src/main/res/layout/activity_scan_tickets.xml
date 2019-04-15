@@ -40,13 +40,13 @@
             android:id="@+id/zxscan"
             android:layout_width="match_parent"
             android:layout_below="@id/check_in_mode_layout"
-            android:layout_above="@id/guest_list_layout"
+            android:layout_above="@id/ticket_list_layout"
             android:layout_height="match_parent">
 
     </me.dm7.barcodescanner.zxing.ZXingScannerView>
 
     <TextView
-            android:id="@+id/guest_list_layout"
+            android:id="@+id/ticket_list_layout"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:background="@color/colorAccent"

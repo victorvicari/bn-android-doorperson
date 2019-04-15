@@ -3,7 +3,10 @@ package com.bigneon.doorperson.rest
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.*
+import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.RedeemResponse
+import com.bigneon.doorperson.rest.response.TicketsResponse
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -23,10 +26,11 @@ interface RestClient {
     @GET("events/checkins")
     fun getScannableEvents(@Header("Authorization") token: String): Call<EventsResponse>
 
-    @GET("events/{event_id}/dashboard")
-    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String): Call<DashboardResponse>
+    // TODO - Isn't need any more
+//    @GET("events/{event_id}/dashboard")
+//    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String): Call<DashboardResponse>
 
-
+    // TODO - Replace getTicketsForEvent() when BE team fix query parameter. It doesn't supposed to be mandatory
 //    @GET("events/{eventId}/guests")
 //    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 
@@ -36,6 +40,7 @@ interface RestClient {
     @POST("events/{event_id}/redeem/{ticket_id}")
     fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<RedeemResponse>
 
-    @GET("tickets/{ticket_id}")
-    fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>
+    // TODO - Isn't need any more
+//    @GET("tickets/{ticket_id}")
+//    fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>
 }
