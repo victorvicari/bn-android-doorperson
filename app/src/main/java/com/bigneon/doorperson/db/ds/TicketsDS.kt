@@ -38,7 +38,7 @@ class TicketsDS : BaseDS() {
             null
         )?.use {
             if (it.moveToFirst()) {
-                val ticket= cursorToTicket(it)
+                val ticket = cursorToTicket(it)
                 it.close()
                 return ticket
             }
@@ -53,6 +53,31 @@ class TicketsDS : BaseDS() {
             TableTicketsDML.TABLE_TICKETS,
             allColumns,
             TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val ticket = cursorToTicket(it)
+                    ticketModels.add(ticket)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
+    }
+
+    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
+
+        database?.query(
+            TableTicketsDML.TABLE_TICKETS,
+            allColumns,
+            TableTicketsDML.STATUS + " = 'CHECKED'",
             null,
             null,
             null,
@@ -105,7 +130,7 @@ class TicketsDS : BaseDS() {
     fun getRedeemedTicketNumberForEvent(eventId: String): Int {
         database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
-                    TableTicketsDML.STATUS + " = 'Redeemed'",
+                    TableTicketsDML.STATUS + " = 'REDEEMED'",
             null
         )?.use {
             if (it.moveToFirst()) {
@@ -120,7 +145,7 @@ class TicketsDS : BaseDS() {
     fun getCheckedTicketNumberForEvent(eventId: String): Int {
         database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
-                    TableTicketsDML.STATUS + " = 'Checked'",
+                    TableTicketsDML.STATUS + " = 'CHECKED'",
             null
         )?.use {
             if (it.moveToFirst()) {
@@ -149,7 +174,7 @@ class TicketsDS : BaseDS() {
 
     fun setCheckedTicket(ticketId: String): TicketModel? {
         val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "Checked")
+        values.put(TableTicketsDML.STATUS, "CHECKED")
         database?.update(
             TableTicketsDML.TABLE_TICKETS,
             values,
