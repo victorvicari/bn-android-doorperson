@@ -40,12 +40,22 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
     private val ticketsDS: TicketsDS = TicketsDS()
 
     override fun doInBackground(vararg params: Unit?) {
+        // Upload synchronization
+        ticketUploadSynchronization()
+
         // Download synchronization
         eventDownloadSynchronization()
         ticketDownloadSynchronization()
+    }
 
-        // Upload synchronization
-        ticketUploadSynchronization()
+    private fun ticketUploadSynchronization() {
+        fun setAccessTokenForEvent(accessToken: String?) {
+            val checkedTickets = ticketsDS.getAllCheckedTickets()
+            checkedTickets?.forEach() { t ->
+                RestAPI.redeemTicketForEvent(accessToken!!, t.eventId!!, t.ticketId!!, t.redeemKey!!)
+            }
+        }
+        RestAPI.accessToken(::setAccessTokenForEvent)
     }
 
     private fun eventDownloadSynchronization() {
@@ -105,7 +115,7 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                                         t.priceInCents!!,
                                         t.ticketType!!,
                                         t.redeemKey!!,
-                                        t.status!!
+                                        t.status?.toUpperCase()!!
                                     )
                                 } else {
                                     ticketsDS.createTicket(
@@ -116,7 +126,7 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                                         t.priceInCents!!,
                                         t.ticketType!!,
                                         t.redeemKey!!,
-                                        t.status!!
+                                        t.status?.toUpperCase()!!
                                     )
                                 }
                             }
@@ -130,7 +140,4 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
         RestAPI.accessToken(::setAccessTokenForTicket)
     }
 
-    private fun ticketUploadSynchronization() {
-
-    }
 }
