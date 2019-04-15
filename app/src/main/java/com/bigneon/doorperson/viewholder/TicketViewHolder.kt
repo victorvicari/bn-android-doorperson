@@ -19,8 +19,9 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
     var redeemedStatusTextView: TextView? = null
+    var checkedStatusTextView: TextView? = null
     var purchasedStatusTextView: TextView? = null
-    private var ticketItemBackgroundRedeemed: TextView? = null
+    private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
     var checkedIn: Boolean = false
@@ -30,8 +31,9 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         lastNameAndFirstNameTextView = itemView.findViewById(R.id.last_name_and_first_name)
         priceAndTicketTypeTextView = itemView.findViewById(R.id.price_and_ticket_type)
         redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status)
+        checkedStatusTextView = itemView.findViewById(R.id.checked_status)
         purchasedStatusTextView = itemView.findViewById(R.id.purchased_status)
-        ticketItemBackgroundRedeemed = itemView.findViewById(R.id.ticket_item_background_redeemed)
+        ticketItemBackgroundRedeemedOrChecked = itemView.findViewById(R.id.ticket_item_background_redeemed_or_checked)
         ticketItemBackgroundPurchased = itemView.findViewById(R.id.ticket_item_background_purchased)
     }
 
@@ -42,18 +44,34 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
 //        priceAndTicketTypeTextView?.text =
 //            context!!.getString(R.string.price_ticket_type, ticket.priceInCents?.div(100), ticket.ticketType)
         priceAndTicketTypeTextView?.text = ticket.redeemKey
-        if (ticket.status?.toLowerCase() == context!!.getString(R.string.redeemed).toLowerCase()) {
-            redeemedStatusTextView?.visibility = View.VISIBLE
-            purchasedStatusTextView?.visibility = View.GONE
-            ticketItemBackgroundRedeemed?.visibility = View.VISIBLE
-            ticketItemBackgroundPurchased?.visibility = View.GONE
-            checkedIn = true
-        } else {
-            redeemedStatusTextView?.visibility = View.GONE
-            purchasedStatusTextView?.visibility = View.VISIBLE
-            ticketItemBackgroundRedeemed?.visibility = View.GONE
-            ticketItemBackgroundPurchased?.visibility = View.VISIBLE
-            checkedIn = false
+        val ticketStatus = ticket.status?.toLowerCase()
+        val statusRedeemed = context!!.getString(R.string.redeemed).toLowerCase()
+        val statusChecked = context!!.getString(R.string.checked).toLowerCase()
+        when (ticketStatus) {
+            statusRedeemed -> {
+                redeemedStatusTextView?.visibility = View.VISIBLE
+                checkedStatusTextView?.visibility = View.GONE
+                purchasedStatusTextView?.visibility = View.GONE
+                ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
+                ticketItemBackgroundPurchased?.visibility = View.GONE
+                checkedIn = true
+            }
+            statusChecked -> {
+                redeemedStatusTextView?.visibility = View.GONE
+                checkedStatusTextView?.visibility = View.VISIBLE
+                purchasedStatusTextView?.visibility = View.GONE
+                ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
+                ticketItemBackgroundPurchased?.visibility = View.GONE
+                checkedIn = true
+            }
+            else -> {
+                redeemedStatusTextView?.visibility = View.GONE
+                checkedStatusTextView?.visibility = View.GONE
+                purchasedStatusTextView?.visibility = View.VISIBLE
+                ticketItemBackgroundRedeemedOrChecked?.visibility = View.GONE
+                ticketItemBackgroundPurchased?.visibility = View.VISIBLE
+                checkedIn = false
+            }
         }
     }
 }

@@ -117,6 +117,21 @@ class TicketsDS : BaseDS() {
         return 0
     }
 
+    fun getCheckedTicketNumberForEvent(eventId: String): Int {
+        database?.rawQuery(
+            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
+                    TableTicketsDML.STATUS + " = 'Checked'",
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                it.close()
+                return count
+            }
+        } ?: return 0
+        return 0
+    }
+
     fun getAllTicketNumberForEvent(eventId: String): Int {
         database?.rawQuery(
             "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
@@ -132,9 +147,9 @@ class TicketsDS : BaseDS() {
         return 0
     }
 
-    fun setRedeemTicket(ticketId: String): TicketModel? {
+    fun setCheckedTicket(ticketId: String): TicketModel? {
         val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "Redeemed")
+        values.put(TableTicketsDML.STATUS, "Checked")
         database?.update(
             TableTicketsDML.TABLE_TICKETS,
             values,

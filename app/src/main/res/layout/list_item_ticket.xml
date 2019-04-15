@@ -31,7 +31,7 @@
                     android:visibility="gone"/>
 
             <TextView
-                    android:id="@+id/ticket_item_background_redeemed"
+                    android:id="@+id/ticket_item_background_redeemed_or_checked"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="20dp"
@@ -84,6 +84,18 @@
                             android:background="@drawable/redeemed_status_background"
                             android:layout_marginStart="10dp"
                             android:padding="5dp"/>
+
+                    <TextView
+                            android:id="@+id/checked_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/checked"
+                            android:textColor="@color/colorBlack"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/checked_status_background"
+                            android:layout_marginStart="10dp"
+                            android:padding="5dp"
+                            android:visibility="gone"/>
 
                     <TextView
                             android:id="@+id/purchased_status"

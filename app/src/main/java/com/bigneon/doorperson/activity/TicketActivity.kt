@@ -51,14 +51,29 @@ class TicketActivity : AppCompatActivity() {
         price_and_ticket_type?.text =
             getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketTypeName)
 
-        if (status?.toLowerCase() == "redeemed") {
-            redeemed_status?.visibility = View.VISIBLE
-            purchased_status?.visibility = View.GONE
-            complete_check_in?.visibility = View.GONE
-        } else {
-            redeemed_status?.visibility = View.GONE
-            purchased_status?.visibility = View.VISIBLE
-            complete_check_in?.visibility = View.VISIBLE
+        val ticketStatus = status?.toLowerCase()
+        val statusRedeemed = getString(R.string.redeemed).toLowerCase()
+        val statusChecked = getString(R.string.checked).toLowerCase()
+
+        when (ticketStatus) {
+            statusRedeemed -> {
+                redeemed_status?.visibility = View.VISIBLE
+                checked_status?.visibility = View.GONE
+                purchased_status?.visibility = View.GONE
+                complete_check_in?.visibility = View.GONE
+            }
+            statusChecked -> {
+                redeemed_status?.visibility = View.GONE
+                checked_status?.visibility = View.VISIBLE
+                purchased_status?.visibility = View.GONE
+                complete_check_in?.visibility = View.GONE
+            }
+            else -> {
+                redeemed_status?.visibility = View.GONE
+                checked_status?.visibility = View.GONE
+                purchased_status?.visibility = View.VISIBLE
+                complete_check_in?.visibility = View.VISIBLE
+            }
         }
 
         ticket_toolbar.navigationIcon!!.setColorFilter(
@@ -85,32 +100,28 @@ class TicketActivity : AppCompatActivity() {
         }
 
         complete_check_in.setOnClickListener {
-            setRedeemTicket(ticketId, redeemKey)
-        }
-    }
+            val checkedTicket = ticketsDS!!.setCheckedTicket(ticketId)
+            if (checkedTicket != null) {
+                scanning_ticket_layout.checked_status?.visibility = View.VISIBLE
+                scanning_ticket_layout.purchased_status?.visibility = View.GONE
+                scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
-    private fun setRedeemTicket(ticketId: String, redeemKey: String) {
-        val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
-        if (redeemedTicket != null) {
-            scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
-            scanning_ticket_layout.purchased_status?.visibility = View.GONE
-            scanning_ticket_layout.complete_check_in?.visibility = View.GONE
-
-            Snackbar
-                .make(
-                    scanning_ticket_layout,
-                    "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
-                    Snackbar.LENGTH_LONG
-                )
-                .setDuration(5000).show()
-        } else {
-            Snackbar
-                .make(
-                    scanning_ticket_layout,
-                    "User ticket already redeemed! Redeem key: $redeemKey",
-                    Snackbar.LENGTH_LONG
-                )
-                .setDuration(5000).show()
+                Snackbar
+                    .make(
+                        scanning_ticket_layout,
+                        "Checked in ${checkedTicket.lastName + ", " + checkedTicket.firstName}",
+                        Snackbar.LENGTH_LONG
+                    )
+                    .setDuration(5000).show()
+            } else {
+                Snackbar
+                    .make(
+                        scanning_ticket_layout,
+                        "User ticket already redeemed! Redeem key: $redeemKey",
+                        Snackbar.LENGTH_LONG
+                    )
+                    .setDuration(5000).show()
+            }
         }
     }
 }
