@@ -10,9 +10,10 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.ds.TicketsDS
-import kotlinx.android.synthetic.main.activity_guest.*
-import kotlinx.android.synthetic.main.content_guest.*
-import kotlinx.android.synthetic.main.content_guest.view.*
+import kotlinx.android.synthetic.main.activity_ticket.*
+import kotlinx.android.synthetic.main.content_ticket.*
+import kotlinx.android.synthetic.main.content_ticket.view.*
+
 
 class TicketActivity : AppCompatActivity() {
 
@@ -24,11 +25,11 @@ class TicketActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_guest)
+        setContentView(R.layout.activity_ticket)
 
         ticketsDS = TicketsDS()
 
-        setSupportActionBar(guest_toolbar)
+        setSupportActionBar(ticket_toolbar)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -60,12 +61,12 @@ class TicketActivity : AppCompatActivity() {
             complete_check_in?.visibility = View.VISIBLE
         }
 
-        guest_toolbar.navigationIcon!!.setColorFilter(
+        ticket_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 
-        guest_toolbar.setNavigationOnClickListener {
+        ticket_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
@@ -84,28 +85,32 @@ class TicketActivity : AppCompatActivity() {
         }
 
         complete_check_in.setOnClickListener {
-            val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
-            if (redeemedTicket != null) {
-                scanning_guest_layout.redeemed_status?.visibility = View.VISIBLE
-                scanning_guest_layout.purchased_status?.visibility = View.GONE
-                scanning_guest_layout.complete_check_in?.visibility = View.GONE
+            setRedeemTicket(ticketId, redeemKey)
+        }
+    }
 
-                Snackbar
-                    .make(
-                        scanning_guest_layout,
-                        "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
-                        Snackbar.LENGTH_LONG
-                    )
-                    .setDuration(5000).show()
-            } else {
-                Snackbar
-                    .make(
-                        scanning_guest_layout,
-                        "User ticket already redeemed! Redeem key: $redeemKey",
-                        Snackbar.LENGTH_LONG
-                    )
-                    .setDuration(5000).show()
-            }
+    private fun setRedeemTicket(ticketId: String, redeemKey: String) {
+        val redeemedTicket = ticketsDS!!.setRedeemTicket(ticketId)
+        if (redeemedTicket != null) {
+            scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
+            scanning_ticket_layout.purchased_status?.visibility = View.GONE
+            scanning_ticket_layout.complete_check_in?.visibility = View.GONE
+
+            Snackbar
+                .make(
+                    scanning_ticket_layout,
+                    "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                    Snackbar.LENGTH_LONG
+                )
+                .setDuration(5000).show()
+        } else {
+            Snackbar
+                .make(
+                    scanning_ticket_layout,
+                    "User ticket already redeemed! Redeem key: $redeemKey",
+                    Snackbar.LENGTH_LONG
+                )
+                .setDuration(5000).show()
         }
     }
 }

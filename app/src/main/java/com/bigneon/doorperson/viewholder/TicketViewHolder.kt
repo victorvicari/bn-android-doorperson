@@ -15,13 +15,13 @@ import com.bigneon.doorperson.rest.model.TicketModel
  * Created by SRKI-ST on 22.03.2019..
  ****************************************************/
 class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
-    RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_guest, parent, false)) {
+    RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_ticket, parent, false)) {
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
     var redeemedStatusTextView: TextView? = null
     var purchasedStatusTextView: TextView? = null
-    private var guestItemBackgroundRedeemed: TextView? = null
-    private var guestItemBackgroundPurchased: TextView? = null
+    private var ticketItemBackgroundRedeemed: TextView? = null
+    private var ticketItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
     var checkedIn: Boolean = false
 
@@ -31,8 +31,8 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         priceAndTicketTypeTextView = itemView.findViewById(R.id.price_and_ticket_type)
         redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status)
         purchasedStatusTextView = itemView.findViewById(R.id.purchased_status)
-        guestItemBackgroundRedeemed = itemView.findViewById(R.id.guest_item_background_redeemed)
-        guestItemBackgroundPurchased = itemView.findViewById(R.id.guest_item_background_purchased)
+        ticketItemBackgroundRedeemed = itemView.findViewById(R.id.ticket_item_background_redeemed)
+        ticketItemBackgroundPurchased = itemView.findViewById(R.id.ticket_item_background_purchased)
     }
 
     fun bind(ticket: TicketModel) {
@@ -45,14 +45,14 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         if (ticket.status?.toLowerCase() == context!!.getString(R.string.redeemed).toLowerCase()) {
             redeemedStatusTextView?.visibility = View.VISIBLE
             purchasedStatusTextView?.visibility = View.GONE
-            guestItemBackgroundRedeemed?.visibility = View.VISIBLE
-            guestItemBackgroundPurchased?.visibility = View.GONE
+            ticketItemBackgroundRedeemed?.visibility = View.VISIBLE
+            ticketItemBackgroundPurchased?.visibility = View.GONE
             checkedIn = true
         } else {
             redeemedStatusTextView?.visibility = View.GONE
             purchasedStatusTextView?.visibility = View.VISIBLE
-            guestItemBackgroundRedeemed?.visibility = View.GONE
-            guestItemBackgroundPurchased?.visibility = View.VISIBLE
+            ticketItemBackgroundRedeemed?.visibility = View.GONE
+            ticketItemBackgroundPurchased?.visibility = View.VISIBLE
             checkedIn = false
         }
     }

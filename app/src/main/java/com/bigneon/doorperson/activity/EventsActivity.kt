@@ -1,10 +1,10 @@
 package com.bigneon.doorperson.activity
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
+import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -46,23 +46,23 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        SharedPrefs.setContext(this);
-        RestAPI.setContext(this);
-        SyncController.setContext(this);
-        SQLiteHelper.setContext(this);
+        SharedPrefs.setContext(this)
+        RestAPI.setContext(this)
+        SyncController.setContext(this)
+        SQLiteHelper.setContext(this)
 
         eventsDS = EventsDS()
 
-        // TODO - If we need synchronization every minute
-//        val filter = IntentFilter()
-//        // Run every 1 minute!
-//        filter.addAction("android.intent.action.TIME_TICK")
-//        val receiver = object : BroadcastReceiver() {
-//            override fun onReceive(context: Context, intent: Intent) {
-//                SyncController().synchronizeAllTables()
-//            }
-//        }
-//        registerReceiver(receiver, filter)
+        // If we need synchronization every minute
+        val filter = IntentFilter()
+        // Run every 1 minute!
+        filter.addAction("android.intent.action.TIME_TICK")
+        val syncAllTablesReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                SyncController().synchronizeAllTables()
+            }
+        }
+        registerReceiver(syncAllTablesReceiver, filter)
 
         NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
 
@@ -71,34 +71,20 @@ class EventsActivity : AppCompatActivity() {
                 startActivity(Intent(getContext(), LoginActivity::class.java))
             } else {
                 setSupportActionBar(events_toolbar)
-                //this line shows back button
-                supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-                events_toolbar.navigationIcon!!.setColorFilter(
-                    ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
-                    PorterDuff.Mode.SRC_ATOP
-                )
-
-                events_toolbar.setNavigationOnClickListener {
-                    startActivity(Intent(getContext(), LoginActivity::class.java))
-                }
-
-                val eventsListView: RecyclerView =
-                    events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
-                val eventList = eventsDS!!.getAllEvents()
-                eventsListView.layoutManager =
-                    LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-
-                eventsListView.adapter = EventListAdapter(eventList!!)
-
-                eventsListView.addOnItemClickListener(object : OnItemClickListener {
-                    override fun onItemClicked(position: Int, view: View) {
-                        val eventId = eventList[position].id
-                        val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                        intent.putExtra("eventId", eventId)
-                        startActivity(intent)
+                // Refresh event list every minute
+                val intentFilter = IntentFilter()
+                // Run every 1 minute!
+                intentFilter.addAction("android.intent.action.TIME_TICK")
+                val refreshEventListReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        refreshEventList()
                     }
-                })
+                }
+                registerReceiver(refreshEventListReceiver, intentFilter)
+
+                // Refresh/load event list initially
+                refreshEventList()
             }
         }
         RestAPI.accessToken(::setAccessToken)
@@ -107,5 +93,26 @@ class EventsActivity : AppCompatActivity() {
     override fun onPause() {
         NetworkUtils.instance().removeNetworkStateListener(getContext(), networkStateReceiverListener)
         super.onPause()
+    }
+
+    private fun refreshEventList() {
+        val eventsListView: RecyclerView =
+            events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
+        val eventList = eventsDS!!.getAllEvents()
+        if(eventList != null) {
+            eventsListView.layoutManager =
+                LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
+
+            eventsListView.adapter = EventListAdapter(eventList)
+
+            eventsListView.addOnItemClickListener(object : OnItemClickListener {
+                override fun onItemClicked(position: Int, view: View) {
+                    val eventId = eventList[position].id
+                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                    intent.putExtra("eventId", eventId)
+                    startActivity(intent)
+                }
+            })
+        }
     }
 }

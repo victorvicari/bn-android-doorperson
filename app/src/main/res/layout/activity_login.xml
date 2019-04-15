@@ -11,22 +11,7 @@
             android:id="@+id/login_appbar"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-                android:id="@+id/login_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:contentInsetLeft="0dp"
-                app:contentInsetStart="0dp"
-                app:title="@string/back_button_login_title"
-                app:titleTextAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
-                app:titleTextColor="@color/colorBlack"
-                android:background="@color/colorWhite"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
+            android:theme="@style/AppTheme.AppBarOverlay" />
 
     <include layout="@layout/content_login"/>
 

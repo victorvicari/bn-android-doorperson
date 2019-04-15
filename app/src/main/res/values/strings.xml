@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
-    <string name="app_name">BigNeon - Door person</string>
+    <string name="app_name">Door person</string>
     <string name="title_activity_main">Door person</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email_address">Email Address</string>
@@ -8,11 +8,12 @@
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
     <string name="event_image">Event image</string>
     <string name="event_right_arrow">Event right arrow</string>
+    <string name="events_synchronized">Events have been synchronized</string>
     <string name="title_activity_scanning_event">ScanningEventActivity</string>
     <string name="back_button_events_title">Login</string>
     <string name="back_button_scanning_event_title">Manage events</string>
     <string name="back_button_login_title">Exit</string>
-    <string name="back_button_guest_list_title">Scan Tickets</string>
+    <string name="back_button_ticket_list_title">Scan Tickets</string>
     <string name="manage_events">Manage events</string>
     <string name="scanning_event">Scanning Event</string>
     <string name="scan_tickets">Scan Tickets</string>
@@ -35,6 +36,4 @@
     <string name="no_guests_found">No guests found.</string>
     <string name="no_guests_found_placeholder_icon">No guests found placeholder icon</string>
     <string name="turn_on_wifi">Turn ON WiFi</string>
-    <string name="turn_on_mobile_network">Mobile network</string>
-    <string name="turn_on">Turn On</string>
 </resources>
