@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.content_ticket.view.*
@@ -143,6 +144,8 @@ class RecyclerItemTouchHelper :
                                         )
                                         .setDuration(5000).show()
                                 }
+                                ticketListItemPosition = pos
+//                                ticketListItemOffset = (viewHolder.itemView.ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(pos)!!.top
                             }
                         }
                     }

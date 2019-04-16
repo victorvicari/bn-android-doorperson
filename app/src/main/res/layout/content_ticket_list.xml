@@ -9,6 +9,8 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/activity_ticket_list"
         android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         tools:context=".activity.TicketListActivity">
 
     <TextView
@@ -37,7 +39,9 @@
             android:maxLines="1"
             android:inputType="text"
             android:background="@drawable/search_button_background"
-            tools:ignore="Autofill"/>
+            tools:ignore="Autofill"
+            android:nextFocusUp="@id/search_guest"
+            android:nextFocusLeft="@id/search_guest"/>
 
     <android.support.v7.widget.RecyclerView
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -45,6 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone">
+
         <requestFocus/>
     </android.support.v7.widget.RecyclerView>
 

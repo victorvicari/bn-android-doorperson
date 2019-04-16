@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
 
-class EventsActivity : AppCompatActivity() {
+class EventsActivity : AppCompatActivity(), IEventListRefresher {
     private var eventsDS: EventsDS? = null
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -52,6 +52,7 @@ class EventsActivity : AppCompatActivity() {
         SQLiteHelper.setContext(this)
 
         eventsDS = EventsDS()
+        SyncController.eventListRefresher = this
 
         // If we need synchronization every minute
         val filter = IntentFilter()
@@ -71,19 +72,6 @@ class EventsActivity : AppCompatActivity() {
                 startActivity(Intent(getContext(), LoginActivity::class.java))
             } else {
                 setSupportActionBar(events_toolbar)
-
-                // Refresh event list every minute
-                val intentFilter = IntentFilter()
-                // Run every 1 minute!
-                intentFilter.addAction("android.intent.action.TIME_TICK")
-                val refreshEventListReceiver = object : BroadcastReceiver() {
-                    override fun onReceive(context: Context, intent: Intent) {
-                        refreshEventList()
-                    }
-                }
-                registerReceiver(refreshEventListReceiver, intentFilter)
-
-                // Refresh/load event list initially
                 refreshEventList()
             }
         }
@@ -95,11 +83,11 @@ class EventsActivity : AppCompatActivity() {
         super.onPause()
     }
 
-    private fun refreshEventList() {
+    override fun refreshEventList() {
         val eventsListView: RecyclerView =
             events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
         val eventList = eventsDS!!.getAllEvents()
-        if(eventList != null) {
+        if (eventList != null) {
             eventsListView.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
@@ -115,4 +103,8 @@ class EventsActivity : AppCompatActivity() {
             })
         }
     }
+}
+
+interface IEventListRefresher {
+    fun refreshEventList()
 }
