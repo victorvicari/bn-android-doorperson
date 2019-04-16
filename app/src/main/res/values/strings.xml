@@ -38,4 +38,8 @@
     <string name="no_guests_found">No guests found.</string>
     <string name="no_guests_found_placeholder_icon">No guests found placeholder icon</string>
     <string name="turn_on_wifi">Turn ON WiFi</string>
+    <string name="settings">Settings</string>
+    <string name="profile_settings">Profile settings</string>
+    <string name="log_out">Log out</string>
+    <string name="allow_offline_synchronization">Allow offline\nsynchronization</string>
 </resources>
