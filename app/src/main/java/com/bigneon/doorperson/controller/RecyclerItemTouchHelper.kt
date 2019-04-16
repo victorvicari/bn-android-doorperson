@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.content_ticket.view.*
@@ -117,20 +118,20 @@ class RecyclerItemTouchHelper :
                             if (ticketList != null && adapter != null) {
                                 val pos = viewHolder.getAdapterPosition()
                                 val ticket = ticketList!![pos]
-                                ticket.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                                ticket.status = viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                 adapter!!.notifyItemChanged(pos)
 
                                 ticketsDS = TicketsDS()
-                                val redeemedTicket = ticketsDS!!.setRedeemTicket(ticket.ticketId!!)
-                                if (redeemedTicket != null) {
-                                    viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
+                                val checkedTicket = ticketsDS!!.setCheckedTicket(ticket.ticketId!!)
+                                if (checkedTicket != null) {
+                                    viewHolder.checkedStatusTextView?.visibility = View.VISIBLE
                                     viewHolder.purchasedStatusTextView?.visibility = View.GONE
                                     this.parentLayout!!.complete_check_in?.visibility = View.GONE
 
                                     Snackbar
                                         .make(
                                             this.parentLayout!!,
-                                            "Checked in ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                                            "Checked in ${checkedTicket.lastName + ", " + checkedTicket.firstName}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
@@ -143,6 +144,8 @@ class RecyclerItemTouchHelper :
                                         )
                                         .setDuration(5000).show()
                                 }
+                                ticketListItemPosition = pos
+//                                ticketListItemOffset = (viewHolder.itemView.ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(pos)!!.top
                             }
                         }
                     }
