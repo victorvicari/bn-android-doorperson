@@ -9,9 +9,11 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.rest.request.AuthRequest
+import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.RedeemResponse
 import com.bigneon.doorperson.rest.response.TicketsResponse
 import com.bigneon.doorperson.util.NetworkUtils
 import okhttp3.Interceptor
@@ -176,6 +178,34 @@ class RestAPI private constructor() {
             }
 
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
+        }
+
+
+        fun redeemTicketForEvent(
+            accessToken: String, eventId: String, ticketId: String, redeemKey: String
+        ) {
+            try {
+                val redeemRequest = RedeemRequest()
+                redeemRequest.redeemKey = redeemKey
+                val redeemTicketForEventCall = client()
+                    .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
+                val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
+                    override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
+                        if (response.body() != null) {
+                            Log.e(TAG, "Redeem ticket for event $eventId succeeded")
+                        } else {
+                            Log.e(TAG, "Redeem ticket for event $eventId failed")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<RedeemResponse>, t: Throwable) {
+                        Log.e(TAG, "Redeem ticket for event $eventId failed")
+                    }
+                }
+                redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
+            } catch (e: Exception) {
+                Log.e(TAG, e.message)
+            }
         }
     }
 }

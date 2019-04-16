@@ -4,11 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
+import android.util.Log
 import android.widget.Toast
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.activity.IEventListRefresher
+import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemOffset
+import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -20,6 +25,10 @@ import com.bigneon.doorperson.rest.model.TicketModel
  ****************************************************/
 class SyncController {
     companion object {
+        var eventListRefresher: IEventListRefresher? = null
+        var ticketListRefresher: ITicketListRefresher? = null
+        var ticketListItemPosition = -1
+        var ticketListItemOffset = 0
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
@@ -30,25 +39,21 @@ class SyncController {
     }
 
     fun synchronizeAllTables() {
-        SynchronizeAllTablesTask(context).execute()
+        SynchronizeAllTablesTask(context, eventListRefresher, ticketListRefresher).execute()
     }
 }
 
-class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val context: Context) :
+class SynchronizeAllTablesTask(
+    @SuppressLint("StaticFieldLeak") private val context: Context, var eventListRefresher: IEventListRefresher?,
+    var ticketListRefresher: ITicketListRefresher?
+) :
     AsyncTask<Unit, Unit, Unit>() {
+    private val TAG = SynchronizeAllTablesTask::class.java.simpleName
+
     private val eventsDS: EventsDS = EventsDS()
     private val ticketsDS: TicketsDS = TicketsDS()
 
     override fun doInBackground(vararg params: Unit?) {
-        // Download synchronization
-        eventDownloadSynchronization()
-        ticketDownloadSynchronization()
-
-        // Upload synchronization
-        ticketUploadSynchronization()
-    }
-
-    private fun eventDownloadSynchronization() {
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken == null)
                 context.startActivity(
@@ -58,79 +63,92 @@ class SynchronizeAllTablesTask(@SuppressLint("StaticFieldLeak") private val cont
                     )
                 )
             else {
-                fun setEvents(events: ArrayList<EventModel>?) {
-                    // for all events
-                    events?.forEach {
-                        if (eventsDS.eventExists(it.id!!)) {
-                            eventsDS.updateEvent(it.id!!, it.name!!, it.promoImageURL!!)
-                        } else {
-                            eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
-                        }
-                    }
+                // Upload synchronization
+                ticketUploadSynchronization(accessToken)
 
-                    Toast.makeText(
-                        context,
-                        context.resources.getString(R.string.events_synchronized),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                RestAPI.getScannableEvents(accessToken, ::setEvents)
+                // Download synchronization
+                eventDownloadSynchronization(accessToken)
+                ticketDownloadSynchronization(accessToken)
             }
         }
         RestAPI.accessToken(::setAccessTokenForEvent)
     }
 
-    private fun ticketDownloadSynchronization() {
-        fun setAccessTokenForTicket(accessToken: String?) {
-            if (accessToken == null)
-                context.startActivity(
-                    Intent(
-                        context,
-                        LoginActivity::class.java
-                    )
-                )
-            else {
-                fun setEvents(events: ArrayList<EventModel>?) {
-                    // for all events
-                    events?.forEach { e ->
-                        fun setTickets(tickets: ArrayList<TicketModel>?) {
-                            // for all tickets in the event
-                            tickets?.forEach { t ->
-                                if (ticketsDS.ticketExists(t.ticketId!!)) {
-                                    ticketsDS.updateTicket(
-                                        t.ticketId!!,
-                                        t.eventId!!,
-                                        t.firstName!!,
-                                        t.lastName!!,
-                                        t.priceInCents!!,
-                                        t.ticketType!!,
-                                        t.redeemKey!!,
-                                        t.status!!
-                                    )
-                                } else {
-                                    ticketsDS.createTicket(
-                                        t.ticketId!!,
-                                        t.eventId!!,
-                                        t.firstName!!,
-                                        t.lastName!!,
-                                        t.priceInCents!!,
-                                        t.ticketType!!,
-                                        t.redeemKey!!,
-                                        t.status!!
-                                    )
-                                }
-                            }
-                        }
-                        RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
-                    }
-                }
-                RestAPI.getScannableEvents(accessToken, ::setEvents)
-            }
+    private fun ticketUploadSynchronization(accessToken: String) {
+        val checkedTickets = ticketsDS.getAllCheckedTickets()
+        checkedTickets?.forEach { t ->
+            RestAPI.redeemTicketForEvent(accessToken, t.eventId!!, t.ticketId!!, t.redeemKey!!)
         }
-        RestAPI.accessToken(::setAccessTokenForTicket)
     }
 
-    private fun ticketUploadSynchronization() {
+    private fun eventDownloadSynchronization(accessToken: String) {
 
+        fun setEvents(events: ArrayList<EventModel>?) {
+            // for all events
+            events?.forEach {
+                if (eventsDS.eventExists(it.id!!)) {
+                    eventsDS.updateEvent(it.id!!, it.name!!, it.promoImageURL!!)
+                } else {
+                    eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
+                }
+            }
+
+            Toast.makeText(
+                context,
+                context.resources.getString(R.string.events_synchronized),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            // Refresh event list
+            eventListRefresher?.refreshEventList()
+        }
+        RestAPI.getScannableEvents(accessToken, ::setEvents)
+    }
+
+    private fun ticketDownloadSynchronization(accessToken: String) {
+        fun setEvents(events: ArrayList<EventModel>?) {
+            // for all events
+            events?.forEach { e ->
+                fun setTickets(tickets: ArrayList<TicketModel>?) {
+                    // for all tickets in the event
+                    tickets?.forEach { t ->
+                        if (ticketsDS.ticketExists(t.ticketId!!)) {
+                            // Prevent download sync if checked ticket wasn't uploaded
+                            val ticket = ticketsDS.getTicket(t.ticketId!!)
+                            if (ticket?.status == context.getString(R.string.checked) &&
+                                t.status == context.getString(R.string.purchased)
+                            ) {
+                                Log.d(TAG, "Prevented download sync for checked ticket that wasn't uploaded")
+                            } else {
+                                ticketsDS.updateTicket(
+                                    t.ticketId!!,
+                                    t.eventId!!,
+                                    t.firstName!!,
+                                    t.lastName!!,
+                                    t.priceInCents!!,
+                                    t.ticketType!!,
+                                    t.redeemKey!!,
+                                    t.status?.toUpperCase()!!
+                                )
+                            }
+                        } else {
+                            ticketsDS.createTicket(
+                                t.ticketId!!,
+                                t.eventId!!,
+                                t.firstName!!,
+                                t.lastName!!,
+                                t.priceInCents!!,
+                                t.ticketType!!,
+                                t.redeemKey!!,
+                                t.status?.toUpperCase()!!
+                            )
+                        }
+                    }
+                }
+                RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
+                ticketListRefresher?.refreshTicketList(e.id!!, ticketListItemPosition, ticketListItemOffset)
+            }
+        }
+        RestAPI.getScannableEvents(accessToken, ::setEvents)
     }
 }

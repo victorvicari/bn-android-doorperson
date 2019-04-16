@@ -45,6 +45,11 @@ class ScanningEventActivity : AppCompatActivity() {
             ticketsDS!!.getAllTicketNumberForEvent(eventId)
         )
 
+        number_of_checked.text = getString(
+            R.string._1_d_checked,
+            ticketsDS!!.getCheckedTicketNumberForEvent(eventId)
+        )
+
         scanning_events_button.setOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)

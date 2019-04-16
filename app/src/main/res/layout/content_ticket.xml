@@ -46,6 +46,19 @@
                     android:layout_gravity="center_vertical"/>
 
             <TextView
+                    android:id="@+id/checked_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/checked"
+                    android:textColor="@color/colorBlack"
+                    android:background="@drawable/checked_status_background"
+                    android:layout_marginStart="10dp"
+                    android:padding="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:visibility="gone"/>
+
+            <TextView
                     android:id="@+id/purchased_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
