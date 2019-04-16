@@ -76,6 +76,10 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
             }
         }
         RestAPI.accessToken(::setAccessToken)
+
+        profile_settings.setOnClickListener {
+            startActivity(Intent(getContext(), ProfileActivity::class.java))
+        }
     }
 
     override fun onPause() {
