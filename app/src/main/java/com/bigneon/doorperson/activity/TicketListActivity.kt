@@ -146,9 +146,9 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         if (eventId != this.eventId)
             return
 
-        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
-
         tickets_layout.loading_guests_progress_bar.visibility = View.GONE
+
+        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!) ?: return
         adaptListView(ticket_list_view)
 
         if (position >= 0) {
@@ -159,7 +159,10 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
             override fun onItemClicked(pos: Int, view: View) {
 
                 val filteredList =
-                    if (TicketListActivity.finallyFilteredTicketList.size > 0) TicketListActivity.finallyFilteredTicketList else ticketList
+                    if (TicketListActivity.finallyFilteredTicketList.size > 0)
+                        TicketListActivity.finallyFilteredTicketList else ticketList
+
+
                 val intent = Intent(getContext(), TicketActivity::class.java)
                 intent.putExtra("ticketId", filteredList?.get(pos)?.ticketId)
                 intent.putExtra("eventId", eventId)
