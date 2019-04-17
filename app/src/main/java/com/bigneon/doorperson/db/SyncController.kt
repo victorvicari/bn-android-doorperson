@@ -1,4 +1,4 @@
-package com.bigneon.doorperson.db.sync
+package com.bigneon.doorperson.db
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,11 +10,11 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.IEventListRefresher
 import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.activity.LoginActivity
+import com.bigneon.doorperson.db.SyncController.Companion.isSyncActive
+import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
+import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.sync.SyncController.Companion.isSyncActive
-import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemOffset
-import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -33,6 +33,7 @@ class SyncController {
 
         var isNetworkAvailable: Boolean = false
         var isSyncActive: Boolean = false
+        var isOfflineModeEnabled: Boolean = false
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
@@ -43,7 +44,11 @@ class SyncController {
     }
 
     fun synchronizeAllTables() {
-        SynchronizeAllTablesTask(context, eventListRefresher, ticketListRefresher).execute()
+        SynchronizeAllTablesTask(
+            context,
+            eventListRefresher,
+            ticketListRefresher
+        ).execute()
     }
 }
 
@@ -86,7 +91,7 @@ class SynchronizeAllTablesTask(
     private fun ticketUploadSynchronization(accessToken: String) {
         val checkedTickets = ticketsDS.getAllCheckedTickets()
         checkedTickets?.forEach { t ->
-            RestAPI.redeemTicketForEvent(accessToken, t.eventId!!, t.ticketId!!, t.redeemKey!!)
+            RestAPI.redeemTicketForEvent(accessToken, t.eventId!!, t.ticketId!!, t.redeemKey!!, null)
         }
     }
 

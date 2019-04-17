@@ -11,10 +11,7 @@ import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.AuthTokenResponse
-import com.bigneon.doorperson.rest.response.EventsResponse
-import com.bigneon.doorperson.rest.response.RedeemResponse
-import com.bigneon.doorperson.rest.response.TicketsResponse
+import com.bigneon.doorperson.rest.response.*
 import com.bigneon.doorperson.util.NetworkUtils
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -182,7 +179,7 @@ class RestAPI private constructor() {
 
 
         fun redeemTicketForEvent(
-            accessToken: String, eventId: String, ticketId: String, redeemKey: String
+            accessToken: String, eventId: String, ticketId: String, redeemKey: String, redeemTicketResult: (() -> Unit)?
         ) {
             try {
                 val redeemRequest = RedeemRequest()
@@ -192,6 +189,7 @@ class RestAPI private constructor() {
                 val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
                     override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
                         if (response.body() != null) {
+                            redeemTicketResult?.invoke()
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
                         } else {
                             Log.e(TAG, "Redeem ticket for event $eventId failed")
@@ -203,6 +201,38 @@ class RestAPI private constructor() {
                     }
                 }
                 redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
+            } catch (e: Exception) {
+                Log.e(TAG, e.message)
+            }
+        }
+
+        fun getTicket(
+            accessToken: String,
+            ticketId: String,
+            getTicketResult: (isRedeemed: Boolean, ticket: TicketModel?) -> Unit
+        ) {
+            try {
+                val getTicketCall = client().getTicket(accessToken, ticketId)
+                val getTicketCallback = object : Callback<TicketResponse> {
+                    override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
+                        if (response.body() != null) {
+                            val ticket = response.body()!!.ticket!!
+                            ticket.firstName = response.body()!!.user?.firstName ?: ""
+                            ticket.lastName = response.body()!!.user?.lastName ?: ""
+                            getTicketResult(true, ticket)
+                            Log.e(TAG, "Redeem ticket $ticketId succeeded")
+                        } else {
+                            getTicketResult(false, null)
+                            Log.e(TAG, "Redeem ticket $ticketId failed")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<TicketResponse>, t: Throwable) {
+                        getTicketResult(false, null)
+                        Log.e(TAG, "Redeem ticket $ticketId failed")
+                    }
+                }
+                getTicketCall.enqueue(getTicketCallback)
             } catch (e: Exception) {
                 Log.e(TAG, e.message)
             }

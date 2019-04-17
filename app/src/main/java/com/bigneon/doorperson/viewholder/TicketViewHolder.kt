@@ -25,19 +25,21 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     private var ticketItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
     var checkedIn: Boolean = false
+    var ticketId: String? = null
 
     init {
         context = parent.context
         lastNameAndFirstNameTextView = itemView.findViewById(R.id.last_name_and_first_name)
         priceAndTicketTypeTextView = itemView.findViewById(R.id.price_and_ticket_type)
-        redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status)
-        checkedStatusTextView = itemView.findViewById(R.id.checked_status)
-        purchasedStatusTextView = itemView.findViewById(R.id.purchased_status)
+        redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status_item)
+        checkedStatusTextView = itemView.findViewById(R.id.checked_status_item)
+        purchasedStatusTextView = itemView.findViewById(R.id.purchased_status_item)
         ticketItemBackgroundRedeemedOrChecked = itemView.findViewById(R.id.ticket_item_background_redeemed_or_checked)
         ticketItemBackgroundPurchased = itemView.findViewById(R.id.ticket_item_background_purchased)
     }
 
     fun bind(ticket: TicketModel) {
+        ticketId = ticket.ticketId
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
         // TODO - Uncomment after test!

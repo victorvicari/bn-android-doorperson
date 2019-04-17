@@ -31,8 +31,19 @@
                 android:text="@string/log_out"/>
     </LinearLayout>
 
+    <TextView
+            android:id="@+id/offline_mode_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/colorBlack"
+            android:text="@string/offline_mode_enabled"/>
+
     <LinearLayout
-            android:id="@+id/offline_sync_button"
+            android:id="@+id/offline_mode_button"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:orientation="horizontal"
@@ -41,6 +52,7 @@
             android:layout_margin="20dp">
 
         <TextView
+                android:id="@+id/offline_mode_button_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
@@ -48,6 +60,6 @@
                 android:gravity="center"
                 android:layout_marginStart="10dp"
                 android:textColor="@color/colorAccent"
-                android:text="@string/allow_offline_synchronization"/>
+                android:text="@string/disable_offline_mode"/>
     </LinearLayout>
 </LinearLayout>
