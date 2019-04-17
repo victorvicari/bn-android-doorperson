@@ -17,6 +17,7 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.sync.SyncController
+import com.bigneon.doorperson.db.sync.SyncController.Companion.isNetworkAvailable
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.NetworkUtils
@@ -26,14 +27,18 @@ import kotlinx.android.synthetic.main.content_events.*
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
     private var eventsDS: EventsDS? = null
+
+
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
                 Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
+                isNetworkAvailable = true
                 SyncController().synchronizeAllTables()
             }
 
             override fun networkUnavailable() {
+                isNetworkAvailable = false
                 Toast.makeText(getContext(), "Network is unavailable!", Toast.LENGTH_LONG).show()
             }
         }
@@ -60,7 +65,8 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
         filter.addAction("android.intent.action.TIME_TICK")
         val syncAllTablesReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                SyncController().synchronizeAllTables()
+                if (isNetworkAvailable)
+                    SyncController().synchronizeAllTables()
             }
         }
         registerReceiver(syncAllTablesReceiver, filter)

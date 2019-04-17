@@ -12,6 +12,7 @@ import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.sync.SyncController.Companion.isSyncActive
 import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemOffset
 import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.RestAPI
@@ -29,6 +30,9 @@ class SyncController {
         var ticketListRefresher: ITicketListRefresher? = null
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
+
+        var isNetworkAvailable: Boolean = false
+        var isSyncActive: Boolean = false
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
@@ -55,14 +59,19 @@ class SynchronizeAllTablesTask(
 
     override fun doInBackground(vararg params: Unit?) {
         fun setAccessTokenForEvent(accessToken: String?) {
-            if (accessToken == null)
-                context.startActivity(
-                    Intent(
-                        context,
-                        LoginActivity::class.java
+            if (accessToken == null) {
+                if (isSyncActive) {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            LoginActivity::class.java
+                        )
                     )
-                )
-            else {
+                }
+                isSyncActive = false
+            } else {
+                isSyncActive = true
+
                 // Upload synchronization
                 ticketUploadSynchronization(accessToken)
 
