@@ -184,6 +184,18 @@ class TicketsDS : BaseDS() {
         return getTicket(ticketId)
     }
 
+    fun setRedeemedTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(TableTicketsDML.STATUS, "REDEEMED")
+        database?.update(
+            TableTicketsDML.TABLE_TICKETS,
+            values,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            null
+        )
+        return getTicket(ticketId)
+    }
+
 
     fun createTicket(
         ticketId: String,

@@ -1,8 +1,8 @@
 package com.bigneon.doorperson.controller
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Canvas
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -13,12 +13,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.adapter.TicketListAdapter
+import com.bigneon.doorperson.db.SyncController
+import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
+import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.viewholder.TicketViewHolder
-import kotlinx.android.synthetic.main.content_ticket.view.*
 import kotlinx.android.synthetic.main.list_item_ticket.view.*
 
 /****************************************************
@@ -104,6 +107,71 @@ class RecyclerItemTouchHelper :
                 // build alert dialog
                 val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
 
+                fun checkInTicket(ticketModel: TicketModel) {
+                    val ticket = ticketsDS!!.setCheckedTicket(ticketModel.ticketId!!)
+                    if (ticket != null) {
+                        viewHolder.checkedStatusTextView?.visibility = View.VISIBLE
+                        viewHolder.purchasedStatusTextView?.visibility = View.GONE
+                    }
+                }
+
+                fun redeemTicket(ticketModel: TicketModel) {
+                    fun setAccessToken(accessToken: String?) {
+                        if (accessToken == null) {
+                            viewHolder.itemView.context.startActivity(
+                                Intent(
+                                    viewHolder.itemView.context,
+                                    LoginActivity::class.java
+                                )
+                            )
+                        } else {
+                            fun redeemTicketResult() {
+                                fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
+                                    if (isRedeemed) {
+                                        ticketsDS!!.setRedeemedTicket(ticketModel.ticketId!!)
+
+                                        viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
+                                        viewHolder.purchasedStatusTextView?.visibility = View.GONE
+                                    } else {
+                                        // build alert dialog
+                                        val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
+
+                                        // set message of alert dialog
+                                        dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Turn on the offline mode") { _, _ ->
+                                                run {
+                                                    SyncController.isOfflineModeEnabled = true
+                                                    checkInTicket(ticketModel)
+                                                }
+                                            }
+                                            .setNegativeButton("Turn on the WiFi") { _, _ ->
+                                                run {
+                                                    NetworkUtils.instance()
+                                                        .setWiFiEnabled(viewHolder.itemView.context, true)
+                                                    redeemTicket(ticketModel)
+                                                }
+                                            }
+                                        val alert = dialogBuilder.create()
+                                        alert.setTitle("Error in connection!")
+                                        alert.show()
+                                    }
+                                }
+                                RestAPI.getTicket(accessToken, ticketModel.ticketId!!, ::getTicketResult)
+                            }
+
+                            RestAPI.redeemTicketForEvent(
+                                accessToken,
+                                ticketModel.eventId!!,
+                                ticketModel.ticketId!!,
+                                ticketModel.redeemKey!!,
+                                ::redeemTicketResult
+                            )
+                        }
+                    }
+                    RestAPI.accessToken(::setAccessToken)
+                }
+
                 // set message of alert dialog
                 dialogBuilder.setMessage("Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}")
                     .setCancelable(false)
@@ -117,33 +185,20 @@ class RecyclerItemTouchHelper :
                             ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
                             if (ticketList != null && adapter != null) {
                                 val pos = viewHolder.getAdapterPosition()
-                                val ticket = ticketList!![pos]
-                                ticket.status = viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
+                                val ticketModel = ticketList!![pos]
+
                                 adapter!!.notifyItemChanged(pos)
 
                                 ticketsDS = TicketsDS()
-                                val checkedTicket = ticketsDS!!.setCheckedTicket(ticket.ticketId!!)
-                                if (checkedTicket != null) {
-                                    viewHolder.checkedStatusTextView?.visibility = View.VISIBLE
-                                    viewHolder.purchasedStatusTextView?.visibility = View.GONE
-                                    this.parentLayout!!.complete_check_in?.visibility = View.GONE
 
-                                    Snackbar
-                                        .make(
-                                            this.parentLayout!!,
-                                            "Checked in ${checkedTicket.lastName + ", " + checkedTicket.firstName}",
-                                            Snackbar.LENGTH_LONG
-                                        )
-                                        .setDuration(5000).show()
+                                if (SyncController.isOfflineModeEnabled) {
+                                    ticketModel.status = viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
+                                    checkInTicket(ticketModel)
                                 } else {
-                                    Snackbar
-                                        .make(
-                                            this.parentLayout!!,
-                                            "User ticket already redeemed! Redeem key: ${ticket.redeemKey!!}",
-                                            Snackbar.LENGTH_LONG
-                                        )
-                                        .setDuration(5000).show()
+                                    ticketModel.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                                    redeemTicket(ticketModel)
                                 }
+
                                 ticketListItemPosition = pos
 //                                ticketListItemOffset = (viewHolder.itemView.ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(pos)!!.top
                             }

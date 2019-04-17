@@ -18,7 +18,7 @@ import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.sync.SyncController
+import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.rest.model.TicketModel
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*

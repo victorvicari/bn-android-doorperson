@@ -15,9 +15,9 @@ import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SQLiteHelper
+import com.bigneon.doorperson.db.SyncController
+import com.bigneon.doorperson.db.SyncController.Companion.isNetworkAvailable
 import com.bigneon.doorperson.db.ds.EventsDS
-import com.bigneon.doorperson.db.sync.SyncController
-import com.bigneon.doorperson.db.sync.SyncController.Companion.isNetworkAvailable
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.NetworkUtils
