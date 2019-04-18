@@ -70,12 +70,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:text="@string/last_name_first_name"
+                            android:maxLength="14"
                             android:gravity="center_vertical"
                             android:textSize="20sp"
                             android:textStyle="bold"/>
 
                     <TextView
-                            android:id="@+id/redeemed_status"
+                            android:id="@+id/redeemed_status_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/redeemed"
@@ -86,7 +87,7 @@
                             android:padding="5dp"/>
 
                     <TextView
-                            android:id="@+id/checked_status"
+                            android:id="@+id/checked_status_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/checked"
@@ -98,7 +99,7 @@
                             android:visibility="gone"/>
 
                     <TextView
-                            android:id="@+id/purchased_status"
+                            android:id="@+id/purchased_status_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/purchased"
