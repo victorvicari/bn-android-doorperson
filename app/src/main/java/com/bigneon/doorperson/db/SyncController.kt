@@ -1,19 +1,17 @@
-package com.bigneon.doorperson.db.sync
+package com.bigneon.doorperson.db
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.util.Log
-import android.widget.Toast
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.IEventListRefresher
 import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.activity.LoginActivity
+import com.bigneon.doorperson.db.SyncController.Companion.isSyncActive
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemOffset
-import com.bigneon.doorperson.db.sync.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -26,9 +24,16 @@ import com.bigneon.doorperson.rest.model.TicketModel
 class SyncController {
     companion object {
         var eventListRefresher: IEventListRefresher? = null
+        var eventListItemPosition = -1
+        var eventListItemOffset = 0
+
         var ticketListRefresher: ITicketListRefresher? = null
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
+
+        var isNetworkAvailable: Boolean = false
+        var isSyncActive: Boolean = false
+        var isOfflineModeEnabled: Boolean = true
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
@@ -39,7 +44,11 @@ class SyncController {
     }
 
     fun synchronizeAllTables() {
-        SynchronizeAllTablesTask(context, eventListRefresher, ticketListRefresher).execute()
+        SynchronizeAllTablesTask(
+            context,
+            eventListRefresher,
+            ticketListRefresher
+        ).execute()
     }
 }
 
@@ -55,14 +64,19 @@ class SynchronizeAllTablesTask(
 
     override fun doInBackground(vararg params: Unit?) {
         fun setAccessTokenForEvent(accessToken: String?) {
-            if (accessToken == null)
-                context.startActivity(
-                    Intent(
-                        context,
-                        LoginActivity::class.java
+            if (accessToken == null) {
+                if (isSyncActive) {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            LoginActivity::class.java
+                        )
                     )
-                )
-            else {
+                }
+                isSyncActive = false
+            } else {
+                isSyncActive = true
+
                 // Upload synchronization
                 ticketUploadSynchronization(accessToken)
 
@@ -77,7 +91,7 @@ class SynchronizeAllTablesTask(
     private fun ticketUploadSynchronization(accessToken: String) {
         val checkedTickets = ticketsDS.getAllCheckedTickets()
         checkedTickets?.forEach { t ->
-            RestAPI.redeemTicketForEvent(accessToken, t.eventId!!, t.ticketId!!, t.redeemKey!!)
+            RestAPI.redeemTicketForEvent(accessToken, t.eventId!!, t.ticketId!!, t.redeemKey!!, null)
         }
     }
 
@@ -92,12 +106,6 @@ class SynchronizeAllTablesTask(
                     eventsDS.createEvent(it.id!!, it.name!!, it.promoImageURL!!)
                 }
             }
-
-            Toast.makeText(
-                context,
-                context.resources.getString(R.string.events_synchronized),
-                Toast.LENGTH_SHORT
-            ).show()
 
             // Refresh event list
             eventListRefresher?.refreshEventList()
@@ -146,7 +154,7 @@ class SynchronizeAllTablesTask(
                     }
                 }
                 RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
-                ticketListRefresher?.refreshTicketList(e.id!!, ticketListItemPosition, ticketListItemOffset)
+                ticketListRefresher?.refreshTicketList(e.id!!)
             }
         }
         RestAPI.getScannableEvents(accessToken, ::setEvents)
