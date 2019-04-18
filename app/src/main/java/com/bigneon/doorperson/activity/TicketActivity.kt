@@ -48,8 +48,6 @@ class TicketActivity : AppCompatActivity() {
         val priceInCents = intent.getIntExtra("priceInCents", 0)
         val ticketTypeName = intent.getStringExtra("ticketTypeName")
         val status = intent.getStringExtra("status")
-        val position = intent.getIntExtra("position", -1)
-        val offset = intent.getIntExtra("offset", 0)
 
         last_name_and_first_name?.text =
             getContext().getString(R.string.last_name_first_name, lastName, firstName)
@@ -90,8 +88,6 @@ class TicketActivity : AppCompatActivity() {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
-            intent.putExtra("position", position)
-            intent.putExtra("offset", offset)
             startActivity(intent)
         }
 
@@ -99,8 +95,6 @@ class TicketActivity : AppCompatActivity() {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
             intent.putExtra("searchGuestText", searchGuestText)
-            intent.putExtra("position", position)
-            intent.putExtra("offset", offset)
             startActivity(intent)
         }
 

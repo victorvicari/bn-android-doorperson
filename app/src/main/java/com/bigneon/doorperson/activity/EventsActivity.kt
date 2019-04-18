@@ -9,13 +9,14 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.widget.Toast
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.SyncController
+import com.bigneon.doorperson.db.SyncController.Companion.eventListItemOffset
+import com.bigneon.doorperson.db.SyncController.Companion.eventListItemPosition
 import com.bigneon.doorperson.db.SyncController.Companion.isNetworkAvailable
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -26,20 +27,21 @@ import kotlinx.android.synthetic.main.content_events.*
 
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
+    private val TAG = EventsActivity::class.java.simpleName
     private var eventsDS: EventsDS? = null
 
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
-                Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
                 isNetworkAvailable = true
                 SyncController().synchronizeAllTables()
+                //Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
             }
 
             override fun networkUnavailable() {
                 isNetworkAvailable = false
-                Toast.makeText(getContext(), "Network is unavailable!", Toast.LENGTH_LONG).show()
+                //Toast.makeText(getContext(), "Network is unavailable!", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -103,12 +105,29 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
             eventsListView.adapter = EventListAdapter(eventList)
 
+            if (eventListItemPosition >= 0) {
+                (eventsListView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    eventListItemPosition,
+                    eventListItemOffset
+                )
+            }
+
             eventsListView.addOnItemClickListener(object : OnItemClickListener {
                 override fun onItemClicked(position: Int, view: View) {
                     val eventId = eventList[position].id
                     val intent = Intent(getContext(), ScanningEventActivity::class.java)
                     intent.putExtra("eventId", eventId)
                     startActivity(intent)
+                }
+            })
+
+            eventsListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    eventListItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    eventListItemOffset =
+                        recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top
                 }
             })
         }

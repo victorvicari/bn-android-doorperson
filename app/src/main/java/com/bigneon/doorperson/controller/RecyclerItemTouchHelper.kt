@@ -16,7 +16,6 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -192,15 +191,14 @@ class RecyclerItemTouchHelper :
                                 ticketsDS = TicketsDS()
 
                                 if (SyncController.isOfflineModeEnabled) {
-                                    ticketModel.status = viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
+                                    ticketModel.status =
+                                        viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                     checkInTicket(ticketModel)
                                 } else {
-                                    ticketModel.status = viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                                    ticketModel.status =
+                                        viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                     redeemTicket(ticketModel)
                                 }
-
-                                ticketListItemPosition = pos
-//                                ticketListItemOffset = (viewHolder.itemView.ticket_list_view.layoutManager as LinearLayoutManager).findViewByPosition(pos)!!.top
                             }
                         }
                     }
