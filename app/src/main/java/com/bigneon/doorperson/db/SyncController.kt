@@ -33,7 +33,7 @@ class SyncController {
 
         var isNetworkAvailable: Boolean = false
         var isSyncActive: Boolean = false
-        var isOfflineModeEnabled: Boolean = false
+        var isOfflineModeEnabled: Boolean = true
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
