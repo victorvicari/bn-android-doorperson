@@ -5,14 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.util.Log
-import android.widget.Toast
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.IEventListRefresher
 import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.db.SyncController.Companion.isSyncActive
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
@@ -27,6 +24,9 @@ import com.bigneon.doorperson.rest.model.TicketModel
 class SyncController {
     companion object {
         var eventListRefresher: IEventListRefresher? = null
+        var eventListItemPosition = -1
+        var eventListItemOffset = 0
+
         var ticketListRefresher: ITicketListRefresher? = null
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
@@ -107,12 +107,6 @@ class SynchronizeAllTablesTask(
                 }
             }
 
-            Toast.makeText(
-                context,
-                context.resources.getString(R.string.events_synchronized),
-                Toast.LENGTH_SHORT
-            ).show()
-
             // Refresh event list
             eventListRefresher?.refreshEventList()
         }
@@ -160,7 +154,7 @@ class SynchronizeAllTablesTask(
                     }
                 }
                 RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
-                ticketListRefresher?.refreshTicketList(e.id!!, ticketListItemPosition, ticketListItemOffset)
+                ticketListRefresher?.refreshTicketList(e.id!!)
             }
         }
         RestAPI.getScannableEvents(accessToken, ::setEvents)

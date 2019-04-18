@@ -30,24 +30,6 @@ class LoginActivity : AppCompatActivity() {
         return this
     }
 
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        SharedPrefs.setContext(this)
-//        super.onCreate(savedInstanceState)
-//
-//        NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
-//        val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
-//
-//        if (refreshToken != "") {
-//            startActivity(Intent(getContext(), EventsActivity::class.java))
-//            finish()
-//        } else {
-//            setContentView(com.bigneon.doorperson.R.layout.activity_login)
-//            turn_on_wifi.setOnClickListener {
-//                NetworkUtils.instance().setWiFiEnabled(getContext(), true)
-//            }
-//        }
-//    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_login)

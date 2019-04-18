@@ -253,7 +253,6 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 intent.putExtra("priceInCents", ticket?.priceInCents)
                 intent.putExtra("ticketTypeName", ticket?.ticketType)
                 intent.putExtra("status", ticket?.status)
-                intent.putExtra("position", -1)
                 startActivity(intent)
             } else {
                 if (SyncController.isOfflineModeEnabled) {
