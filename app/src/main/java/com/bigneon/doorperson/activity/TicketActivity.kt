@@ -171,7 +171,7 @@ class TicketActivity : AppCompatActivity() {
                                     }
                                     .setNegativeButton("Turn on the WiFi") { _, _ ->
                                         run {
-                                            NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+                                            NetworkUtils.instance().setWiFiEnabled(true)
                                             redeemTicket()
                                         }
                                     }

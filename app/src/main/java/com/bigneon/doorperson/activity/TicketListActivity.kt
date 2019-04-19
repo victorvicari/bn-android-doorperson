@@ -64,7 +64,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 searchGuestText = ""
         }
 
-        //searchGuestText = search_guest.text.toString()
         eventId = intent.getStringExtra("eventId")
 
         ticket_list_view.layoutManager =
@@ -114,6 +113,9 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
         finallyFilteredTicketList.clear()
 
+        if(ticketList == null)
+            return
+
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
                 it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
@@ -154,7 +156,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         tickets_layout.loading_guests_progress_bar.visibility = View.GONE
 
-        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!) ?: return
+        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
         adaptListView(ticket_list_view)
 
         if (ticketListItemPosition >= 0) {
@@ -169,7 +171,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
                 val filteredList =
                     if (TicketListActivity.finallyFilteredTicketList.size > 0)
-                        TicketListActivity.finallyFilteredTicketList else ticketList
+                        finallyFilteredTicketList else ticketList
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
                 intent.putExtra("ticketId", filteredList?.get(adapterPosition)?.ticketId)
