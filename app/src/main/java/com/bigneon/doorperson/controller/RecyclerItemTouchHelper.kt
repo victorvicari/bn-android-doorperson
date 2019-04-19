@@ -81,17 +81,15 @@ class RecyclerItemTouchHelper :
         isCurrentlyActive: Boolean
     ) {
         if (actionState == ACTION_STATE_SWIPE) {
-            recyclerView.setOnTouchListener(object : View.OnTouchListener {
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    if (viewHolder is TicketViewHolder) {
-                        if (viewHolder.checkedIn) {
-                            swipeBack =
-                                event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
-                        }
+            recyclerView.setOnTouchListener { _, event ->
+                if (viewHolder is TicketViewHolder) {
+                    if (viewHolder.checkedIn) {
+                        swipeBack =
+                            event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
                     }
-                    return false
                 }
-            })
+                false
+            }
             ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(
                 c, recyclerView, viewHolder.itemView.ticket_item_foreground, dX, dY,
                 actionState, isCurrentlyActive
