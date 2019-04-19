@@ -189,15 +189,16 @@ class RestAPI private constructor() {
                 val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
                     override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
                         if (response.body() != null) {
-                            redeemTicketResult?.invoke()
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
                         } else {
                             Log.e(TAG, "Redeem ticket for event $eventId failed")
                         }
+                        redeemTicketResult?.invoke()
                     }
 
                     override fun onFailure(call: Call<RedeemResponse>, t: Throwable) {
                         Log.e(TAG, "Redeem ticket for event $eventId failed")
+                        redeemTicketResult?.invoke()
                     }
                 }
                 redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)

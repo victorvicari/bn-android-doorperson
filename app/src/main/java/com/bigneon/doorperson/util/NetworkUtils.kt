@@ -22,7 +22,7 @@ class NetworkUtils {
 
     companion object {
         fun instance(): NetworkUtils {
-            return NetworkUtils.Loader.INSTANCE
+            return Loader.INSTANCE
         }
     }
 
@@ -33,7 +33,7 @@ class NetworkUtils {
         context: Context,
         networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
     ) {
-        if(!registeredListenersMap.contains(networkStateReceiverListener)) {
+        if (!registeredListenersMap.contains(networkStateReceiverListener)) {
             networkStateReceiver.addListener(networkStateReceiverListener)
             context.registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
             registeredListenersMap.add(networkStateReceiverListener)
@@ -50,7 +50,7 @@ class NetworkUtils {
             registeredListenersMap.remove(networkStateReceiverListener)
         }
     }
-    
+
     fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
         val activeNetworkInfo = connectivityManager!!.activeNetworkInfo

@@ -44,6 +44,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        NetworkUtils.instance().removeNetworkStateListener(getContext(), networkStateReceiverListener)
+        super.onPause()
+    }
+
     fun btnLoginClick(@Suppress("UNUSED_PARAMETER") view: View) {
         try {
             val email = email_address.text.toString()

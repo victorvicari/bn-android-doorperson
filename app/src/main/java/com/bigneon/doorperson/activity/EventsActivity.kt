@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.widget.Toast
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
@@ -36,14 +37,21 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
             override fun networkAvailable() {
                 isNetworkAvailable = true
                 SyncController().synchronizeAllTables()
-                //Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
+                Toast.makeText(getContext(), "Network is available!", Toast.LENGTH_LONG).show()
             }
 
             override fun networkUnavailable() {
                 isNetworkAvailable = false
-                //Toast.makeText(getContext(), "Network is unavailable!", Toast.LENGTH_LONG).show()
+                Toast.makeText(getContext(), "Network is unavailable!", Toast.LENGTH_LONG).show()
             }
         }
+
+    private val syncAllTablesReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (isNetworkAvailable)
+                SyncController().synchronizeAllTables()
+        }
+    }
 
     private fun getContext(): Context {
         return this
@@ -65,15 +73,9 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
         val filter = IntentFilter()
         // Run every 1 minute!
         filter.addAction("android.intent.action.TIME_TICK")
-        val syncAllTablesReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (isNetworkAvailable)
-                    SyncController().synchronizeAllTables()
-            }
-        }
-        registerReceiver(syncAllTablesReceiver, filter)
 
         NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
+        registerReceiver(syncAllTablesReceiver, filter)
 
         fun setAccessToken(accessToken: String?) {
             if (accessToken == null) {
@@ -92,6 +94,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
     override fun onPause() {
         NetworkUtils.instance().removeNetworkStateListener(getContext(), networkStateReceiverListener)
+        unregisterReceiver(syncAllTablesReceiver)
         super.onPause()
     }
 
