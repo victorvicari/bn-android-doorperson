@@ -37,15 +37,15 @@ class LoginActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
 
         turn_on_wifi.setOnClickListener {
-            NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+            NetworkUtils.instance().setWiFiEnabled(true)
         }
     }
 
     override fun onPause() {
-        NetworkUtils.instance().removeNetworkStateListener(getContext(), networkStateReceiverListener)
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
         super.onPause()
     }
 

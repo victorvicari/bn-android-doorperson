@@ -216,7 +216,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                         }
                                         .setNegativeButton("Turn on the WiFi") { _, _ ->
                                             run {
-                                                NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+                                                NetworkUtils.instance().setWiFiEnabled(true)
                                                 redeemTicket()
                                             }
                                         }
