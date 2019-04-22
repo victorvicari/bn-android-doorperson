@@ -37,12 +37,10 @@ class RestAPI private constructor() {
     }
 
     init {
-        val interceptor = object : Interceptor {
-            override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
-                val originalRequest = chain.request()
-                val builder = originalRequest.newBuilder()
-                return chain.proceed(builder.build())
-            }
+        val interceptor = Interceptor { chain ->
+            val originalRequest = chain.request()
+            val builder = originalRequest.newBuilder()
+            chain.proceed(builder.build())
         }
 
         val logging = HttpLoggingInterceptor()

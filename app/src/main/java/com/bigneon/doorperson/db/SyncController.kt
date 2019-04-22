@@ -102,8 +102,8 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
 }
 
 class DownloadSyncTask(
-    var eventListRefresher: IEventListRefresher?,
-    var ticketListRefresher: ITicketListRefresher?
+    private var eventListRefresher: IEventListRefresher?,
+    private var ticketListRefresher: ITicketListRefresher?
 ) : AsyncTask<Unit, Unit, Unit>() {
     private val TAG = DownloadSyncTask::class.java.simpleName
     private val eventsDS: EventsDS = EventsDS()
