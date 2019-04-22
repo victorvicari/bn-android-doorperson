@@ -25,7 +25,6 @@ import kotlinx.android.synthetic.main.content_events.*
 
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
-    private val TAG = EventsActivity::class.java.simpleName
     private var eventsDS: EventsDS? = null
 
     private fun getContext(): Context {

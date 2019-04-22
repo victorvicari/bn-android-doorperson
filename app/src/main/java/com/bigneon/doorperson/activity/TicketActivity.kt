@@ -80,7 +80,7 @@ class TicketActivity : AppCompatActivity() {
         }
 
         ticket_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
+            ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 

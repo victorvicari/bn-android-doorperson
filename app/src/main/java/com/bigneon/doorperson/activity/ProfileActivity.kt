@@ -14,7 +14,6 @@ import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.content_profile.*
 
 class ProfileActivity : AppCompatActivity() {
-    private val TAG = ProfileActivity::class.java.simpleName
     private fun getContext(): Context {
         return this
     }
