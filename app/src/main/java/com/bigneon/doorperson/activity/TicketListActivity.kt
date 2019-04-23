@@ -22,6 +22,7 @@ import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
@@ -46,6 +47,8 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
+
+        AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
         SyncController.ticketListRefresher = this
@@ -195,6 +198,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 ticketListItemOffset = recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition)!!.top
             }
         })
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
 

@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
@@ -23,6 +24,8 @@ class ScanningEventActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
+
+        AppUtils.checkLogged(getContext())
 
         eventId = intent.getStringExtra("eventId")
         ticketsDS = TicketsDS()
@@ -55,5 +58,10 @@ class ScanningEventActivity : AppCompatActivity() {
             intent.putExtra("eventId", eventId)
             startActivity(intent)
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
