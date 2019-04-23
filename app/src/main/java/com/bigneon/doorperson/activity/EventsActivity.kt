@@ -19,6 +19,7 @@ import com.bigneon.doorperson.db.SyncController.Companion.eventListItemPosition
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.service.SyncService
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
@@ -40,6 +41,8 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
         SyncController.setContext(this)
         SQLiteHelper.setContext(this)
         NetworkUtils.setContext(this)
+
+        AppUtils.checkLogged(getContext())
 
         eventsDS = EventsDS()
         SyncController.eventListRefresher = this
@@ -98,6 +101,11 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
                 }
             })
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
 

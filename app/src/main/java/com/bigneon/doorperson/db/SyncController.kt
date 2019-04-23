@@ -74,12 +74,8 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken == null) {
                 if (isSyncActive) {
-                    SyncController.getContext().startActivity(
-                        Intent(
-                            SyncController.getContext(),
-                            LoginActivity::class.java
-                        )
-                    )
+                    val intent = Intent(SyncController.getContext(), LoginActivity::class.java)
+                    SyncController.getContext().startActivity(intent)
                 }
                 isSyncActive = false
             } else {
@@ -113,12 +109,8 @@ class DownloadSyncTask(
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken == null) {
                 if (isSyncActive) {
-                    SyncController.getContext().startActivity(
-                        Intent(
-                            SyncController.getContext(),
-                            LoginActivity::class.java
-                        )
-                    )
+                    val intent = Intent(SyncController.getContext(), LoginActivity::class.java)
+                    SyncController.getContext().startActivity(intent)
                 }
                 isSyncActive = false
             } else {

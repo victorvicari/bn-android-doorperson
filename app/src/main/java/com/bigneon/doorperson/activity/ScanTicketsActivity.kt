@@ -22,6 +22,7 @@ import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
@@ -49,6 +50,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
         // Set the scanner view as the content view
         setContentView(R.layout.activity_scan_tickets)
+
+        AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
 
@@ -288,5 +291,10 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         )
         // shove our styled text into the Button
         check_in_mode_button.setText(text, BufferType.SPANNABLE)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
