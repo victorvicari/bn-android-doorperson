@@ -10,11 +10,11 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
+import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.content_profile.*
 
 class ProfileActivity : AppCompatActivity() {
-    private val TAG = ProfileActivity::class.java.simpleName
     private fun getContext(): Context {
         return this
     }
@@ -23,6 +23,8 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         setSupportActionBar(profile_settings_toolbar)
+
+        AppUtils.checkLogged(getContext())
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -49,5 +51,10 @@ class ProfileActivity : AppCompatActivity() {
             offline_mode_label.text = if (isOfflineModeEnabled) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
             offline_mode_button_label.text = if (isOfflineModeEnabled) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }

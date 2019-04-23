@@ -12,7 +12,10 @@ import android.net.ConnectivityManager
  ****************************************************/
 class NetworkStateReceiver : BroadcastReceiver() {
     private var listeners: MutableList<NetworkStateReceiverListener> = ArrayList()
-    private var connected: Boolean = false
+
+    companion object {
+        private var connected: Boolean = false
+    }
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null || intent.extras == null)
@@ -42,12 +45,12 @@ class NetworkStateReceiver : BroadcastReceiver() {
                 listener.networkUnavailable()
     }
 
-    fun addListener(l: NetworkStateReceiverListener) {
-        listeners.add(l)
+    fun addListener(listener: NetworkStateReceiverListener) {
+        listeners.add(listener)
     }
 
-    fun removeListener(l: NetworkStateReceiverListener) {
-        listeners.remove(l)
+    fun removeListener(listener: NetworkStateReceiverListener) {
+        listeners.remove(listener)
     }
 
     interface NetworkStateReceiverListener {

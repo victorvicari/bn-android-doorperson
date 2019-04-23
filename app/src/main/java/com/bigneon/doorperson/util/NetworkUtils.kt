@@ -21,8 +21,15 @@ class NetworkUtils {
     }
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
+        private lateinit var context: Context
+
+        fun setContext(con: Context) {
+            context = con
+        }
+
         fun instance(): NetworkUtils {
-            return NetworkUtils.Loader.INSTANCE
+            return Loader.INSTANCE
         }
     }
 
@@ -30,10 +37,9 @@ class NetworkUtils {
     private var registeredListenersMap: ArrayList<NetworkStateReceiver.NetworkStateReceiverListener> = ArrayList()
 
     fun addNetworkStateListener(
-        context: Context,
         networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
     ) {
-        if(!registeredListenersMap.contains(networkStateReceiverListener)) {
+        if (!registeredListenersMap.contains(networkStateReceiverListener)) {
             networkStateReceiver.addListener(networkStateReceiverListener)
             context.registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
             registeredListenersMap.add(networkStateReceiverListener)
@@ -41,7 +47,6 @@ class NetworkUtils {
     }
 
     fun removeNetworkStateListener(
-        context: Context,
         networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
     ) {
         if (registeredListenersMap.contains(networkStateReceiverListener)) {
@@ -50,15 +55,15 @@ class NetworkUtils {
             registeredListenersMap.remove(networkStateReceiverListener)
         }
     }
-    
-    fun isNetworkAvailable(context: Context): Boolean {
+
+    fun isNetworkAvailable(): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
         val activeNetworkInfo = connectivityManager!!.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 
     @Throws(Exception::class)
-    fun setWiFiEnabled(context: Context, enabled: Boolean) {
+    fun setWiFiEnabled(enabled: Boolean) {
         val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
         wifiManager.isWifiEnabled = enabled
     }
