@@ -1,9 +1,9 @@
 package com.bigneon.doorperson.controller
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Canvas
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
@@ -22,6 +22,7 @@ import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.list_item_ticket.view.*
+import java.util.*
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -81,17 +82,15 @@ class RecyclerItemTouchHelper :
         isCurrentlyActive: Boolean
     ) {
         if (actionState == ACTION_STATE_SWIPE) {
-            recyclerView.setOnTouchListener(object : View.OnTouchListener {
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    if (viewHolder is TicketViewHolder) {
-                        if (viewHolder.checkedIn) {
-                            swipeBack =
-                                event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
-                        }
+            recyclerView.setOnTouchListener { _, event ->
+                if (viewHolder is TicketViewHolder) {
+                    if (viewHolder.checkedIn) {
+                        swipeBack =
+                            event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
                     }
-                    return false
                 }
-            })
+                false
+            }
             ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(
                 c, recyclerView, viewHolder.itemView.ticket_item_foreground, dX, dY,
                 actionState, isCurrentlyActive
@@ -147,7 +146,7 @@ class RecyclerItemTouchHelper :
                                             .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                 run {
                                                     NetworkUtils.instance()
-                                                        .setWiFiEnabled(viewHolder.itemView.context, true)
+                                                        .setWiFiEnabled(true)
                                                     redeemTicket(ticketModel)
                                                 }
                                             }

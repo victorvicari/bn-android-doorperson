@@ -22,6 +22,7 @@ import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
@@ -47,6 +48,8 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
 
+        AppUtils.checkLogged(getContext())
+
         ticketsDS = TicketsDS()
         SyncController.ticketListRefresher = this
 
@@ -64,7 +67,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 searchGuestText = ""
         }
 
-        //searchGuestText = search_guest.text.toString()
         eventId = intent.getStringExtra("eventId")
 
         ticket_list_view.layoutManager =
@@ -114,6 +116,9 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
         finallyFilteredTicketList.clear()
 
+        if(ticketList == null)
+            return
+
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
                 it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
@@ -154,7 +159,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         tickets_layout.loading_guests_progress_bar.visibility = View.GONE
 
-        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!) ?: return
+        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
         adaptListView(ticket_list_view)
 
         if (ticketListItemPosition >= 0) {
@@ -169,7 +174,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
                 val filteredList =
                     if (TicketListActivity.finallyFilteredTicketList.size > 0)
-                        TicketListActivity.finallyFilteredTicketList else ticketList
+                        finallyFilteredTicketList else ticketList
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
                 intent.putExtra("ticketId", filteredList?.get(adapterPosition)?.ticketId)
@@ -193,6 +198,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 ticketListItemOffset = recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition)!!.top
             }
         })
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
 

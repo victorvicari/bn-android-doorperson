@@ -37,12 +37,10 @@ class RestAPI private constructor() {
     }
 
     init {
-        val interceptor = object : Interceptor {
-            override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
-                val originalRequest = chain.request()
-                val builder = originalRequest.newBuilder()
-                return chain.proceed(builder.build())
-            }
+        val interceptor = Interceptor { chain ->
+            val originalRequest = chain.request()
+            val builder = originalRequest.newBuilder()
+            chain.proceed(builder.build())
         }
 
         val logging = HttpLoggingInterceptor()
@@ -103,7 +101,7 @@ class RestAPI private constructor() {
         }
 
         fun accessToken(setAccessToken: (accessToken: String?) -> Unit) {
-            if (NetworkUtils.instance().isNetworkAvailable(context)) {
+            if (NetworkUtils.instance().isNetworkAvailable()) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") setAccessToken(null)
 
@@ -189,15 +187,16 @@ class RestAPI private constructor() {
                 val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
                     override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
                         if (response.body() != null) {
-                            redeemTicketResult?.invoke()
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
                         } else {
                             Log.e(TAG, "Redeem ticket for event $eventId failed")
                         }
+                        redeemTicketResult?.invoke()
                     }
 
                     override fun onFailure(call: Call<RedeemResponse>, t: Throwable) {
                         Log.e(TAG, "Redeem ticket for event $eventId failed")
+                        redeemTicketResult?.invoke()
                     }
                 }
                 redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)

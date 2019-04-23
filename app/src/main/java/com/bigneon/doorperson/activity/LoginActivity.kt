@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.content_login.*
 
@@ -37,11 +38,21 @@ class LoginActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        NetworkUtils.instance().addNetworkStateListener(getContext(), networkStateReceiverListener)
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
 
         turn_on_wifi.setOnClickListener {
-            NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+            NetworkUtils.instance().setWiFiEnabled(true)
         }
+    }
+
+    override fun onPause() {
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        super.onPause()
+    }
+
+    override fun onBackPressed() {
+        //super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 
     fun btnLoginClick(@Suppress("UNUSED_PARAMETER") view: View) {

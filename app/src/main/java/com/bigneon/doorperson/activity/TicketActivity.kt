@@ -14,6 +14,7 @@ import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.*
@@ -31,6 +32,8 @@ class TicketActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
+
+        AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
 
@@ -80,7 +83,7 @@ class TicketActivity : AppCompatActivity() {
         }
 
         ticket_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
+            ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 
@@ -171,7 +174,7 @@ class TicketActivity : AppCompatActivity() {
                                     }
                                     .setNegativeButton("Turn on the WiFi") { _, _ ->
                                         run {
-                                            NetworkUtils.instance().setWiFiEnabled(getContext(), true)
+                                            NetworkUtils.instance().setWiFiEnabled(true)
                                             redeemTicket()
                                         }
                                     }
@@ -202,5 +205,10 @@ class TicketActivity : AppCompatActivity() {
                 redeemTicket()
             }
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppUtils.checkLogged(getContext())
     }
 }
