@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Canvas
+import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
@@ -169,41 +170,39 @@ class RecyclerItemTouchHelper :
                     }
                     RestAPI.accessToken(::setAccessToken)
                 }
+                Snackbar
+                    .make(
+                        viewHolder.itemView,
+                        "Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}",
+                        Snackbar.LENGTH_LONG
+                    )
+                    .setDuration(5000).show()
 
-                // set message of alert dialog
-                dialogBuilder.setMessage("Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}")
-                    .setCancelable(false)
-                    .setPositiveButton("OK") { dialog, _ ->
-                        run {
-                            Log.d(
-                                TAG,
-                                "ACTION: CHECK-IN: ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}"
-                            )
-                            dialog.cancel()
-                            ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
-                            if (ticketList != null && adapter != null) {
-                                val pos = viewHolder.getAdapterPosition()
-                                val ticketModel = ticketList!![pos]
+                run {
+                    Log.d(
+                        TAG,
+                        "ACTION: CHECK-IN: ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}"
+                    )
+                    ItemTouchHelper.Callback.getDefaultUIUtil().clearView(viewHolder.itemView)
+                    if (ticketList != null && adapter != null) {
+                        val pos = viewHolder.getAdapterPosition()
+                        val ticketModel = ticketList!![pos]
 
-                                adapter!!.notifyItemChanged(pos)
+                        adapter!!.notifyItemChanged(pos)
 
-                                ticketsDS = TicketsDS()
+                        ticketsDS = TicketsDS()
 
-                                if (SyncController.isOfflineModeEnabled) {
-                                    ticketModel.status =
-                                        viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
-                                    checkInTicket(ticketModel)
-                                } else {
-                                    ticketModel.status =
-                                        viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
-                                    redeemTicket(ticketModel)
-                                }
-                            }
+                        if (SyncController.isOfflineModeEnabled) {
+                            ticketModel.status =
+                                viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
+                            checkInTicket(ticketModel)
+                        } else {
+                            ticketModel.status =
+                                viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
+                            redeemTicket(ticketModel)
                         }
                     }
-                val alert = dialogBuilder.create()
-                alert.setTitle("Alert")
-                alert.show()
+                }
             }
         }
     }
