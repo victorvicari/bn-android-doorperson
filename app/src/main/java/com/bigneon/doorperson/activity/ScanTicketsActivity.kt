@@ -61,8 +61,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
         // Set initial check-in mode from shared preferences if it's already stored. Otherwise set manual
         checkInMode =
-            SharedPrefs.getProperty(AppConstants.CHECK_IN_MODE) ?: AppConstants.CHECK_IN_MODE_MANUAL
-        if (checkInMode == "") checkInMode = AppConstants.CHECK_IN_MODE_MANUAL
+            SharedPrefs.getProperty(AppConstants.CHECK_IN_MODE) ?: AppConstants.CHECK_IN_MODE_AUTOMATIC
+        if (checkInMode == "") checkInMode = AppConstants.CHECK_IN_MODE_AUTOMATIC
 
         setButtonText()
 
