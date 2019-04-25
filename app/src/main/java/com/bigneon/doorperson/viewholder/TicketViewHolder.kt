@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.model.TicketModel
 
 /****************************************************
@@ -40,8 +41,10 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
 
     fun bind(ticket: TicketModel) {
         ticketId = ticket.ticketId
+        val usersDS = UsersDS()
+        val user = usersDS.getUser(ticket.userId!!)
         lastNameAndFirstNameTextView?.text =
-            context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
+            context!!.getString(R.string.last_name_first_name, user?.lastName, user?.firstName)
         // TODO - Uncomment after test!
 //        priceAndTicketTypeTextView?.text =
 //            context!!.getString(R.string.price_ticket_type, ticket.priceInCents?.div(100), ticket.ticketType)
