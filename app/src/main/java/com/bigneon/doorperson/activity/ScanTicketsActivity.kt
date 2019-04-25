@@ -20,11 +20,13 @@ import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import com.google.zxing.Result
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
 import kotlinx.android.synthetic.main.activity_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.view.*
@@ -40,6 +42,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
     private var cameraPermissionGranted: Boolean = false
     private var checkInMode: String? = null
     private var ticketsDS: TicketsDS? = null
+    private var usersDS: UsersDS? = null
 
     private fun getContext(): Context {
         return this
@@ -54,6 +57,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
+        usersDS = UsersDS()
 
         eventId = intent.getStringExtra("eventId")
 
@@ -153,10 +157,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
+                    val user = usersDS!!.getUser(ticket.userId!!)
                     Snackbar
                         .make(
                             scanning_ticket_layout,
-                            "Checked in ${ticket.lastName + ", " + ticket.firstName}",
+                            "Checked in ${user?.lastName + ", " + user?.firstName}",
                             Snackbar.LENGTH_LONG
                         )
                         .setDuration(5000).show()
@@ -197,10 +202,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
                                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
+                                    val user = usersDS!!.getUser(ticket?.userId!!)
                                     Snackbar
                                         .make(
                                             scanning_ticket_layout,
-                                            "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
+                                            "Redeemed ${user?.lastName + ", " + user?.firstName}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
@@ -243,19 +249,36 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 RestAPI.accessToken(::setAccessToken)
             }
 
+            fun showPillUserInfo() {
+                pill_user_info.visibility = View.VISIBLE
+
+                val ticket = ticketsDS!!.setCheckedTicket(ticketId)
+                if (ticket != null) {
+                    val user = usersDS!!.getUser(ticket.userId!!)
+                    Picasso
+                        .get() // give it the context
+                        .load(user?.profilePicURL) // load the image
+                        .into(pill_user_image) // select the ImageView to load it into
+
+                    pill_user_name.text = "${user?.firstName}, ${user?.lastName}"
+                    pill_ticket_type.text = ticket.ticketType
+                }
+            }
+
             if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
                 val ticket = ticketsDS!!.getTicket(ticketId)
+                val user = usersDS!!.getUser(ticket?.userId!!)
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", ticket?.ticketId)
-                intent.putExtra("eventId", ticket?.eventId)
-                intent.putExtra("redeemKey", ticket?.redeemKey)
+                intent.putExtra("ticketId", ticket.ticketId)
+                intent.putExtra("eventId", ticket.eventId)
+                intent.putExtra("redeemKey", ticket.redeemKey)
                 intent.putExtra("searchGuestText", "")
-                intent.putExtra("firstName", ticket?.firstName)
-                intent.putExtra("lastName", ticket?.lastName)
-                intent.putExtra("priceInCents", ticket?.priceInCents)
-                intent.putExtra("ticketTypeName", ticket?.ticketType)
-                intent.putExtra("status", ticket?.status)
+                intent.putExtra("firstName", user?.firstName)
+                intent.putExtra("lastName", user?.lastName)
+                intent.putExtra("priceInCents", ticket.priceInCents)
+                intent.putExtra("ticketTypeName", ticket.ticketType)
+                intent.putExtra("status", ticket.status)
                 startActivity(intent)
             } else {
                 if (SyncController.isOfflineModeEnabled) {
@@ -263,6 +286,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 } else {
                     redeemTicket()
                 }
+
+                showPillUserInfo()
             }
 
             Log.v(TAG, rawResult.text) // Prints scan results
