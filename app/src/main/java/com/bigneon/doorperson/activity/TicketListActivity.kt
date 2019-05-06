@@ -122,7 +122,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
                 it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
-                    word.toLowerCase()) || it.redeemKey?.toLowerCase()!!.contains(word.toLowerCase())
+                    word.toLowerCase()) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase())
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
