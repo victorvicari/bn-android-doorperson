@@ -42,10 +42,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         ticketId = ticket.ticketId
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
-        // TODO - Uncomment after test!
-//        priceAndTicketTypeTextView?.text =
-//            context!!.getString(R.string.price_ticket_type, ticket.priceInCents?.div(100), ticket.ticketType)
-        priceAndTicketTypeTextView?.text = ticket.redeemKey
+        priceAndTicketTypeTextView?.text = "...${ticket.ticketId?.takeLast(8)}"
         val ticketStatus = ticket.status?.toLowerCase()
         val statusRedeemed = context!!.getString(R.string.redeemed).toLowerCase()
         val statusChecked = context!!.getString(R.string.checked).toLowerCase()
