@@ -150,33 +150,34 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val redeemKey = jsonObjectData.getString("redeem_key")
             val ticketId = jsonObjectData.getString("id")
 
-            fun checkInTicket() {
-                val ticket = ticketsDS!!.setCheckedTicket(ticketId)
-                if (ticket != null) {
-                    scanning_ticket_layout.checked_status?.visibility = View.VISIBLE
-                    scanning_ticket_layout.purchased_status?.visibility = View.GONE
-                    scanning_ticket_layout.complete_check_in?.visibility = View.GONE
+            fun checkInTicket(): Boolean {
+                var ticket = ticketsDS!!.getTicket(ticketId)
+                ticket = if(ticket?.status == "CHECKED" || ticket?.status == "REDEEMED") null else ticketsDS!!.setCheckedTicket(ticketId)
 
+                if (ticket != null) {
                     val user = usersDS!!.getUser(ticket.userId!!)
                     Snackbar
                         .make(
-                            scanning_ticket_layout,
+                            scan_tickets_layout,
                             "Checked in ${user?.lastName + ", " + user?.firstName}",
                             Snackbar.LENGTH_LONG
                         )
                         .setDuration(5000).show()
+                    return true
                 } else {
                     Snackbar
                         .make(
-                            scanning_ticket_layout,
+                            scan_tickets_layout,
                             "User ticket already redeemed! Redeem key: $redeemKey",
                             Snackbar.LENGTH_LONG
                         )
                         .setDuration(5000).show()
+                    return false
                 }
             }
 
-            fun redeemTicket() {
+            fun redeemTicket(): Boolean {
+                var success = false
                 fun setAccessToken(accessToken: String?) {
                     if (accessToken == null) {
                         Snackbar
@@ -192,6 +193,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                 LoginActivity::class.java
                             )
                         )
+                        success = false
                     } else {
                         fun redeemTicketResult() {
                             fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
@@ -210,6 +212,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
+                                    success = true
                                 } else {
                                     // build alert dialog
                                     val dialogBuilder = AlertDialog.Builder(getContext())
@@ -232,6 +235,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                     val alert = dialogBuilder.create()
                                     alert.setTitle("Error in connection!")
                                     alert.show()
+                                    success = false
                                 }
                             }
                             RestAPI.getTicket(accessToken, ticketId, ::getTicketResult)
@@ -247,21 +251,30 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     }
                 }
                 RestAPI.accessToken(::setAccessToken)
+                return success
             }
 
-            fun showPillUserInfo() {
+            fun showPillUserInfo(success: Boolean) {
                 pill_user_info.visibility = View.VISIBLE
 
-                val ticket = ticketsDS!!.setCheckedTicket(ticketId)
+                val ticket = ticketsDS!!.getTicket(ticketId)
                 if (ticket != null) {
                     val user = usersDS!!.getUser(ticket.userId!!)
-                    Picasso
-                        .get() // give it the context
-                        .load(user?.profilePicURL) // load the image
-                        .into(pill_user_image) // select the ImageView to load it into
+
+                    if (!user?.profilePicURL.isNullOrEmpty()) {
+                        Picasso
+                            .get() // give it the context
+                            .load(user?.profilePicURL) // load the image
+                            .into(pill_user_image) // select the ImageView to load it into
+                    }
 
                     pill_user_name.text = "${user?.firstName}, ${user?.lastName}"
                     pill_ticket_type.text = ticket.ticketType
+
+                    Picasso
+                        .get()
+                        .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
+                        .into(pill_checked_status_image)
                 }
             }
 
@@ -281,13 +294,13 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 intent.putExtra("status", ticket.status)
                 startActivity(intent)
             } else {
-                if (SyncController.isOfflineModeEnabled) {
+                val success = if (SyncController.isOfflineModeEnabled) {
                     checkInTicket()
                 } else {
                     redeemTicket()
                 }
 
-                showPillUserInfo()
+                showPillUserInfo(success)
             }
 
             Log.v(TAG, rawResult.text) // Prints scan results
