@@ -19,7 +19,7 @@ interface AppConstants {
 
         // DB const
         const val DATABASE_NAME = "doorperson.db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
 
     }
 

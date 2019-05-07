@@ -12,6 +12,7 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
@@ -24,6 +25,7 @@ import kotlinx.android.synthetic.main.content_ticket.view.*
 class TicketActivity : AppCompatActivity() {
 
     private var ticketsDS: TicketsDS? = null
+    private var usersDS: UsersDS? = null
 
     private fun getContext(): Context {
         return this
@@ -36,6 +38,7 @@ class TicketActivity : AppCompatActivity() {
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
+        usersDS = UsersDS()
 
         setSupportActionBar(ticket_toolbar)
 
@@ -108,10 +111,11 @@ class TicketActivity : AppCompatActivity() {
                 scanning_ticket_layout.purchased_status?.visibility = View.GONE
                 scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
+                val user = usersDS!!.getUser(ticket.userId!!)
                 Snackbar
                     .make(
                         scanning_ticket_layout,
-                        "Checked in ${ticket.lastName + ", " + ticket.firstName}",
+                        "Checked in ${user?.lastName + ", " + user?.firstName}",
                         Snackbar.LENGTH_LONG
                     )
                     .setDuration(5000).show()
@@ -152,10 +156,11 @@ class TicketActivity : AppCompatActivity() {
                                 scanning_ticket_layout.purchased_status?.visibility = View.GONE
                                 scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
+                                val user = usersDS!!.getUser(ticket?.userId!!)
                                 Snackbar
                                     .make(
                                         scanning_ticket_layout,
-                                        "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
+                                        "Redeemed ${user?.lastName + ", " + user?.firstName}",
                                         Snackbar.LENGTH_LONG
                                     )
                                     .setDuration(5000).show()
