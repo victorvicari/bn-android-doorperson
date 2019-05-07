@@ -14,11 +14,8 @@ class TicketModel {
     @SerializedName("event_id")
     internal var eventId: String? = null
 
-    @SerializedName("first_name")
-    internal var firstName: String? = null
-
-    @SerializedName("last_name")
-    internal var lastName: String? = null
+    @SerializedName("user_id")
+    internal var userId: String? = null
 
     @SerializedName("price_in_cents")
     internal var priceInCents: Int? = null

@@ -21,7 +21,9 @@ import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.rest.model.UserModel
 import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
@@ -31,6 +33,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
+    private var usersDS: UsersDS? = null
 
     companion object {
         private var searchTextChanged: Boolean = false
@@ -51,6 +54,8 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
+        usersDS = UsersDS()
+
         SyncController.ticketListRefresher = this
 
         setSupportActionBar(ticket_list_toolbar)
@@ -121,11 +126,14 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
-                it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
-                    word.toLowerCase()) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase())
+                var user: UserModel? = null
+                if(it.userId != null) {
+                    user = usersDS!!.getUser(it.userId!!)
+                }
+                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase())  || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
-            finallyFilteredTicketList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
+            finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
         }
 
         if (screenRotation || searchTextChanged) {
@@ -175,16 +183,19 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                     if (TicketListActivity.finallyFilteredTicketList.size > 0)
                         finallyFilteredTicketList else ticketList
 
+                val ticket = filteredList?.get(adapterPosition)
+                val user = usersDS!!.getUser(ticket?.userId!!)
+
                 val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", filteredList?.get(adapterPosition)?.ticketId)
+                intent.putExtra("ticketId", ticket.ticketId)
                 intent.putExtra("eventId", eventId)
-                intent.putExtra("redeemKey", filteredList?.get(adapterPosition)?.redeemKey)
+                intent.putExtra("redeemKey", ticket.redeemKey)
                 intent.putExtra("searchGuestText", searchGuestText)
-                intent.putExtra("firstName", filteredList?.get(adapterPosition)?.firstName)
-                intent.putExtra("lastName", filteredList?.get(adapterPosition)?.lastName)
-                intent.putExtra("priceInCents", filteredList?.get(adapterPosition)?.priceInCents)
-                intent.putExtra("ticketTypeName", filteredList?.get(adapterPosition)?.ticketType)
-                intent.putExtra("status", filteredList?.get(adapterPosition)?.status)
+                intent.putExtra("firstName", user?.firstName)
+                intent.putExtra("lastName", user?.lastName)
+                intent.putExtra("priceInCents", ticket.priceInCents)
+                intent.putExtra("ticketTypeName", ticket.ticketType)
+                intent.putExtra("status", ticket.status)
                 startActivity(intent)
             }
         })
