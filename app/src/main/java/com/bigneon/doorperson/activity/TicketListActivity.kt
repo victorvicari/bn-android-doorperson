@@ -130,7 +130,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 if(it.userId != null) {
                     user = usersDS!!.getUser(it.userId!!)
                 }
-                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase()))
+                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase())  || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
