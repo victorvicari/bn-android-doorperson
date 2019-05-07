@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_scanning_event.*
@@ -15,6 +16,7 @@ import kotlinx.android.synthetic.main.content_scanning_event.*
 class ScanningEventActivity : AppCompatActivity() {
     private var eventId: String = ""
     private var ticketsDS: TicketsDS? = null
+    private var eventsDS: EventsDS? = null
 
     private fun getContext(): Context {
         return this
@@ -29,6 +31,7 @@ class ScanningEventActivity : AppCompatActivity() {
 
         eventId = intent.getStringExtra("eventId")
         ticketsDS = TicketsDS()
+        eventsDS = EventsDS()
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -41,6 +44,9 @@ class ScanningEventActivity : AppCompatActivity() {
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
         }
+
+        val event = eventsDS!!.getEvent(eventId)
+        scanning_event_name.text = event?.name ?: ""
 
         number_of_redeemed.text = getString(
             R.string._1_d_of_2_d_redeemed,
