@@ -23,6 +23,10 @@ import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
+//import sun.security.krb5.internal.KDCOptions.with
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
+
 
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
@@ -34,6 +38,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Fabric.with(this, Crashlytics())
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
         SharedPrefs.setContext(this)
