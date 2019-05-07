@@ -88,7 +88,6 @@ class EventsDS : BaseDS() {
         promoImageURL: String
     ) {
         val values = ContentValues()
-        values.put(TableEventsDML.EVENT_ID, eventId)
         values.put(TableEventsDML.NAME, name)
         values.put(TableEventsDML.PROMO_IMAGE_URL, promoImageURL)
 

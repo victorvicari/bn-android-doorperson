@@ -8,6 +8,7 @@ import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.rest.model.UserModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
@@ -175,7 +176,6 @@ class RestAPI private constructor() {
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
         }
 
-
         fun redeemTicketForEvent(
             accessToken: String, eventId: String, ticketId: String, redeemKey: String, redeemTicketResult: (() -> Unit)?
         ) {
@@ -216,8 +216,9 @@ class RestAPI private constructor() {
                     override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
                         if (response.body() != null) {
                             val ticket = response.body()!!.ticket!!
-                            ticket.firstName = response.body()!!.user?.firstName ?: ""
-                            ticket.lastName = response.body()!!.user?.lastName ?: ""
+                            ticket.userId = response.body()!!.user?.userId ?: ""
+//                            ticket.firstName = response.body()!!.user?.firstName ?: ""
+//                            ticket.lastName = response.body()!!.user?.lastName ?: ""
                             getTicketResult(true, ticket)
                             Log.e(TAG, "Redeem ticket $ticketId succeeded")
                         } else {
@@ -232,6 +233,42 @@ class RestAPI private constructor() {
                     }
                 }
                 getTicketCall.enqueue(getTicketCallback)
+            } catch (e: Exception) {
+                Log.e(TAG, e.message)
+            }
+        }
+
+        fun getUser(
+            accessToken: String,
+            userId: String,
+            getUserResult: (user: UserModel?) -> Unit
+        ) {
+            try {
+                val getUserCall = client().getUser(accessToken, userId)
+                val getUserCallback = object : Callback<UserModel> {
+                    override fun onResponse(call: Call<UserModel>, response: Response<UserModel>) {
+                        if (response.body() != null) {
+                            val user = UserModel()
+                            user.userId = response.body()!!.userId ?: ""
+                            user.firstName = response.body()!!.firstName ?: ""
+                            user.lastName = response.body()!!.lastName ?: ""
+                            user.email = response.body()!!.email ?: ""
+                            user.phone = response.body()!!.phone ?: ""
+                            user.profilePicURL = response.body()!!.profilePicURL ?: ""
+                            getUserResult(user)
+                            Log.e(TAG, "Get user with ID $userId succeeded")
+                        } else {
+                            getUserResult(null)
+                            Log.e(TAG, "Get user with ID $userId failed")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<UserModel>, t: Throwable) {
+                        getUserResult(null)
+                        Log.e(TAG, "Get user with ID $userId failed")
+                    }
+                }
+                getUserCall.enqueue(getUserCallback)
             } catch (e: Exception) {
                 Log.e(TAG, e.message)
             }
