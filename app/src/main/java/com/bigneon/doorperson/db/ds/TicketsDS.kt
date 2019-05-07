@@ -19,8 +19,7 @@ class TicketsDS : BaseDS() {
     private val allColumns = arrayOf(
         TableTicketsDML.TICKET_ID,
         TableTicketsDML.EVENT_ID,
-        TableTicketsDML.FIRST_NAME,
-        TableTicketsDML.LAST_NAME,
+        TableTicketsDML.USER_ID,
         TableTicketsDML.PRICE_IN_CENTS,
         TableTicketsDML.TICKET_TYPE_NAME,
         TableTicketsDML.REDEEM_KEY,
@@ -200,8 +199,7 @@ class TicketsDS : BaseDS() {
     fun createTicket(
         ticketId: String,
         eventId: String,
-        firstName: String,
-        lastName: String,
+        userId: String,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
@@ -210,8 +208,7 @@ class TicketsDS : BaseDS() {
         val values = ContentValues()
         values.put(TableTicketsDML.TICKET_ID, ticketId)
         values.put(TableTicketsDML.EVENT_ID, eventId)
-        values.put(TableTicketsDML.FIRST_NAME, firstName)
-        values.put(TableTicketsDML.LAST_NAME, lastName)
+        values.put(TableTicketsDML.USER_ID, userId)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
@@ -223,18 +220,15 @@ class TicketsDS : BaseDS() {
     fun updateTicket(
         ticketId: String,
         eventId: String,
-        firstName: String,
-        lastName: String,
+        userId: String,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
         status: String
     ) {
         val values = ContentValues()
-        values.put(TableTicketsDML.TICKET_ID, ticketId)
         values.put(TableTicketsDML.EVENT_ID, eventId)
-        values.put(TableTicketsDML.FIRST_NAME, firstName)
-        values.put(TableTicketsDML.LAST_NAME, lastName)
+        values.put(TableTicketsDML.USER_ID, userId)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
@@ -258,8 +252,7 @@ class TicketsDS : BaseDS() {
         var index = 0
         ticketModel.ticketId = cursor.getString(index++)
         ticketModel.eventId = cursor.getString(index++)
-        ticketModel.firstName = cursor.getString(index++)
-        ticketModel.lastName = cursor.getString(index++)
+        ticketModel.userId = cursor.getString(index++)
         ticketModel.priceInCents = cursor.getInt(index++)
         ticketModel.ticketType = cursor.getString(index++)
         ticketModel.redeemKey = cursor.getString(index++)
