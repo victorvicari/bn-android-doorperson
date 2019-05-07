@@ -10,6 +10,8 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.db.ds.UsersDS
@@ -209,6 +211,7 @@ class TicketActivity : AppCompatActivity() {
             } else {
                 redeemTicket()
             }
+            SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticketId)
         }
     }
 

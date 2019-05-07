@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.TicketListAdapter
@@ -30,6 +31,7 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
 class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
+    private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
@@ -121,16 +123,21 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
         finallyFilteredTicketList.clear()
 
-        if(ticketList == null)
+        if (ticketList == null)
             return
 
         for (word in searchWords) {
+            if(word == "")
+                continue
+            
             val filteredTicketList = ticketList?.filter {
                 var user: UserModel? = null
-                if(it.userId != null) {
+                if (it.userId != null) {
                     user = usersDS!!.getUser(it.userId!!)
                 }
-                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase())  || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
+                user != null && (user.firstName.isNullOrEmpty() || user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName.isNullOrEmpty() || user.lastName?.toLowerCase()!!.contains(
+                    word.toLowerCase()
+                ) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
@@ -205,6 +212,8 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 super.onScrollStateChanged(recyclerView, newState)
                 ticketListItemPosition =
                     (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                Log.d(TAG, "ticketListItemPosition: $ticketListItemPosition")
+
                 ticketListItemOffset = recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition)!!.top
             }
         })
