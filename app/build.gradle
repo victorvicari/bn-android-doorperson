@@ -29,6 +29,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [crashlytics:getLocalProperty("crashlytics.key")]
     }
     buildTypes {
         release {
@@ -72,5 +73,16 @@ dependencies {
 
     compile('com.crashlytics.sdk.android:crashlytics:2.10.0@aar') {
         transitive = true;
+    }
+}
+
+def getLocalProperty(String propertyName) {
+    def propsFile = rootProject.file('local.properties')
+    if (propsFile.exists()) {
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+        return props[propertyName]
+    } else {
+        return ""
     }
 }
