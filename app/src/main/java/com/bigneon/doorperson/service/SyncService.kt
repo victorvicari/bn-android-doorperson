@@ -30,6 +30,9 @@ class SyncService : Service() {
         filter.addAction("android.intent.action.TIME_TICK")
         registerReceiver(syncAllTablesReceiver, filter)
 
+        //Initial sync
+        SyncController.synchronizeAllTables()
+
         return super.onStartCommand(intent, flags, startId)
     }
 
