@@ -11,8 +11,8 @@ import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
+import com.crashlytics.android.Crashlytics
 import kotlinx.android.synthetic.main.content_login.*
-
 
 class LoginActivity : AppCompatActivity() {
     private val TAG = LoginActivity::class.java.simpleName
@@ -66,6 +66,7 @@ class LoginActivity : AppCompatActivity() {
                         .setDuration(5000).show()
                     startActivity(Intent(getContext(), LoginActivity::class.java))
                 } else {
+                    Crashlytics.setUserEmail(email)
                     startActivity(Intent(getContext(), EventsActivity::class.java))
                     finish()
                 }
