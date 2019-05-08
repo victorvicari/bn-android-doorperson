@@ -41,4 +41,8 @@
     <string name="disable_offline_mode">Disable offline mode</string>
     <string name="offline_mode_enabled">Offline mode is enabled</string>
     <string name="offline_mode_disabled">Offline mode is disabled</string>
+    <string name="title_activity_duplicate_ticket_checkin">DuplicateTicketCheckinActivity</string>
+    <string name="warning">WARNING!</string>
+    <string name="duplicate_ticket_msg">Duplicate ticket!!!\n\nUser ticket with ID:\n%1$s\nhas already been redeemed!</string>
+    <string name="go_back">GO BACK</string>
 </resources>
