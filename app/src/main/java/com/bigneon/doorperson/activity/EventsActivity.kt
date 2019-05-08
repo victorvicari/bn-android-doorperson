@@ -21,13 +21,10 @@ import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.NetworkUtils
+import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
-//import sun.security.krb5.internal.KDCOptions.with
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-
-
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
     private var eventsDS: EventsDS? = null
@@ -110,7 +107,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        finishAndRemoveTask()
     }
 }
 
