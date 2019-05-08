@@ -105,6 +105,17 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
             startActivity(intent)
         }
 
+        tickets_swipe_refresh_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables()
+
+            // Refresh view from DB
+            refreshTicketList(eventId)
+
+            // Hide swipe to refresh icon animation
+            tickets_swipe_refresh_layout.isRefreshing = false
+        }
+
         // Refresh/load ticket list initially
         refreshTicketList(eventId)
     }
@@ -121,16 +132,18 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
         finallyFilteredTicketList.clear()
 
-        if(ticketList == null)
+        if (ticketList == null)
             return
 
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
                 var user: UserModel? = null
-                if(it.userId != null) {
+                if (it.userId != null) {
                     user = usersDS!!.getUser(it.userId!!)
                 }
-                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase())  || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
+                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(
+                    word.toLowerCase()
+                ) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
