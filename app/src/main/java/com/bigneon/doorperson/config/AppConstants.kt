@@ -17,6 +17,8 @@ interface AppConstants {
         const val CHECK_IN_MODE_MANUAL = "M"
         const val CHECK_IN_MODE_AUTOMATIC = "A"
 
+        const val LAST_CHECKED_TICKET_ID = "last_checked_ticket_id"
+
         // DB const
         const val DATABASE_NAME = "doorperson.db"
         const val DATABASE_VERSION = 2

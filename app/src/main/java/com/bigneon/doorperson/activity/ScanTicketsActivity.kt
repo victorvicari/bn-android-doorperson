@@ -37,7 +37,6 @@ import org.json.JSONObject
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     private val TAG = ScanTicketsActivity::class.java.simpleName
     private var eventId: String? = null
-
     private var mScannerView: ZXingScannerView? = null
     private var cameraPermissionGranted: Boolean = false
     private var checkInMode: String? = null
@@ -60,6 +59,9 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         usersDS = UsersDS()
 
         eventId = intent.getStringExtra("eventId")
+        val lastCheckedTicketId = SharedPrefs.getProperty(AppConstants.LAST_CHECKED_TICKET_ID)
+        if (!lastCheckedTicketId.isNullOrEmpty())
+            showPillUserInfo(true, lastCheckedTicketId)
 
         mScannerView = zxscan   // Programmatically initialize the scanner view
 
@@ -152,7 +154,10 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
             fun checkInTicket(): Boolean {
                 var ticket = ticketsDS!!.getTicket(ticketId)
-                ticket = if(ticket?.status == "CHECKED" || ticket?.status == "REDEEMED") null else ticketsDS!!.setCheckedTicket(ticketId)
+                ticket =
+                    if (ticket?.status == "CHECKED" || ticket?.status == "REDEEMED") null else ticketsDS!!.setCheckedTicket(
+                        ticketId
+                    )
 
                 if (ticket != null) {
                     val user = usersDS!!.getUser(ticket.userId!!)
@@ -254,35 +259,17 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 return success
             }
 
-            fun showPillUserInfo(success: Boolean) {
-                pill_user_info.visibility = View.VISIBLE
-
-                val ticket = ticketsDS!!.getTicket(ticketId)
-                if (ticket != null) {
-                    val user = usersDS!!.getUser(ticket.userId!!)
-
-                    if (!user?.profilePicURL.isNullOrEmpty()) {
-                        Picasso
-                            .get() // give it the context
-                            .load(user?.profilePicURL) // load the image
-                            .into(pill_user_image) // select the ImageView to load it into
-                    }
-
-                    pill_user_name.text = "${user?.firstName}, ${user?.lastName}"
-                    pill_ticket_type.text = ticket.ticketType
-
-                    Picasso
-                        .get()
-                        .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
-                        .into(pill_checked_status_image)
-                }
+            val ticket = ticketsDS!!.getTicket(ticketId)
+            if (ticket == null) {
+                Snackbar
+                    .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
+                    .setDuration(5000).show()
+                return
             }
 
             if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
-                val ticket = ticketsDS!!.getTicket(ticketId)
-                val user = usersDS!!.getUser(ticket?.userId!!)
-
                 val intent = Intent(getContext(), TicketActivity::class.java)
+                val user = usersDS!!.getUser(ticket.userId!!)
                 intent.putExtra("ticketId", ticket.ticketId)
                 intent.putExtra("eventId", ticket.eventId)
                 intent.putExtra("redeemKey", ticket.redeemKey)
@@ -300,7 +287,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     redeemTicket()
                 }
 
-                showPillUserInfo(success)
+                SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticket.ticketId)
+                showPillUserInfo(success, ticket.ticketId)
             }
 
             Log.v(TAG, rawResult.text) // Prints scan results
@@ -308,6 +296,28 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
             mScannerView?.resumeCameraPreview(this)
         }
+    }
+
+    private fun showPillUserInfo(success: Boolean, ticketId: String?) {
+        val ticket = ticketsDS!!.getTicket(ticketId!!)
+        val user = usersDS!!.getUser(ticket?.userId!!)
+
+        pill_user_info.visibility = View.VISIBLE
+
+        if (!user?.profilePicURL.isNullOrEmpty()) {
+            Picasso
+                .get() // give it the context
+                .load(user?.profilePicURL) // load the image
+                .into(pill_user_image) // select the ImageView to load it into
+        }
+
+        pill_user_name.text = "${user?.firstName}, ${user?.lastName}"
+        pill_ticket_type.text = ticket.ticketType
+
+        Picasso
+            .get()
+            .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
+            .into(pill_checked_status_image)
     }
 
     private fun setButtonText() {
