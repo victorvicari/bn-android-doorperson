@@ -17,6 +17,21 @@ class TicketModel {
     @SerializedName("user_id")
     internal var userId: String? = null
 
+    @SerializedName("first_name")
+    internal var firstName: String? = null
+
+    @SerializedName("last_name")
+    internal var lastName: String? = null
+
+    @SerializedName("email")
+    internal var email: String? = null
+
+    @SerializedName("phone")
+    internal var phone: String? = null
+
+    @SerializedName("profile_pic_url")
+    internal var profilePicURL: String? = null
+
     @SerializedName("price_in_cents")
     internal var priceInCents: Int? = null
 

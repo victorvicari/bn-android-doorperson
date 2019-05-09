@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.model.TicketModel
 
 /****************************************************
@@ -19,21 +18,28 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_ticket, parent, false)) {
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
+    private var ticketIdTextView: TextView? = null
     var redeemedStatusTextView: TextView? = null
     var checkedStatusTextView: TextView? = null
+    var duplicateStatusTextView: TextView? = null
     var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
     var checkedIn: Boolean = false
     var ticketId: String? = null
+    var priceInCents: Int? = null
+    var ticketTypeName: String? = null
+
 
     init {
         context = parent.context
         lastNameAndFirstNameTextView = itemView.findViewById(R.id.last_name_and_first_name)
         priceAndTicketTypeTextView = itemView.findViewById(R.id.price_and_ticket_type)
+        ticketIdTextView = itemView.findViewById(R.id.ticket_id)
         redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status_item)
         checkedStatusTextView = itemView.findViewById(R.id.checked_status_item)
+        duplicateStatusTextView = itemView.findViewById(R.id.duplicate_status_item)
         purchasedStatusTextView = itemView.findViewById(R.id.purchased_status_item)
         ticketItemBackgroundRedeemedOrChecked = itemView.findViewById(R.id.ticket_item_background_redeemed_or_checked)
         ticketItemBackgroundPurchased = itemView.findViewById(R.id.ticket_item_background_purchased)
@@ -41,21 +47,25 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
 
     fun bind(ticket: TicketModel) {
         ticketId = ticket.ticketId
-        val usersDS = UsersDS()
-        val user = usersDS.getUser(ticket.userId!!)
+        priceInCents = ticket.priceInCents
+        ticketTypeName = ticket.ticketType
 
         lastNameAndFirstNameTextView?.text =
-            context!!.getString(R.string.last_name_first_name, user?.lastName, user?.firstName)
+            context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
 
-        priceAndTicketTypeTextView?.text = "#${ticket.ticketId?.takeLast(8)}"
+        priceAndTicketTypeTextView?.text = context!!.getString(R.string.price_ticket_type, priceInCents?.div(100), ticketTypeName)
+
+        ticketIdTextView?.text = "#${ticket.ticketId?.takeLast(8)}"
 
         val ticketStatus = ticket.status?.toLowerCase()
         val statusRedeemed = context!!.getString(R.string.redeemed).toLowerCase()
         val statusChecked = context!!.getString(R.string.checked).toLowerCase()
+        val statusDuplicate = context!!.getString(R.string.duplicate).toLowerCase()
         when (ticketStatus) {
             statusRedeemed -> {
                 redeemedStatusTextView?.visibility = View.VISIBLE
                 checkedStatusTextView?.visibility = View.GONE
+                duplicateStatusTextView?.visibility = View.GONE
                 purchasedStatusTextView?.visibility = View.GONE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
                 ticketItemBackgroundPurchased?.visibility = View.GONE
@@ -64,6 +74,16 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             statusChecked -> {
                 redeemedStatusTextView?.visibility = View.GONE
                 checkedStatusTextView?.visibility = View.VISIBLE
+                duplicateStatusTextView?.visibility = View.GONE
+                purchasedStatusTextView?.visibility = View.GONE
+                ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
+                ticketItemBackgroundPurchased?.visibility = View.GONE
+                checkedIn = true
+            }
+            statusDuplicate -> {
+                redeemedStatusTextView?.visibility = View.GONE
+                checkedStatusTextView?.visibility = View.GONE
+                duplicateStatusTextView?.visibility = View.VISIBLE
                 purchasedStatusTextView?.visibility = View.GONE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
                 ticketItemBackgroundPurchased?.visibility = View.GONE
@@ -72,6 +92,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             else -> {
                 redeemedStatusTextView?.visibility = View.GONE
                 checkedStatusTextView?.visibility = View.GONE
+                duplicateStatusTextView?.visibility = View.GONE
                 purchasedStatusTextView?.visibility = View.VISIBLE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.GONE
                 ticketItemBackgroundPurchased?.visibility = View.VISIBLE

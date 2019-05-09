@@ -99,6 +99,17 @@
                             android:visibility="gone"/>
 
                     <TextView
+                            android:id="@+id/duplicate_status_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/duplicate"
+                            android:textColor="@color/colorBlack"
+                            android:background="@drawable/duplicate_status_background"
+                            android:layout_marginStart="10dp"
+                            android:padding="5dp"
+                            android:visibility="gone"/>
+
+                    <TextView
                             android:id="@+id/purchased_status_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -117,6 +128,16 @@
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:text="@string/price_ticket_type"
+                        android:gravity="center_vertical"
+                        android:textSize="16sp"
+                        android:textStyle="normal"/>
+
+                <TextView
+                        android:id="@+id/ticket_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/ticket_id"
                         android:gravity="center_vertical"
                         android:textSize="16sp"
                         android:textStyle="normal"/>

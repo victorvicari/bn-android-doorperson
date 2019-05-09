@@ -192,6 +192,9 @@ class RestAPI private constructor() {
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
                         } else {
                             if (response.code() == 409) {
+//                                val ticketsDS = TicketsDS()
+//                                ticketsDS.setDuplicateTicket(ticketId)
+
                                 val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
                                 intent.putExtra("ticketId", ticketId)
                                 context.startActivity(intent)
@@ -223,8 +226,8 @@ class RestAPI private constructor() {
                         if (response.body() != null) {
                             val ticket = response.body()!!.ticket!!
                             ticket.userId = response.body()!!.user?.userId ?: ""
-//                            ticket.firstName = response.body()!!.user?.firstName ?: ""
-//                            ticket.lastName = response.body()!!.user?.lastName ?: ""
+                            ticket.firstName = response.body()!!.user?.firstName ?: ""
+                            ticket.lastName = response.body()!!.user?.lastName ?: ""
                             getTicketResult(true, ticket)
                             Log.e(TAG, "Redeem ticket $ticketId succeeded")
                         } else {

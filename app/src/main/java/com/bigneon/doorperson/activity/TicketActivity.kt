@@ -12,7 +12,6 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
@@ -25,7 +24,6 @@ import kotlinx.android.synthetic.main.content_ticket.view.*
 class TicketActivity : AppCompatActivity() {
 
     private var ticketsDS: TicketsDS? = null
-    private var usersDS: UsersDS? = null
 
     private fun getContext(): Context {
         return this
@@ -38,7 +36,6 @@ class TicketActivity : AppCompatActivity() {
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
-        usersDS = UsersDS()
 
         setSupportActionBar(ticket_toolbar)
 
@@ -60,26 +57,39 @@ class TicketActivity : AppCompatActivity() {
         price_and_ticket_type?.text =
             getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketTypeName)
 
+        ticket_id.text =  "#${ticketId?.takeLast(8)}"
+
         val ticketStatus = status?.toLowerCase()
         val statusRedeemed = getString(R.string.redeemed).toLowerCase()
         val statusChecked = getString(R.string.checked).toLowerCase()
+        val statusDuplicate = getString(R.string.duplicate).toLowerCase()
 
         when (ticketStatus) {
             statusRedeemed -> {
                 redeemed_status?.visibility = View.VISIBLE
                 checked_status?.visibility = View.GONE
+                duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
             }
             statusChecked -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.VISIBLE
+                duplicate_status?.visibility = View.GONE
+                purchased_status?.visibility = View.GONE
+                complete_check_in?.visibility = View.GONE
+            }
+            statusDuplicate -> {
+                redeemed_status?.visibility = View.GONE
+                checked_status?.visibility = View.GONE
+                duplicate_status?.visibility = View.VISIBLE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
             }
             else -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.GONE
+                duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.VISIBLE
                 complete_check_in?.visibility = View.VISIBLE
             }
@@ -111,11 +121,10 @@ class TicketActivity : AppCompatActivity() {
                 scanning_ticket_layout.purchased_status?.visibility = View.GONE
                 scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
-                val user = usersDS!!.getUser(ticket.userId!!)
                 Snackbar
                     .make(
                         scanning_ticket_layout,
-                        "Checked in ${user?.lastName + ", " + user?.firstName}",
+                        "Checked in ${ticket.lastName + ", " + ticket.firstName}",
                         Snackbar.LENGTH_LONG
                     )
                     .setDuration(5000).show()
@@ -156,11 +165,10 @@ class TicketActivity : AppCompatActivity() {
                                 scanning_ticket_layout.purchased_status?.visibility = View.GONE
                                 scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
-                                val user = usersDS!!.getUser(ticket?.userId!!)
                                 Snackbar
                                     .make(
                                         scanning_ticket_layout,
-                                        "Redeemed ${user?.lastName + ", " + user?.firstName}",
+                                        "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
                                         Snackbar.LENGTH_LONG
                                     )
                                     .setDuration(5000).show()
