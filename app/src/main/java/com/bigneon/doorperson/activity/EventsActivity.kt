@@ -1,6 +1,5 @@
 package com.bigneon.doorperson.activity
 
-//import com.bigneon.doorperson.db.SyncController.Companion.isNetworkAvailable
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -64,6 +63,17 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         profile_settings.setOnClickListener {
             startActivity(Intent(getContext(), ProfileActivity::class.java))
+        }
+
+        events_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables()
+
+            // Refresh view from DB
+            refreshEventList()
+
+            // Hide swipe to refresh icon animation
+            events_layout.isRefreshing = false
         }
     }
 
