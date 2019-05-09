@@ -21,9 +21,7 @@ import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.model.TicketModel
-import com.bigneon.doorperson.rest.model.UserModel
 import com.bigneon.doorperson.util.AppUtils
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
@@ -33,7 +31,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
-    private var usersDS: UsersDS? = null
 
     companion object {
         private var searchTextChanged: Boolean = false
@@ -54,7 +51,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
-        usersDS = UsersDS()
 
         SyncController.ticketListRefresher = this
 
@@ -121,16 +117,14 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
         finallyFilteredTicketList.clear()
 
-        if(ticketList == null)
+        if (ticketList == null)
             return
 
         for (word in searchWords) {
             val filteredTicketList = ticketList?.filter {
-                var user: UserModel? = null
-                if(it.userId != null) {
-                    user = usersDS!!.getUser(it.userId!!)
-                }
-                user != null && (user.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || user.lastName?.toLowerCase()!!.contains(word.toLowerCase())  || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
+                (it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
+                    word.toLowerCase()
+                ) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
             } as ArrayList<TicketModel>
             filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
             finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
@@ -184,18 +178,17 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                         finallyFilteredTicketList else ticketList
 
                 val ticket = filteredList?.get(adapterPosition)
-                val user = usersDS!!.getUser(ticket?.userId!!)
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", ticket.ticketId)
+                intent.putExtra("ticketId", ticket?.ticketId)
                 intent.putExtra("eventId", eventId)
-                intent.putExtra("redeemKey", ticket.redeemKey)
+                intent.putExtra("redeemKey", ticket?.redeemKey)
                 intent.putExtra("searchGuestText", searchGuestText)
-                intent.putExtra("firstName", user?.firstName)
-                intent.putExtra("lastName", user?.lastName)
-                intent.putExtra("priceInCents", ticket.priceInCents)
-                intent.putExtra("ticketTypeName", ticket.ticketType)
-                intent.putExtra("status", ticket.status)
+                intent.putExtra("firstName", ticket?.firstName)
+                intent.putExtra("lastName", ticket?.lastName)
+                intent.putExtra("priceInCents", ticket?.priceInCents)
+                intent.putExtra("ticketTypeName", ticket?.ticketType)
+                intent.putExtra("status", ticket?.status)
                 startActivity(intent)
             }
         })
@@ -205,7 +198,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 super.onScrollStateChanged(recyclerView, newState)
                 ticketListItemPosition =
                     (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                ticketListItemOffset = recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition)!!.top
+
+                ticketListItemOffset =
+                    if (recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition) != null) recyclerView.layoutManager?.findViewByPosition(
+                        ticketListItemPosition
+                    )!!.top else 0
             }
         })
     }

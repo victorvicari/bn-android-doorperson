@@ -24,14 +24,6 @@ interface RestClient {
     @GET("events/checkins")
     fun getScannableEvents(@Header("Authorization") token: String): Call<EventsResponse>
 
-    // TODO - Isn't need any more
-//    @GET("events/{event_id}/dashboard")
-//    fun getDashboardForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String): Call<DashboardResponse>
-
-    // TODO - Replace getTicketsForEvent() when BE team fix query parameter. It doesn't supposed to be mandatory
-//    @GET("events/{eventId}/guests")
-//    fun getTicketsForEvent(@Header("Authorization") token: String, @Path("eventId") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
-
     @GET("events/{event_id}/guests")
     fun getTicketsForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Query("query") query: String?): Call<TicketsResponse>
 

@@ -20,6 +20,11 @@ class TicketsDS : BaseDS() {
         TableTicketsDML.TICKET_ID,
         TableTicketsDML.EVENT_ID,
         TableTicketsDML.USER_ID,
+        TableTicketsDML.FIRST_NAME,
+        TableTicketsDML.LAST_NAME,
+        TableTicketsDML.EMAIL,
+        TableTicketsDML.PHONE,
+        TableTicketsDML.PROFILE_PIC_URL,
         TableTicketsDML.PRICE_IN_CENTS,
         TableTicketsDML.TICKET_TYPE_NAME,
         TableTicketsDML.REDEEM_KEY,
@@ -195,11 +200,27 @@ class TicketsDS : BaseDS() {
         return getTicket(ticketId)
     }
 
+    fun setDuplicateTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(TableTicketsDML.STATUS, "DUPLICATE")
+        database?.update(
+            TableTicketsDML.TABLE_TICKETS,
+            values,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            null
+        )
+        return getTicket(ticketId)
+    }
 
     fun createTicket(
         ticketId: String,
         eventId: String,
         userId: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        phone: String?,
+        profilePicURL: String?,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
@@ -209,6 +230,11 @@ class TicketsDS : BaseDS() {
         values.put(TableTicketsDML.TICKET_ID, ticketId)
         values.put(TableTicketsDML.EVENT_ID, eventId)
         values.put(TableTicketsDML.USER_ID, userId)
+        values.put(TableTicketsDML.FIRST_NAME, firstName)
+        values.put(TableTicketsDML.LAST_NAME, lastName)
+        values.put(TableTicketsDML.EMAIL, email)
+        values.put(TableTicketsDML.PHONE, phone)
+        values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
@@ -221,6 +247,11 @@ class TicketsDS : BaseDS() {
         ticketId: String,
         eventId: String,
         userId: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        phone: String?,
+        profilePicURL: String?,
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
@@ -229,6 +260,11 @@ class TicketsDS : BaseDS() {
         val values = ContentValues()
         values.put(TableTicketsDML.EVENT_ID, eventId)
         values.put(TableTicketsDML.USER_ID, userId)
+        values.put(TableTicketsDML.FIRST_NAME, firstName)
+        values.put(TableTicketsDML.LAST_NAME, lastName)
+        values.put(TableTicketsDML.EMAIL, email)
+        values.put(TableTicketsDML.PHONE, phone)
+        values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
@@ -253,6 +289,11 @@ class TicketsDS : BaseDS() {
         ticketModel.ticketId = cursor.getString(index++)
         ticketModel.eventId = cursor.getString(index++)
         ticketModel.userId = cursor.getString(index++)
+        ticketModel.firstName = cursor.getString(index++)
+        ticketModel.lastName = cursor.getString(index++)
+        ticketModel.email = cursor.getString(index++)
+        ticketModel.phone = cursor.getString(index++)
+        ticketModel.profilePicURL = cursor.getString(index++)
         ticketModel.priceInCents = cursor.getInt(index++)
         ticketModel.ticketType = cursor.getString(index++)
         ticketModel.redeemKey = cursor.getString(index++)

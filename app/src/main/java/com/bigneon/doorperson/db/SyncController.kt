@@ -15,11 +15,9 @@ import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.db.ds.UsersDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
-import com.bigneon.doorperson.rest.model.UserModel
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -106,7 +104,6 @@ class DownloadSyncTask(
     private val TAG = DownloadSyncTask::class.java.simpleName
     private val eventsDS: EventsDS = EventsDS()
     private val ticketsDS: TicketsDS = TicketsDS()
-    private val usersDS: UsersDS = UsersDS()
 
     override fun doInBackground(vararg params: Unit?) {
         fun setAccessTokenForEvent(accessToken: String?) {
@@ -130,64 +127,49 @@ class DownloadSyncTask(
                                 if (ticketsDS.ticketExists(t.ticketId!!)) {
                                     // Prevent download sync if checked ticket wasn't uploaded
                                     val ticket = ticketsDS.getTicket(t.ticketId!!)
-                                    if (ticket?.status == SyncController.getContext().getString(R.string.checked) &&
-                                        t.status == SyncController.getContext().getString(R.string.purchased)
+                                    if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.checked).toLowerCase() &&
+                                        t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()
                                     ) {
                                         Log.d(
                                             TAG,
                                             "Prevented download sync for checked ticket that wasn't uploaded"
                                         )
+                                    } else if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.checked).toLowerCase() &&
+                                        t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()
+                                    ) {
+                                        ticketsDS.setDuplicateTicket(t.ticketId!!)
                                     } else {
-                                        ticketsDS.updateTicket(
-                                            t.ticketId!!,
-                                            t.eventId!!,
-                                            t.userId!!,
-                                            t.priceInCents!!,
-                                            t.ticketType!!,
-                                            t.redeemKey!!,
-                                            t.status?.toUpperCase()!!
-                                        )
+                                        if (ticket?.status?.toLowerCase() != SyncController.getContext().getString(R.string.duplicate).toLowerCase())
+                                            ticketsDS.updateTicket(
+                                                t.ticketId!!,
+                                                t.eventId!!,
+                                                t.userId!!,
+                                                t.firstName,
+                                                t.lastName,
+                                                t.email,
+                                                t.phone,
+                                                t.profilePicURL,
+                                                t.priceInCents!!,
+                                                t.ticketType!!,
+                                                t.redeemKey!!,
+                                                t.status?.toUpperCase()!!
+                                            )
                                     }
                                 } else {
                                     ticketsDS.createTicket(
                                         t.ticketId!!,
                                         t.eventId!!,
                                         t.userId!!,
+                                        t.firstName,
+                                        t.lastName,
+                                        t.email,
+                                        t.phone,
+                                        t.profilePicURL,
                                         t.priceInCents!!,
                                         t.ticketType!!,
                                         t.redeemKey!!,
                                         t.status?.toUpperCase()!!
                                     )
-                                }
-
-                                //Create or update user
-                                if(t.userId != null) {
-                                    if (!usersDS.userExists(t.userId!!)) { // TODO - Change with consulting updated_at!
-                                        fun getUserResult(userModel: UserModel?) {
-                                            if (userModel == null)
-                                                return
-                                            if (usersDS.userExists(t.userId!!)) {
-                                                usersDS.updateUser(
-                                                    userModel.userId!!,
-                                                    userModel.firstName!!,
-                                                    userModel.lastName!!,
-                                                    userModel.email!!,
-                                                    userModel.phone!!,
-                                                    userModel.profilePicURL!!
-                                                )
-                                            } else {
-                                                usersDS.createUser(
-                                                    userModel.userId!!,
-                                                    userModel.firstName!!,
-                                                    userModel.lastName!!,
-                                                    userModel.email!!,
-                                                    userModel.phone!!,
-                                                    userModel.profilePicURL!!
-                                                )
-                                            }
-                                        }
-                                        RestAPI.getUser(accessToken, t.userId!!, ::getUserResult)
-                                    }
                                 }
                             }
                             // Refresh ticket list list
