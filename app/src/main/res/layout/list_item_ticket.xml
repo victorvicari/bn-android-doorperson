@@ -14,7 +14,7 @@
         <RelativeLayout
                 android:id="@+id/ticket_item_background"
                 android:layout_width="match_parent"
-                android:layout_height="100dp">
+                android:layout_height="120dp">
 
             <TextView
                     android:id="@+id/ticket_item_background_purchased"
@@ -47,7 +47,7 @@
         <RelativeLayout
                 android:id="@+id/ticket_item_foreground"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="120dp"
                 android:background="@color/colorWhite">
 
             <LinearLayout
