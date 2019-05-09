@@ -2,7 +2,9 @@ package com.bigneon.doorperson.rest
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import com.bigneon.doorperson.activity.DuplicateTicketCheckinActivity
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.SharedPrefs
@@ -189,7 +191,11 @@ class RestAPI private constructor() {
                         if (response.body() != null) {
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
                         } else {
-                            Log.e(TAG, "Redeem ticket for event $eventId failed")
+                            if (response.code() == 409) {
+                                val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
+                                intent.putExtra("ticketId", ticketId)
+                                context.startActivity(intent)
+                            }
                         }
                         redeemTicketResult?.invoke()
                     }
