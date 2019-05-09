@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.TicketListAdapter
@@ -30,6 +31,7 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
 class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
+    private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
@@ -136,6 +138,9 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
             return
 
         for (word in searchWords) {
+            if(word == "")
+                continue
+            
             val filteredTicketList = ticketList?.filter {
                 var user: UserModel? = null
                 if (it.userId != null) {
@@ -218,6 +223,8 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 super.onScrollStateChanged(recyclerView, newState)
                 ticketListItemPosition =
                     (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                Log.d(TAG, "ticketListItemPosition: $ticketListItemPosition")
+
                 ticketListItemOffset = recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition)!!.top
             }
         })

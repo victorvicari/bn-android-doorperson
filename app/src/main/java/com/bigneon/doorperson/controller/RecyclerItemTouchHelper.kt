@@ -16,6 +16,8 @@ import android.widget.LinearLayout
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.adapter.TicketListAdapter
+import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
@@ -201,6 +203,7 @@ class RecyclerItemTouchHelper :
                                 viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                             redeemTicket(ticketModel)
                         }
+                        SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticketModel.ticketId)
                     }
                 }
             }
