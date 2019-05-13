@@ -8,6 +8,7 @@ package com.bigneon.doorperson.config
 interface AppConstants {
     companion object {
         const val BASE_URL = "https://staging.api.bigneon.com"
+//        const val BASE_URL = "https://api.staging.bigneon.com"
 
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
         const val REFRESH_TOKEN = "refresh_token"
@@ -16,6 +17,8 @@ interface AppConstants {
         const val CHECK_IN_MODE = "check_in_mode"
         const val CHECK_IN_MODE_MANUAL = "M"
         const val CHECK_IN_MODE_AUTOMATIC = "A"
+
+        const val LAST_CHECKED_TICKET_ID = "last_checked_ticket_id"
 
         // DB const
         const val DATABASE_NAME = "doorperson.db"
