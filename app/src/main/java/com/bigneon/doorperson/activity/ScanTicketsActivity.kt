@@ -59,7 +59,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         usersDS = UsersDS()
 
         eventId = intent.getStringExtra("eventId")
-        val lastCheckedTicketId = SharedPrefs.getProperty(AppConstants.LAST_CHECKED_TICKET_ID)
+        val lastCheckedTicketId = SharedPrefs.getProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId)
         if (!lastCheckedTicketId.isNullOrEmpty())
             showPillUserInfo(true, lastCheckedTicketId)
 
@@ -287,7 +287,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     redeemTicket()
                 }
 
-                SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticket.ticketId)
+                SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + ticket.eventId, ticket.ticketId)
                 showPillUserInfo(success, ticket.ticketId)
             }
 

@@ -211,7 +211,7 @@ class TicketActivity : AppCompatActivity() {
             } else {
                 redeemTicket()
             }
-            SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticketId)
+            SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)
         }
     }
 
