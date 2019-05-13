@@ -28,6 +28,8 @@ import kotlinx.android.synthetic.main.content_ticket.view.*
 class TicketActivity : AppCompatActivity() {
     private val TAG = TicketActivity::class.java.simpleName
     private var ticketsDS: TicketsDS? = null
+    private var eventId: String? = null
+    private var searchGuestText: String? = null
 
     private fun getContext(): Context {
         return this
@@ -47,9 +49,9 @@ class TicketActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val ticketId = intent.getStringExtra("ticketId")
-        val eventId = intent.getStringExtra("eventId")
+        eventId = intent.getStringExtra("eventId")
         val redeemKey = intent.getStringExtra("redeemKey")
-        val searchGuestText = intent.getStringExtra("searchGuestText")
+        searchGuestText = intent.getStringExtra("searchGuestText")
         val firstName = intent.getStringExtra("firstName")
         val lastName = intent.getStringExtra("lastName")
         val priceInCents = intent.getIntExtra("priceInCents", 0)
@@ -241,7 +243,10 @@ class TicketActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        val intent = Intent(getContext(), TicketListActivity::class.java)
+        intent.putExtra("eventId", eventId)
+        intent.putExtra("searchGuestText", searchGuestText)
+        startActivity(intent)
+        finish()
     }
 }

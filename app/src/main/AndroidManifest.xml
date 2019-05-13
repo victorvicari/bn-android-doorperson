@@ -50,15 +50,15 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".activity.LoginActivity"
-                android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
                 android:name=".activity.DuplicateTicketCheckinActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
                 android:name=".activity.EventsActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".activity.LoginActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -66,7 +66,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <receiver
                 android:name=".receiver.NetworkStateReceiver"
                 android:label="NetworkStateReceiver">

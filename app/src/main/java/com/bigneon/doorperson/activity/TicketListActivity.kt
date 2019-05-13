@@ -223,8 +223,10 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        val intent = Intent(getContext(), ScanTicketsActivity::class.java)
+        intent.putExtra("eventId", eventId)
+        startActivity(intent)
+        finish()
     }
 }
 
