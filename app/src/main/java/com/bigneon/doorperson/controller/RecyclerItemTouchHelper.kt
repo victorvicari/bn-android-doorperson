@@ -203,7 +203,7 @@ class RecyclerItemTouchHelper :
                                 viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                             redeemTicket(ticketModel)
                         }
-                        SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID, ticketModel.ticketId)
+                        SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + ticketModel.eventId, ticketModel.ticketId)
                     }
                 }
             }
