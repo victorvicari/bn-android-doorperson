@@ -41,10 +41,27 @@ class ScanningEventActivity : AppCompatActivity() {
             PorterDuff.Mode.SRC_ATOP
         )
 
+        getEventSummary()
+
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
         }
 
+        scanning_events_button.setOnClickListener {
+            val intent = Intent(getContext(), ScanTicketsActivity::class.java)
+            intent.putExtra("eventId", eventId)
+            startActivity(intent)
+        }
+
+        scanning_event_layout.setOnRefreshListener {
+            getEventSummary()
+
+            // Hide swipe to refresh icon animation
+            scanning_event_layout.isRefreshing = false
+        }
+    }
+
+    private fun getEventSummary() {
         val event = eventsDS!!.getEvent(eventId)
         scanning_event_name.text = event?.name ?: ""
 
@@ -58,12 +75,6 @@ class ScanningEventActivity : AppCompatActivity() {
             R.string._1_d_checked,
             ticketsDS!!.getCheckedTicketNumberForEvent(eventId)
         )
-
-        scanning_events_button.setOnClickListener {
-            val intent = Intent(getContext(), ScanTicketsActivity::class.java)
-            intent.putExtra("eventId", eventId)
-            startActivity(intent)
-        }
     }
 
     override fun onBackPressed() {

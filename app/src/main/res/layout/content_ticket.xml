@@ -59,6 +59,19 @@
                     android:visibility="gone"/>
 
             <TextView
+                    android:id="@+id/duplicate_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/duplicate"
+                    android:textColor="@color/colorBlack"
+                    android:background="@drawable/duplicate_status_background"
+                    android:layout_marginStart="10dp"
+                    android:padding="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:visibility="gone"/>
+
+            <TextView
                     android:id="@+id/purchased_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -81,6 +94,16 @@
                 android:gravity="center_vertical"
                 android:textSize="16sp"
                 android:textStyle="normal"/>
+
+        <TextView
+                android:id="@+id/ticket_id"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/ticket_id"
+                android:gravity="center_vertical"
+                android:textSize="16sp"
+                android:textStyle="normal"/>
     </LinearLayout>
 
     <LinearLayout
@@ -100,8 +123,7 @@
                 android:layout_marginEnd="5dp"
                 android:text="@string/back_to_list"
                 android:background="@drawable/back_to_list_btn_background"
-                android:textAllCaps="false"
-                />
+                android:textAllCaps="false"/>
 
         <Button
                 android:id="@+id/complete_check_in"

@@ -15,6 +15,11 @@ import java.util.*
  ****************************************************/
 class AppUtils {
     companion object {
+        var eventListItemPosition = -1
+        var eventListItemOffset = 0
+        var ticketListItemPosition = -1
+        var ticketListItemOffset = 0
+
         fun getCurrentTimestamp(): String {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMANY)
             dateFormat.timeZone = TimeZone.getTimeZone("CET")

@@ -21,6 +21,8 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+
+
         <service
                 android:name=".service.SyncService"
                 android:exported="false">
@@ -52,6 +54,10 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
+                android:name=".activity.DuplicateTicketCheckinActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
                 android:name=".activity.EventsActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -72,7 +78,7 @@
 
         <meta-data
                 android:name="io.fabric.ApiKey"
-                android:value="${crashlytics}" />
+                android:value="${crashlytics}"/>
     </application>
 
 </manifest>

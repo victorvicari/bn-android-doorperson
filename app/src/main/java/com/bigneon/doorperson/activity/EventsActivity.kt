@@ -1,6 +1,5 @@
 package com.bigneon.doorperson.activity
 
-//import com.bigneon.doorperson.db.SyncController.Companion.isNetworkAvailable
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,20 +13,17 @@ import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.SyncController.Companion.eventListItemOffset
-import com.bigneon.doorperson.db.SyncController.Companion.eventListItemPosition
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
 import com.bigneon.doorperson.util.NetworkUtils
+import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
-//import sun.security.krb5.internal.KDCOptions.with
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-
-
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
     private var eventsDS: EventsDS? = null
@@ -67,6 +63,17 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         profile_settings.setOnClickListener {
             startActivity(Intent(getContext(), ProfileActivity::class.java))
+        }
+
+        events_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables()
+
+            // Refresh view from DB
+            refreshEventList()
+
+            // Hide swipe to refresh icon animation
+            events_layout.isRefreshing = false
         }
     }
 
@@ -110,7 +117,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        finishAndRemoveTask()
     }
 }
 
