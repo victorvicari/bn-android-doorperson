@@ -13,12 +13,12 @@ import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.SyncController.Companion.eventListItemOffset
-import com.bigneon.doorperson.db.SyncController.Companion.eventListItemPosition
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
 import com.bigneon.doorperson.util.NetworkUtils
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
