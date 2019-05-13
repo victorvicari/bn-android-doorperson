@@ -12,7 +12,9 @@ class DuplicateTicketCheckinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_duplicate_ticket_checkin)
 
         val ticketId = intent.getStringExtra("ticketId") ?: "UNKNOWN"
-        duplicate_ticket_msg.text = getString(R.string.duplicate_ticket_msg, ticketId)
+        val lastAndFirstName = intent.getStringExtra("lastAndFirstName") ?: ""
+
+        duplicate_ticket_msg.text = getString(R.string.duplicate_ticket_msg, "#" + ticketId.takeLast(8), lastAndFirstName)
         duplicate_ticket_go_back.setOnClickListener {
             finish()
         }

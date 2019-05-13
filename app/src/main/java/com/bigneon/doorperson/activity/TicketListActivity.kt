@@ -18,11 +18,11 @@ import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemOffset
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListItemPosition
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemOffset
+import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemPosition
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
