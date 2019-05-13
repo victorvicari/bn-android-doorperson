@@ -10,8 +10,6 @@ import android.view.View
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
-import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
@@ -19,9 +17,6 @@ import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
-import com.bigneon.doorperson.util.NetworkUtils
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
@@ -34,14 +29,8 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Fabric.with(this, Crashlytics())
-        setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        SharedPrefs.setContext(this)
-        RestAPI.setContext(this)
-        SyncController.setContext(this)
-        SQLiteHelper.setContext(this)
-        NetworkUtils.setContext(this)
+        setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
         AppUtils.checkLogged(getContext())
 
@@ -116,8 +105,8 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        finishAndRemoveTask()
+        finish()
+        moveTaskToBack(true)
     }
 }
 
