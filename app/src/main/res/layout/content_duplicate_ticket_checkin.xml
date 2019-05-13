@@ -25,9 +25,9 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:text="@string/duplicate_ticket_msg"
-            android:textSize="32sp"
+            android:textSize="24sp"
             android:padding="10dp"
-            android:gravity="center"/>
+            android:gravity="start"/>
 
     <LinearLayout
             android:layout_width="match_parent"

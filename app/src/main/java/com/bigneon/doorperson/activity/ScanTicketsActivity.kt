@@ -146,16 +146,16 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val jsonObjectData = jsonObj.getJSONObject("data")
             val redeemKey = jsonObjectData.getString("redeem_key")
             val ticketId = jsonObjectData.getString("id")
+            var ticket = ticketsDS!!.getTicket(ticketId)
 
             fun checkInTicket(): Boolean {
-                var ticket = ticketsDS!!.getTicket(ticketId)
-                ticket = if(ticket?.status == "PURCHASED") ticketsDS!!.setCheckedTicket(ticketId) else  null
+                ticket = if (ticket?.status == "PURCHASED") ticketsDS!!.setCheckedTicket(ticketId) else null
 
                 if (ticket != null) {
                     Snackbar
                         .make(
                             scan_tickets_layout,
-                            "Checked in ${ticket.lastName + ", " + ticket.firstName}",
+                            "Checked in ${ticket!!.lastName + ", " + ticket!!.firstName}",
                             Snackbar.LENGTH_LONG
                         )
                         .setDuration(5000).show()
@@ -191,55 +191,67 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         )
                         success = false
                     } else {
-                        fun redeemTicketResult() {
-                            fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
-                                if (isRedeemed) {
-                                    ticketsDS!!.setRedeemedTicket(ticketId)
+                        fun redeemTicketResult(isDuplicateTicket: Boolean) {
+                            if (isDuplicateTicket) {
+                                ticketsDS!!.setDuplicateTicket(ticketId)
+                                Log.d(TAG, "Ticket ID: $ticketId - DUPLICATE in local ")
+                            } else {
+                                fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
+                                    if (isRedeemed) {
+                                        ticketsDS!!.setRedeemedTicket(ticketId)
+                                        Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
 
-                                    scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
-                                    scanning_ticket_layout.purchased_status?.visibility = View.GONE
-                                    scanning_ticket_layout.complete_check_in?.visibility = View.GONE
+                                        scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
+                                        scanning_ticket_layout.purchased_status?.visibility = View.GONE
+                                        scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
-                                    Snackbar
-                                        .make(
-                                            scanning_ticket_layout,
-                                            "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
-                                            Snackbar.LENGTH_LONG
-                                        )
-                                        .setDuration(5000).show()
-                                    success = true
-                                } else {
-                                    // build alert dialog
-                                    val dialogBuilder = AlertDialog.Builder(getContext())
+                                        Snackbar
+                                            .make(
+                                                scanning_ticket_layout,
+                                                "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
+                                                Snackbar.LENGTH_LONG
+                                            )
+                                            .setDuration(5000).show()
+                                        success = true
+                                    } else {
+                                        if(!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                            // build alert dialog
+                                            val dialogBuilder = AlertDialog.Builder(getContext())
 
-                                    // set message of alert dialog
-                                    dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Turn on the offline mode") { _, _ ->
-                                            run {
-                                                SyncController.isOfflineModeEnabled = true
-                                                checkInTicket()
-                                            }
+                                            // set message of alert dialog
+                                            dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
+                                                .setCancelable(false)
+                                                .setPositiveButton("Turn on the offline mode") { _, _ ->
+                                                    run {
+                                                        SyncController.isOfflineModeEnabled = true
+                                                        checkInTicket()
+                                                    }
+                                                }
+                                                .setNegativeButton("Turn on the WiFi") { _, _ ->
+                                                    run {
+                                                        NetworkUtils.instance().setWiFiEnabled(true)
+                                                        redeemTicket()
+                                                    }
+                                                }
+                                            val alert = dialogBuilder.create()
+                                            alert.setTitle("Error in connection!")
+                                            alert.show()
+                                            success = false
+                                        } else {
+                                            Log.e(TAG, "ERROR: redeemTicketForEvent")
                                         }
-                                        .setNegativeButton("Turn on the WiFi") { _, _ ->
-                                            run {
-                                                NetworkUtils.instance().setWiFiEnabled(true)
-                                                redeemTicket()
-                                            }
-                                        }
-                                    val alert = dialogBuilder.create()
-                                    alert.setTitle("Error in connection!")
-                                    alert.show()
-                                    success = false
+                                    }
                                 }
+                                RestAPI.getTicket(accessToken, ticketId, ::getTicketResult)
                             }
-                            RestAPI.getTicket(accessToken, ticketId, ::getTicketResult)
                         }
 
                         RestAPI.redeemTicketForEvent(
                             accessToken,
                             eventId!!,
                             ticketId!!,
+                            ticket!!.firstName!!,
+                            ticket!!.lastName!!,
                             redeemKey!!,
                             ::redeemTicketResult
                         )
