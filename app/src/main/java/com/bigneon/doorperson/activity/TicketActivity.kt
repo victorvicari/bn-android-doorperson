@@ -74,6 +74,7 @@ class TicketActivity : AppCompatActivity() {
             statusRedeemed -> {
                 redeemed_status?.visibility = View.VISIBLE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -81,6 +82,7 @@ class TicketActivity : AppCompatActivity() {
             statusChecked -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.VISIBLE
+                checked_no_internet?.visibility = View.VISIBLE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -88,6 +90,7 @@ class TicketActivity : AppCompatActivity() {
             statusDuplicate -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.VISIBLE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -95,6 +98,7 @@ class TicketActivity : AppCompatActivity() {
             else -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.VISIBLE
                 complete_check_in?.visibility = View.VISIBLE

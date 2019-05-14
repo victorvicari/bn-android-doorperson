@@ -13,13 +13,13 @@
     <LinearLayout
             android:id="@+id/ticket_item_data"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="120dp"
             android:orientation="vertical">
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:orientation="horizontal">
 
             <TextView
@@ -43,7 +43,17 @@
                     android:background="@drawable/redeemed_status_background"
                     android:layout_marginStart="10dp"
                     android:padding="5dp"
-                    android:layout_gravity="center_vertical"/>
+                    android:layout_gravity="center_vertical"
+                    android:visibility="visible"/>
+
+            <ImageView
+                    android:id="@+id/checked_no_internet"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:paddingTop="5dp"
+                    android:src="@drawable/no_internet"
+                    android:contentDescription="@string/no_internet_icon"
+                    android:visibility="gone"/>
 
             <TextView
                     android:id="@+id/checked_status"
