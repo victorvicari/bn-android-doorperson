@@ -12,16 +12,28 @@ import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
+import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
 class EventsActivity : AppCompatActivity(), IEventListRefresher {
     private var eventsDS: EventsDS? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
+
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -32,6 +44,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventsDS = EventsDS()

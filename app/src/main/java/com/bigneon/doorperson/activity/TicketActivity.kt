@@ -16,6 +16,7 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
@@ -30,6 +31,16 @@ class TicketActivity : AppCompatActivity() {
     private var ticketsDS: TicketsDS? = null
     private var eventId: String? = null
     private var searchGuestText: String? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
+
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -39,6 +50,7 @@ class TicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
 
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
