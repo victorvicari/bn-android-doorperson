@@ -34,6 +34,20 @@
                 android:layout_centerInParent="true"
                 android:textAllCaps="false"
                 android:text="@string/check_in_mode"/>
+
+        <ProgressBar
+                android:id="@+id/reading_ticket"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@string/reading_ticket"
+                android:layout_centerVertical="true"
+                android:textColor="@color/colorWhite"
+                android:padding="5dp"
+                android:layout_alignParentEnd="true"
+                android:textAllCaps="false"
+                android:visibility="gone"/>
     </RelativeLayout>
 
     <me.dm7.barcodescanner.zxing.ZXingScannerView

@@ -150,9 +150,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             }
 
             readingTicket = true
+            reading_ticket.visibility = View.VISIBLE
             val handler = Handler()
             handler.postDelayed({
                 readingTicket = false
+                reading_ticket.visibility = View.GONE
             }, 3000)
 
             val json = rawResult.text
