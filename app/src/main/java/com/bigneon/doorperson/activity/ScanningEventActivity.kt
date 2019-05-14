@@ -78,7 +78,7 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        startActivity(Intent(getContext(), EventsActivity::class.java))
+        finish()
     }
 }

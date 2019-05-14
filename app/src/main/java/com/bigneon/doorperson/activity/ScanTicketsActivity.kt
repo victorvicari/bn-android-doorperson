@@ -368,7 +368,9 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        AppUtils.checkLogged(getContext())
+        val intent = Intent(getContext(), ScanningEventActivity::class.java)
+        intent.putExtra("eventId", eventId)
+        startActivity(intent)
+        finish()
     }
 }
