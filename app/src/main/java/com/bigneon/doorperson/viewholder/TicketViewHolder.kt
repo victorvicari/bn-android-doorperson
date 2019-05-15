@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -21,6 +22,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     private var ticketIdTextView: TextView? = null
     var redeemedStatusTextView: TextView? = null
     var checkedStatusTextView: TextView? = null
+    var checkedNoInternetImageView: ImageView? = null
     var duplicateStatusTextView: TextView? = null
     var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
@@ -39,6 +41,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         ticketIdTextView = itemView.findViewById(R.id.ticket_id)
         redeemedStatusTextView = itemView.findViewById(R.id.redeemed_status_item)
         checkedStatusTextView = itemView.findViewById(R.id.checked_status_item)
+        checkedNoInternetImageView = itemView.findViewById(R.id.checked_no_internet_item)
         duplicateStatusTextView = itemView.findViewById(R.id.duplicate_status_item)
         purchasedStatusTextView = itemView.findViewById(R.id.purchased_status_item)
         ticketItemBackgroundRedeemedOrChecked = itemView.findViewById(R.id.ticket_item_background_redeemed_or_checked)
@@ -65,6 +68,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             statusRedeemed -> {
                 redeemedStatusTextView?.visibility = View.VISIBLE
                 checkedStatusTextView?.visibility = View.GONE
+                checkedNoInternetImageView?.visibility = View.GONE
                 duplicateStatusTextView?.visibility = View.GONE
                 purchasedStatusTextView?.visibility = View.GONE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
@@ -74,6 +78,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             statusChecked -> {
                 redeemedStatusTextView?.visibility = View.GONE
                 checkedStatusTextView?.visibility = View.VISIBLE
+                checkedNoInternetImageView?.visibility = View.VISIBLE
                 duplicateStatusTextView?.visibility = View.GONE
                 purchasedStatusTextView?.visibility = View.GONE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
@@ -83,6 +88,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             statusDuplicate -> {
                 redeemedStatusTextView?.visibility = View.GONE
                 checkedStatusTextView?.visibility = View.GONE
+                checkedNoInternetImageView?.visibility = View.GONE
                 duplicateStatusTextView?.visibility = View.VISIBLE
                 purchasedStatusTextView?.visibility = View.GONE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.VISIBLE
@@ -92,6 +98,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             else -> {
                 redeemedStatusTextView?.visibility = View.GONE
                 checkedStatusTextView?.visibility = View.GONE
+                checkedNoInternetImageView?.visibility = View.GONE
                 duplicateStatusTextView?.visibility = View.GONE
                 purchasedStatusTextView?.visibility = View.VISIBLE
                 ticketItemBackgroundRedeemedOrChecked?.visibility = View.GONE

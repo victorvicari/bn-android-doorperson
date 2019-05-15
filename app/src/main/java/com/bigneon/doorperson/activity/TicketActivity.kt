@@ -16,6 +16,7 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
@@ -30,6 +31,16 @@ class TicketActivity : AppCompatActivity() {
     private var ticketsDS: TicketsDS? = null
     private var eventId: String? = null
     private var searchGuestText: String? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
+
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -39,6 +50,7 @@ class TicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
 
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
@@ -74,6 +86,7 @@ class TicketActivity : AppCompatActivity() {
             statusRedeemed -> {
                 redeemed_status?.visibility = View.VISIBLE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -81,6 +94,7 @@ class TicketActivity : AppCompatActivity() {
             statusChecked -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.VISIBLE
+                checked_no_internet?.visibility = View.VISIBLE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -88,6 +102,7 @@ class TicketActivity : AppCompatActivity() {
             statusDuplicate -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.VISIBLE
                 purchased_status?.visibility = View.GONE
                 complete_check_in?.visibility = View.GONE
@@ -95,6 +110,7 @@ class TicketActivity : AppCompatActivity() {
             else -> {
                 redeemed_status?.visibility = View.GONE
                 checked_status?.visibility = View.GONE
+                checked_no_internet?.visibility = View.GONE
                 duplicate_status?.visibility = View.GONE
                 purchased_status?.visibility = View.VISIBLE
                 complete_check_in?.visibility = View.VISIBLE

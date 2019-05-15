@@ -6,10 +6,13 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
@@ -17,6 +20,16 @@ class ScanningEventActivity : AppCompatActivity() {
     private var eventId: String = ""
     private var ticketsDS: TicketsDS? = null
     private var eventsDS: EventsDS? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
+
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -27,6 +40,7 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventId = intent.getStringExtra("eventId")
