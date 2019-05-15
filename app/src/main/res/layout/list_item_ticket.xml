@@ -84,8 +84,18 @@
                             android:gravity="center_vertical"
                             android:background="@drawable/redeemed_status_background"
                             android:layout_marginStart="10dp"
-                            android:padding="5dp"/>
+                            android:padding="5dp"
+                            android:visibility="visible"/>
 
+                    <ImageView
+                            android:id="@+id/checked_no_internet_item"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="10dp"
+                            android:paddingTop="5dp"
+                            android:src="@drawable/no_internet"
+                            android:contentDescription="@string/no_internet_icon"
+                            android:visibility="gone"/>
                     <TextView
                             android:id="@+id/checked_status_item"
                             android:layout_width="wrap_content"

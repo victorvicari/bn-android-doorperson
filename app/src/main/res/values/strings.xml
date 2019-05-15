@@ -48,4 +48,5 @@
     <string name="go_back">GO BACK</string>
     <string name="ticket_id">Ticket ID</string>
     <string name="reading_ticket">Reading ticket</string>
+    <string name="no_internet_icon">No internet icon</string>
 </resources>
