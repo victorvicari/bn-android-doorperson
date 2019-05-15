@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat.checkSelfPermission
@@ -15,7 +16,6 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
 import android.widget.TextView.BufferType
-import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
@@ -40,6 +40,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
     private var cameraPermissionGranted: Boolean = false
     private var checkInMode: String? = null
     private var ticketsDS: TicketsDS? = null
+    private var readingTicket: Boolean = false
 
     private fun getContext(): Context {
         return this
@@ -49,7 +50,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         super.onCreate(savedInstanceState)
 
         // Set the scanner view as the content view
-        setContentView(R.layout.activity_scan_tickets)
+        setContentView(com.bigneon.doorperson.R.layout.activity_scan_tickets)
 
         AppUtils.checkLogged(getContext())
 
@@ -143,6 +144,19 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
     override fun handleResult(rawResult: Result) {
         if (cameraPermissionGranted) {
+            if (readingTicket) {
+                mScannerView?.resumeCameraPreview(this)
+                return
+            }
+
+            readingTicket = true
+            reading_ticket.visibility = View.VISIBLE
+            val handler = Handler()
+            handler.postDelayed({
+                readingTicket = false
+                reading_ticket.visibility = View.GONE
+            }, 3000)
+
             val json = rawResult.text
             val jsonObj = JSONObject(json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1))
             val jsonObjectData = jsonObj.getJSONObject("data")
@@ -267,6 +281,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 Snackbar
                     .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
                     .setDuration(5000).show()
+                mScannerView?.resumeCameraPreview(this)
                 return
             }
 
@@ -288,7 +303,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
                     Picasso
                         .get()
-                        .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
+                        .load(if (success) com.bigneon.doorperson.R.drawable.icon_ok else com.bigneon.doorperson.R.drawable.icon_delete)
                         .into(pill_checked_status_image)
                 }
             }
@@ -342,24 +357,31 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
         Picasso
             .get()
-            .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
+            .load(if (success) com.bigneon.doorperson.R.drawable.icon_ok else com.bigneon.doorperson.R.drawable.icon_delete)
             .into(pill_checked_status_image)
     }
 
     private fun setButtonText() {
         val text = SpannableString(
-            getString(R.string.check_in_mode) + " " + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(R.string.manual) else getString(
-                R.string.automatic
+            getString(com.bigneon.doorperson.R.string.check_in_mode) + " " + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
+                com.bigneon.doorperson.R.string.manual
+            ) else getString(
+                com.bigneon.doorperson.R.string.automatic
             ))
         )
-        text.setSpan(ForegroundColorSpan(getColor(R.color.colorWhite)), 0, getString(R.string.check_in_mode).length, 0)
         text.setSpan(
-            ForegroundColorSpan(getColor(R.color.colorAccent)),
-            getString(R.string.check_in_mode).length + 1,
-            getString(R.string.check_in_mode).length + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
-                R.string.manual
+            ForegroundColorSpan(getColor(com.bigneon.doorperson.R.color.colorWhite)),
+            0,
+            getString(com.bigneon.doorperson.R.string.check_in_mode).length,
+            0
+        )
+        text.setSpan(
+            ForegroundColorSpan(getColor(com.bigneon.doorperson.R.color.colorAccent)),
+            getString(com.bigneon.doorperson.R.string.check_in_mode).length + 1,
+            getString(com.bigneon.doorperson.R.string.check_in_mode).length + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
+                com.bigneon.doorperson.R.string.manual
             ).length else getString(
-                R.string.automatic
+                com.bigneon.doorperson.R.string.automatic
             ).length) + 1,
             0
         )

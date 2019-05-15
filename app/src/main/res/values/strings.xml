@@ -47,5 +47,6 @@
     <string name="duplicate_ticket_msg">Duplicate ticket detected!!!\nTicket has already been redeemed!\n\nTicket: %1$s\nUser: %2$s</string>
     <string name="go_back">GO BACK</string>
     <string name="ticket_id">Ticket ID</string>
+    <string name="reading_ticket">Reading ticket</string>
     <string name="no_internet_icon">No internet icon</string>
 </resources>
