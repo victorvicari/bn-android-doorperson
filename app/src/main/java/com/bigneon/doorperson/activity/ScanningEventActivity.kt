@@ -41,7 +41,6 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventId = intent.getStringExtra("eventId")
@@ -95,8 +94,13 @@ class ScanningEventActivity : AppCompatActivity() {
         )
     }
 
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
+    }
+
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

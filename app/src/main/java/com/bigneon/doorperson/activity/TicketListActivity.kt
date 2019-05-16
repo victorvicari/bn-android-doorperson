@@ -62,7 +62,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
         setSupportActionBar(ticket_list_toolbar)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
@@ -133,6 +132,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
             // Hide swipe to refresh icon animation
             tickets_swipe_refresh_layout.isRefreshing = false
         }
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -241,7 +245,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

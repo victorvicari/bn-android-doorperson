@@ -13,7 +13,7 @@ class SyncService : Service() {
     private val syncAllTablesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             @Synchronized
-            if (!SyncController.syncInProgress && NetworkUtils.instance().isNetworkAvailable()) {
+            if (!SyncController.syncInProgress && NetworkUtils.instance().isNetworkAvailable(context)) {
                 SyncController.synchronizeAllTables(false)
             }
         }

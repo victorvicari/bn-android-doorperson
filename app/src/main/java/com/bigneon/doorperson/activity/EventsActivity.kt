@@ -44,7 +44,6 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventsDS = EventsDS()
@@ -77,6 +76,11 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
             // Hide swipe to refresh icon animation
             events_layout.isRefreshing = false
         }
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
     }
 
     override fun refreshEventList() {
@@ -119,7 +123,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

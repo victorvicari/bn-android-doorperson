@@ -230,7 +230,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             .setDuration(5000).show()
                                         success = true
                                     } else {
-                                        if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                        if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
                                             // build alert dialog
                                             val dialogBuilder = AlertDialog.Builder(getContext())
 
@@ -245,7 +245,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                                 }
                                                 .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                     run {
-                                                        NetworkUtils.instance().setWiFiEnabled(true)
+                                                        NetworkUtils.instance().setWiFiEnabled(this, true)
                                                         redeemTicket()
                                                     }
                                                 }

@@ -49,7 +49,6 @@ class TicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
@@ -200,7 +199,7 @@ class TicketActivity : AppCompatActivity() {
                                         )
                                         .setDuration(5000).show()
                                 } else {
-                                    if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                    if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
                                         // build alert dialog
                                         val dialogBuilder = AlertDialog.Builder(getContext())
 
@@ -215,7 +214,7 @@ class TicketActivity : AppCompatActivity() {
                                             }
                                             .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                 run {
-                                                    NetworkUtils.instance().setWiFiEnabled(true)
+                                                    NetworkUtils.instance().setWiFiEnabled(this, true)
                                                     redeemTicket()
                                                 }
                                             }
@@ -257,8 +256,13 @@ class TicketActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
+    }
+
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

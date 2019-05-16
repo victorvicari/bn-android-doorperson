@@ -137,7 +137,7 @@ class RecyclerItemTouchHelper :
                                             viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
                                             viewHolder.purchasedStatusTextView?.visibility = View.GONE
                                         } else {
-                                            if(!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                            if(!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(viewHolder.itemView.context)) {
                                                 // build alert dialog
                                                 val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
 
@@ -153,7 +153,7 @@ class RecyclerItemTouchHelper :
                                                     .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                         run {
                                                             NetworkUtils.instance()
-                                                                .setWiFiEnabled(true)
+                                                                .setWiFiEnabled(viewHolder.itemView.context, true)
                                                             redeemTicket(ticketModel)
                                                         }
                                                     }
