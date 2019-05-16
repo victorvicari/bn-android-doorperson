@@ -188,6 +188,18 @@ class TicketsDS : BaseDS() {
         return getTicket(ticketId)
     }
 
+    fun setPurchasedTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(TableTicketsDML.STATUS, "PURCHASED")
+        database?.update(
+            TableTicketsDML.TABLE_TICKETS,
+            values,
+            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            null
+        )
+        return getTicket(ticketId)
+    }
+
     fun setRedeemedTicket(ticketId: String): TicketModel? {
         val values = ContentValues()
         values.put(TableTicketsDML.STATUS, "REDEEMED")

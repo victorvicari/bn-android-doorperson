@@ -104,22 +104,35 @@ class DownloadSyncTask(
                                         TAG,
                                         "Ticket ID: ${t.ticketId} - Status on server: ${t.status}, status in local ${ticket?.status} "
                                     )
-                                    if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
-                                        if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase() ||
-                                            ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.duplicate).toLowerCase()
-                                        ) {
-                                            Log.e(
-                                                TAG,
-                                                "ERROR: Illegal ticket state! On server: ${t.status}, on device ${ticket.status}"
-                                            )
-                                        }
-                                    } else
-                                        if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
-                                            if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) {
+
+                                    if (fullRefresh) {
+                                        if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
+                                            ticketsDS.setPurchasedTicket(t.ticketId!!)
+                                        } else
+                                            if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
                                                 ticketsDS.setRedeemedTicket(t.ticketId!!)
-                                                Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED in local ")
                                             }
-                                        }
+                                    } else {
+                                        if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
+                                            if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase() ||
+                                                ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.duplicate).toLowerCase()
+                                            ) {
+                                                Log.e(
+                                                    TAG,
+                                                    "ERROR: Illegal ticket state! On server: ${t.status}, on device ${ticket.status}"
+                                                )
+                                            }
+                                        } else
+                                            if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
+                                                if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                        R.string.purchased
+                                                    ).toLowerCase()
+                                                ) {
+                                                    ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                                    Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED in local ")
+                                                }
+                                            }
+                                    }
                                 } else {
                                     ticketsDS.createTicket(
                                         t.ticketId!!,
@@ -140,7 +153,11 @@ class DownloadSyncTask(
                             }
                             ticketListRefresher?.refreshTicketList(e.id!!)
                         }
-                        val changesSince = if(fullRefresh) MIN_TIMESTAMP else syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
+
+                        val changesSince = if (fullRefresh) MIN_TIMESTAMP else syncDS.getLastSyncTime(
+                            AppConstants.SyncTableName.TICKETS,
+                            false
+                        )
                         RestAPI.getTicketsForEvent(accessToken, e.id!!, changesSince, ::setTickets)
                     }
                     // Refresh event list
