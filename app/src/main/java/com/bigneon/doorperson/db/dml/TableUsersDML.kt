@@ -15,7 +15,7 @@ object TableUsersDML {
     const val PROFILE_PIC_URL = "profile_pic_url"
 
     const val TABLE_USERS_CREATE =
-        ("create table $TABLE_USERS($USER_ID text not null, $FIRST_NAME text null, $LAST_NAME text null, $EMAIL text not null, $PHONE text null, $PROFILE_PIC_URL text null);")
+        "create table $TABLE_USERS($USER_ID text not null, $FIRST_NAME text null, $LAST_NAME text null, $EMAIL text not null, $PHONE text null, $PROFILE_PIC_URL text null);"
 
     const val TABLE_USERS_DELETE = "drop table if exists $TABLE_USERS"
 

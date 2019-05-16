@@ -69,7 +69,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables()
+            SyncController.synchronizeAllTables(true)
 
             // Refresh view from DB
             refreshEventList()

@@ -7,14 +7,17 @@ import android.util.Log
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.IEventListRefresher
 import com.bigneon.doorperson.activity.ITicketListRefresher
+import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.db.SyncController.Companion.eventListRefresher
 import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
 import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.db.ds.SyncDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils.Companion.MIN_TIMESTAMP
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -41,10 +44,10 @@ class SyncController {
             return context
         }
 
-        fun synchronizeAllTables() {
+        fun synchronizeAllTables(fullRefresh: Boolean) {
             if (!syncInProgress) {
                 Log.d(TAG, "SynchronizeAllTablesTask - STARTED")
-                SynchronizeAllTablesTask().execute()
+                SynchronizeAllTablesTask(fullRefresh).execute()
             } else {
                 Log.d(TAG, "Synchronization already in progress - SKIP")
             }
@@ -52,24 +55,27 @@ class SyncController {
     }
 }
 
-class SynchronizeAllTablesTask :
-    AsyncTask<Unit, Unit, Unit>() {
-    override fun doInBackground(vararg params: Unit?) {
+class SynchronizeAllTablesTask(private val fullRefresh: Boolean) :
+    AsyncTask<Boolean, Unit, Unit>() {
+    override fun doInBackground(vararg params: Boolean?) {
         DownloadSyncTask(
             eventListRefresher,
-            ticketListRefresher
+            ticketListRefresher,
+            fullRefresh
         ).execute()
     }
 }
 
 class DownloadSyncTask(
     private var eventListRefresher: IEventListRefresher?,
-    private var ticketListRefresher: ITicketListRefresher?
+    private var ticketListRefresher: ITicketListRefresher?,
+    private var fullRefresh: Boolean
 ) : AsyncTask<Unit, Unit, Unit>() {
     private val TAG = DownloadSyncTask::class.java.simpleName
 
     private val eventsDS: EventsDS = EventsDS()
     private val ticketsDS: TicketsDS = TicketsDS()
+    private val syncDS: SyncDS = SyncDS()
 
     override fun onPreExecute() {
         super.onPreExecute()
@@ -134,10 +140,12 @@ class DownloadSyncTask(
                             }
                             ticketListRefresher?.refreshTicketList(e.id!!)
                         }
-                        RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
+                        val changesSince = if(fullRefresh) MIN_TIMESTAMP else syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
+                        RestAPI.getTicketsForEvent(accessToken, e.id!!, changesSince, ::setTickets)
                     }
                     // Refresh event list
                     eventListRefresher?.refreshEventList()
+                    syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
                 }
                 RestAPI.getScannableEvents(accessToken, ::setEvents)
             }

@@ -14,7 +14,7 @@ class SyncService : Service() {
         override fun onReceive(context: Context, intent: Intent) {
             @Synchronized
             if (!SyncController.syncInProgress && NetworkUtils.instance().isNetworkAvailable()) {
-                SyncController.synchronizeAllTables()
+                SyncController.synchronizeAllTables(false)
             }
         }
     }
@@ -31,7 +31,7 @@ class SyncService : Service() {
         registerReceiver(syncAllTablesReceiver, filter)
 
         //Initial sync
-        SyncController.synchronizeAllTables()
+        SyncController.synchronizeAllTables(false)
 
         return super.onStartCommand(intent, flags, startId)
     }

@@ -37,6 +37,11 @@ class SQLiteHelper : SQLiteOpenHelper(
         db?.execSQL(TableEventsDML.TABLE_EVENTS_CREATE)
         db?.execSQL(TableTicketsDML.TABLE_TICKETS_CREATE)
         db?.execSQL(TableUsersDML.TABLE_USERS_CREATE)
+
+        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_D)
+        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_U)
+        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_D)
+        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_U)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

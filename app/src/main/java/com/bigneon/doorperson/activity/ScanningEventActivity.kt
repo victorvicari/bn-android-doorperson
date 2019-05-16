@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -68,6 +69,9 @@ class ScanningEventActivity : AppCompatActivity() {
         }
 
         scanning_event_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables(true)
+
             getEventSummary()
 
             // Hide swipe to refresh icon animation

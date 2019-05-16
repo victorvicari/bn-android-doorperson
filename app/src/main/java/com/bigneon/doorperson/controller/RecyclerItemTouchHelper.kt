@@ -129,43 +129,43 @@ class RecyclerItemTouchHelper :
                                     ticketsDS!!.setDuplicateTicket(ticketModel.ticketId!!)
                                     Log.d(TAG, "Ticket ID: ${ticketModel.ticketId!!} - DUPLICATE in local ")
                                 } else {
-                                        fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
-                                            if (isRedeemed) {
-                                                ticketsDS!!.setRedeemedTicket(ticketModel.ticketId!!)
-                                                Log.d(TAG, "Ticket ID: ${ticketModel.ticketId!!} - REDEEMED in local ")
+                                    fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
+                                        if (isRedeemed) {
+                                            ticketsDS!!.setRedeemedTicket(ticketModel.ticketId!!)
+                                            Log.d(TAG, "Ticket ID: ${ticketModel.ticketId!!} - REDEEMED in local ")
 
-                                                viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
-                                                viewHolder.purchasedStatusTextView?.visibility = View.GONE
+                                            viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
+                                            viewHolder.purchasedStatusTextView?.visibility = View.GONE
+                                        } else {
+                                            if(!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                                // build alert dialog
+                                                val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
+
+                                                // set message of alert dialog
+                                                dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
+                                                    .setCancelable(false)
+                                                    .setPositiveButton("Turn on the offline mode") { _, _ ->
+                                                        run {
+                                                            SyncController.isOfflineModeEnabled = true
+                                                            checkInTicket(ticketModel)
+                                                        }
+                                                    }
+                                                    .setNegativeButton("Turn on the WiFi") { _, _ ->
+                                                        run {
+                                                            NetworkUtils.instance()
+                                                                .setWiFiEnabled(true)
+                                                            redeemTicket(ticketModel)
+                                                        }
+                                                    }
+                                                val alert = dialogBuilder.create()
+                                                alert.setTitle("Error in connection!")
+                                                alert.show()
                                             } else {
-                                                if(!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
-                                                    // build alert dialog
-                                                    val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
-
-                                                    // set message of alert dialog
-                                                    dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
-                                                        .setCancelable(false)
-                                                        .setPositiveButton("Turn on the offline mode") { _, _ ->
-                                                            run {
-                                                                SyncController.isOfflineModeEnabled = true
-                                                                checkInTicket(ticketModel)
-                                                            }
-                                                        }
-                                                        .setNegativeButton("Turn on the WiFi") { _, _ ->
-                                                            run {
-                                                                NetworkUtils.instance()
-                                                                    .setWiFiEnabled(true)
-                                                                redeemTicket(ticketModel)
-                                                            }
-                                                        }
-                                                    val alert = dialogBuilder.create()
-                                                    alert.setTitle("Error in connection!")
-                                                    alert.show()
-                                                } else {
-                                                    Log.e(TAG, "ERROR: redeemTicketForEvent")
-                                                }
+                                                Log.e(TAG, "ERROR: redeemTicketForEvent")
                                             }
                                         }
-                                        RestAPI.getTicket(accessToken, ticketModel.ticketId!!, ::getTicketResult)
+                                    }
+                                    RestAPI.getTicket(accessToken, ticketModel.ticketId!!, ::getTicketResult)
                                 }
                             }
 

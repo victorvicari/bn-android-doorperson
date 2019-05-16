@@ -20,8 +20,11 @@ class AppUtils {
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
 
+        const val MIN_TIMESTAMP = "2000-01-01T00:00:00.000000"
+        const val MAX_TIMESTAMP = "2100-01-01T00:00:00.000000"
+
         fun getCurrentTimestamp(): String {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMANY)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.US)
             dateFormat.timeZone = TimeZone.getTimeZone("CET")
             val date = Date()
             return dateFormat.format(date)
