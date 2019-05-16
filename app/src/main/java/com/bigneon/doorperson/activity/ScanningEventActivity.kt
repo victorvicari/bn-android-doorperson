@@ -95,6 +95,11 @@ class ScanningEventActivity : AppCompatActivity() {
         )
     }
 
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        super.onStop()
+    }
+
     override fun onBackPressed() {
         startActivity(Intent(getContext(), EventsActivity::class.java))
         finish()

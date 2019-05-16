@@ -257,6 +257,11 @@ class TicketActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        super.onStop()
+    }
+
     override fun onBackPressed() {
         val intent = Intent(getContext(), TicketListActivity::class.java)
         intent.putExtra("eventId", eventId)

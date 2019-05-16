@@ -118,6 +118,11 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
         }
     }
 
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        super.onStop()
+    }
+
     override fun onBackPressed() {
         finish()
         moveTaskToBack(true)

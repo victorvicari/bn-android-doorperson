@@ -77,9 +77,9 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
+    override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
-        super.onPause()
+        super.onStop()
     }
 
     override fun onBackPressed() {

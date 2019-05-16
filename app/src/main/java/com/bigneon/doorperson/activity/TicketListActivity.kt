@@ -240,6 +240,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         })
     }
 
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
+        super.onStop()
+    }
+
     override fun onBackPressed() {
         val intent = Intent(getContext(), ScanTicketsActivity::class.java)
         intent.putExtra("eventId", eventId)
