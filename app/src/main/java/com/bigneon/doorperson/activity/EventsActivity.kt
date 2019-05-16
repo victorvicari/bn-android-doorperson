@@ -111,7 +111,8 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
                     eventListItemPosition =
                         (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                     eventListItemOffset =
-                        recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top
+                        if (recyclerView.layoutManager?.findViewByPosition(eventListItemPosition) != null)
+                            recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top else 0
                 }
             })
         }

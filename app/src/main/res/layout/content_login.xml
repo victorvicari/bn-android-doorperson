@@ -74,7 +74,6 @@
                 android:layout_marginRight="@dimen/fab_margin"
                 android:background="@drawable/button_border_1"
                 android:gravity="center"
-                android:onClick="btnLoginClick"
                 android:text="@string/login_to_your_account_lowercase"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"

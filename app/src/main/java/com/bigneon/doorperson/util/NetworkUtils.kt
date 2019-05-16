@@ -31,6 +31,9 @@ class NetworkUtils {
         fun instance(): NetworkUtils {
             return Loader.INSTANCE
         }
+
+        private const val CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE"
+        private const val WIFI_STATE_CHANGED = "android.net.wifi.WIFI_STATE_CHANGED"
     }
 
     private var networkStateReceiver: NetworkStateReceiver = NetworkStateReceiver()
@@ -41,7 +44,10 @@ class NetworkUtils {
     ) {
         if (!registeredListenersMap.contains(networkStateReceiverListener)) {
             networkStateReceiver.addListener(networkStateReceiverListener)
-            context.registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(CONNECTIVITY_ACTION)
+            intentFilter.addAction(WIFI_STATE_CHANGED)
+            context.registerReceiver(networkStateReceiver, intentFilter)
             registeredListenersMap.add(networkStateReceiverListener)
         }
     }

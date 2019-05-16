@@ -13,7 +13,6 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -75,7 +74,7 @@ class TicketActivity : AppCompatActivity() {
         price_and_ticket_type?.text =
             getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketTypeName)
 
-        ticket_id.text = "#${ticketId?.takeLast(8)}"
+        ticket_id.text = "#" + ticketId?.takeLast(8)
 
         val ticketStatus = status?.toLowerCase()
         val statusRedeemed = getString(R.string.redeemed).toLowerCase()
@@ -201,7 +200,7 @@ class TicketActivity : AppCompatActivity() {
                                         )
                                         .setDuration(5000).show()
                                 } else {
-                                    if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                    if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
                                         // build alert dialog
                                         val dialogBuilder = AlertDialog.Builder(getContext())
 

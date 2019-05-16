@@ -1,6 +1,5 @@
 package com.bigneon.doorperson.rest
 
-import com.bigneon.doorperson.rest.model.UserModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
@@ -31,8 +30,4 @@ interface RestClient {
 
     @GET("tickets/{ticket_id}")
     fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>
-
-
-    @GET("users/{user_id}")
-    fun getUser(@Header("Authorization") token: String, @Path("user_id") userId: String): Call<UserModel>
 }

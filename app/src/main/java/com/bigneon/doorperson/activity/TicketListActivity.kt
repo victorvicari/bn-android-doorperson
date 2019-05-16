@@ -31,7 +31,6 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
 class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
-    private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
