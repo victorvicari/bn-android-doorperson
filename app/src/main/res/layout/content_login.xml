@@ -15,6 +15,20 @@
             android:background="@color/colorWhite"
             android:orientation="vertical">
 
+        <TextView
+                android:id="@+id/turn_on_wifi"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="@dimen/fab_margin"
+                android:layout_marginEnd="@dimen/fab_margin"
+                android:background="@color/colorAccent"
+                android:hint="@string/turn_on_wifi"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                android:visibility="gone"/>
+
         <android.support.v7.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
@@ -33,7 +47,7 @@
                 android:layout_marginBottom="30dp"
                 android:background="@color/edit_text_background"
                 android:hint="@string/email_address"
-                android:inputType="text"
+                android:inputType="textEmailAddress"
                 android:paddingStart="30dp"
                 android:paddingEnd="0dp"
                 android:textSize="16sp"/>
@@ -47,7 +61,7 @@
                 android:layout_marginBottom="30dp"
                 android:background="@color/edit_text_background"
                 android:hint="@string/password"
-                android:inputType="text"
+                android:inputType="textPassword"
                 android:paddingStart="30dp"
                 android:paddingEnd="0dp"
                 android:textSize="16sp"/>

@@ -4,23 +4,32 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
+import android.view.View
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.auth.AppAuth
-import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.response.GuestsResponse
+import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class ScanningEventActivity : AppCompatActivity() {
-    private val TAG = ScanningEventActivity::class.java.simpleName
     private var eventId: String = ""
+    private var ticketsDS: TicketsDS? = null
+    private var eventsDS: EventsDS? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
+
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -31,6 +40,13 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
+        AppUtils.checkLogged(getContext())
+
+        eventId = intent.getStringExtra("eventId")
+        ticketsDS = TicketsDS()
+        eventsDS = EventsDS()
+
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -39,52 +55,44 @@ class ScanningEventActivity : AppCompatActivity() {
             PorterDuff.Mode.SRC_ATOP
         )
 
+        getEventSummary()
+
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
         }
-
-        getGuestsForEvent()
 
         scanning_events_button.setOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)
             startActivity(intent)
         }
+
+        scanning_event_layout.setOnRefreshListener {
+            getEventSummary()
+
+            // Hide swipe to refresh icon animation
+            scanning_event_layout.isRefreshing = false
+        }
     }
 
-    private fun getGuestsForEvent() {
-        eventId = intent.getStringExtra("eventId")
+    private fun getEventSummary() {
+        val event = eventsDS!!.getEvent(eventId)
+        scanning_event_name.text = event?.name ?: ""
 
-        val getGuestsForEventCall =
-            RestAPI.client().getGuestsForEvent(AppAuth.getAccessToken(getContext()), eventId, null)
-        val callbackGetScannableEvents = object : Callback<GuestsResponse> {
-            override fun onResponse(call: Call<GuestsResponse>, response: Response<GuestsResponse>) {
-                if (response.code() == 401) { //Unauthorized
-                    Snackbar
-                        .make(scanning_events_layout, "Unauthorized request!", Snackbar.LENGTH_LONG)
-                        .setDuration(5000).show()
-                    Log.e(TAG, "MSG:" + response.message() + ", CODE: " + response.code())
-                } else {
-                    val purNumber = response.body()!!.data?.stream()
-                        ?.filter { g -> g.status.equals("Purchased") }
-                        ?.count()
-                    val redNumber = response.body()!!.data?.stream()
-                        ?.filter { g -> g.status.equals("Redeemed") }
-                        ?.count()
-                    val purAndRedNumber = purNumber!!.plus(redNumber!!)
-                    number_of_redeemed.text = getString(R.string._1_d_of_2_d_redeemed, redNumber, purAndRedNumber)
-                }
-            }
+        number_of_redeemed.text = getString(
+            R.string._1_d_of_2_d_redeemed,
+            ticketsDS!!.getRedeemedTicketNumberForEvent(eventId),
+            ticketsDS!!.getAllTicketNumberForEvent(eventId)
+        )
 
-            override fun onFailure(call: Call<GuestsResponse>, t: Throwable) {
-                Snackbar
-                    .make(scanning_events_layout, "Authentication error!", Snackbar.LENGTH_LONG)
-                    .setAction(
-                        "RETRY"
-                    ) { startActivity(Intent(getContext(), LoginActivity::class.java)) }.setDuration(5000).show()
-                Log.e(TAG, "Failure MSG:" + t.message)
-            }
-        }
-        getGuestsForEventCall.enqueue(callbackGetScannableEvents)
+        number_of_checked.text = getString(
+            R.string._1_d_checked,
+            ticketsDS!!.getCheckedTicketNumberForEvent(eventId)
+        )
+    }
+
+    override fun onBackPressed() {
+        startActivity(Intent(getContext(), EventsActivity::class.java))
+        finish()
     }
 }

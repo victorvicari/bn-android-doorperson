@@ -2,37 +2,38 @@ package com.bigneon.doorperson.activity
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
-import com.bigneon.doorperson.R
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
-import com.bigneon.doorperson.auth.AppAuth
-import com.bigneon.doorperson.config.AppConstants
-import com.bigneon.doorperson.config.AppConstants.Companion.REFRESH_TOKEN
-import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.db.SyncController
+import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.AuthTokenResponse
-import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.service.SyncService
+import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
+import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
+import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
-import kotlinx.android.synthetic.main.content_login.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
+class EventsActivity : AppCompatActivity(), IEventListRefresher {
+    private var eventsDS: EventsDS? = null
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+                no_internet_toolbar_icon.visibility = View.GONE
+            }
 
-class EventsActivity : AppCompatActivity() {
-    private val TAG = EventsActivity::class.java.simpleName
+            override fun networkUnavailable() {
+                no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -40,109 +41,88 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
-        val refreshToken = SharedPrefs.getProperty(getContext(), REFRESH_TOKEN)
 
-        setSupportActionBar(events_toolbar)
-        //this line shows back button
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
+        AppUtils.checkLogged(getContext())
 
-        events_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), R.color.colorAccent),
-            PorterDuff.Mode.SRC_ATOP
-        )
+        eventsDS = EventsDS()
+        SyncController.eventListRefresher = this
 
-        events_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), LoginActivity::class.java))
-        }
+        // Start synchronization service
+        startService(Intent(this, SyncService::class.java))
 
-        // If there is no refresh token, then user isn't logged in
-        if (refreshToken.equals("")) {
-            startActivity(Intent(getContext(), LoginActivity::class.java))
-        } else {
-            getScannableEvents()
-        }
-    }
-
-    private fun getScannableEvents() {
-        try {
-            val getScannableEventsCall = RestAPI.client().getScannableEvents(AppAuth.getAccessToken(getContext()))
-            val callbackGetScannableEvents = object : Callback<EventsResponse> {
-                override fun onResponse(call: Call<EventsResponse>, response: Response<EventsResponse>) {
-                    if (response.code() == 401) { //Unauthorized
-                        refreshToken()
-                    } else {
-                        val eventsListView: RecyclerView = findViewById(com.bigneon.doorperson.R.id.events_list_view)
-                        val eventList = response.body()!!.data
-
-                        val layoutManager = LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
-                        eventsListView.layoutManager = layoutManager
-
-                        eventsListView.adapter = EventListAdapter(eventList!!)
-
-                        eventsListView.addOnItemClickListener(object : OnItemClickListener {
-                            override fun onItemClicked(position: Int, view: View) {
-                                val eventId = eventList[position].id
-                                val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                                intent.putExtra("eventId", eventId)
-                                startActivity(intent)
-                            }
-                        })
-
-                        Log.d(TAG, "SUCCESS")
-                    }
-                }
-
-                override fun onFailure(call: Call<EventsResponse>, t: Throwable) {
-                    Log.d(TAG, "FAILURE")
-                    refreshToken()
-                }
+        fun setAccessToken(accessToken: String?) {
+            if (accessToken == null) {
+                startActivity(Intent(getContext(), LoginActivity::class.java))
+            } else {
+                setSupportActionBar(events_toolbar)
+                refreshEventList()
             }
-            getScannableEventsCall.enqueue(callbackGetScannableEvents)
-        } catch (e: Exception) {
-            Log.e(TAG, e.message)
+        }
+        RestAPI.accessToken(::setAccessToken)
+
+        profile_settings.setOnClickListener {
+            startActivity(Intent(getContext(), ProfileActivity::class.java))
+        }
+
+        events_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables()
+
+            // Refresh view from DB
+            refreshEventList()
+
+            // Hide swipe to refresh icon animation
+            events_layout.isRefreshing = false
         }
     }
 
-    fun refreshToken() {
-        try {
-            val refreshTokenRequest = RefreshTokenRequest()
-            refreshTokenRequest.refreshToken = SharedPrefs.getProperty(getContext(), REFRESH_TOKEN)
-            val refreshTokenCall = RestAPI.client().refreshToken(refreshTokenRequest)
+    override fun refreshEventList() {
+        val eventsListView: RecyclerView =
+            events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
+        val eventList = eventsDS!!.getAllEvents()
+        if (eventList != null) {
+            eventsListView.layoutManager =
+                LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-            val callbackRefreshToken = object : Callback<AuthTokenResponse> {
-                override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
-                    if (response.body() != null) {
-                        SharedPrefs.setProperty(
-                            getContext(),
-                            AppConstants.ACCESS_TOKEN,
-                            response.body()!!.accessToken.orEmpty()
-                        )
-                        SharedPrefs.setProperty(getContext(), REFRESH_TOKEN, response.body()!!.refreshToken.orEmpty())
+            eventsListView.adapter = EventListAdapter(eventList)
 
-                        startActivity(Intent(getContext(), EventsActivity::class.java))
-                    } else {
-                        Snackbar
-                            .make(scanning_events_layout, "Refresh token is not valid!", Snackbar.LENGTH_LONG)
-                            .setDuration(5000).show()
-                        Log.e(TAG, "MSG:" + response.message() + ", CODE: " + response.code())
-                    }
-                }
-
-                override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
-                    Snackbar
-                        .make(login_layout, "Authentication error!", Snackbar.LENGTH_LONG)
-                        .setAction(
-                            "RETRY"
-                        ) { startActivity(Intent(getContext(), LoginActivity::class.java)) }.setDuration(5000).show()
-                    Log.e(TAG, "Failure MSG:" + t.message)
-                }
+            if (eventListItemPosition >= 0) {
+                (eventsListView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    eventListItemPosition,
+                    eventListItemOffset
+                )
             }
 
-            refreshTokenCall.enqueue(callbackRefreshToken)
-        } catch (e: Exception) {
-            Log.e(TAG, e.message)
+            eventsListView.addOnItemClickListener(object : OnItemClickListener {
+                override fun onItemClicked(position: Int, view: View) {
+                    val eventId = eventList[position].id
+                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                    intent.putExtra("eventId", eventId)
+                    startActivity(intent)
+                }
+            })
+
+            eventsListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    eventListItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    eventListItemOffset =
+                        recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top
+                }
+            })
         }
     }
 
+    override fun onBackPressed() {
+        finish()
+        moveTaskToBack(true)
+    }
+}
+
+interface IEventListRefresher {
+    fun refreshEventList()
 }

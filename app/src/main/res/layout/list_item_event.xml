@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
-                android:id="@+id/list_item_event_layout"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:background="@color/colorGray">
@@ -18,18 +17,18 @@
             android:layout_marginBottom="10dp">
 
         <ImageView
+                android:id="@+id/event_image"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:id="@+id/event_image"
                 android:src="@color/colorBlack"
                 android:contentDescription="@string/event_image"/>
 
         <TextView
+                android:id="@+id/event_name"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:id="@+id/event_name"
                 android:layout_toEndOf="@+id/event_image"
                 android:layout_toStartOf="@+id/event_right_arrow"
                 android:paddingStart="10dp"
@@ -38,9 +37,10 @@
                 android:gravity="center_vertical"/>
 
         <ImageView
-                android:layout_width="20dp"
-                android:layout_height="100dp"
                 android:id="@+id/event_right_arrow"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:padding="15dp"
                 android:contentDescription="@string/event_right_arrow"
                 android:src="@drawable/right_arrow"
                 android:layout_alignParentEnd="true"/>

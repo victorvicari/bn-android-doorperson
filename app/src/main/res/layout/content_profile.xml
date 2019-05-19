@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/scanning_event_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:showIn="@layout/activity_profile"
+        android:orientation="vertical"
+        tools:context=".activity.ProfileActivity">
+
+    <TextView
+            android:id="@+id/offline_mode_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/colorBlack"
+            android:text="@string/offline_mode_enabled"/>
+
+    <LinearLayout
+            android:id="@+id/offline_mode_button"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/scan_tickets_button_background"
+            android:layout_margin="20dp">
+
+        <TextView
+                android:id="@+id/offline_mode_button_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/colorAccent"
+                android:text="@string/disable_offline_mode"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/logout_button"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/scan_tickets_button_background"
+            android:layout_margin="20dp">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/colorAccent"
+                android:text="@string/log_out"/>
+    </LinearLayout>
+</LinearLayout>

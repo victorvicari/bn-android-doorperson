@@ -3,13 +3,13 @@
                 android:id="@+id/scan_tickets_layout"
                 android:layout_width="match_parent"
                 android:orientation="vertical"
-                android:background="@color/colorBlack"
                 android:layout_height="match_parent">
 
     <RelativeLayout
             android:id="@+id/check_in_mode_layout"
             android:layout_width="match_parent"
-            android:layout_height="100dp">
+            android:layout_height="100dp"
+            android:background="@color/colorBlack">
 
         <ImageView
                 android:id="@+id/check_in_mode_exit"
@@ -34,19 +34,102 @@
                 android:layout_centerInParent="true"
                 android:textAllCaps="false"
                 android:text="@string/check_in_mode"/>
+
+        <ProgressBar
+                android:id="@+id/reading_ticket"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@string/reading_ticket"
+                android:layout_centerVertical="true"
+                android:textColor="@color/colorWhite"
+                android:padding="5dp"
+                android:layout_alignParentEnd="true"
+                android:textAllCaps="false"
+                android:visibility="gone"/>
     </RelativeLayout>
 
     <me.dm7.barcodescanner.zxing.ZXingScannerView
             android:id="@+id/zxscan"
             android:layout_width="match_parent"
             android:layout_below="@id/check_in_mode_layout"
-            android:layout_above="@id/guest_list_layout"
+            android:layout_above="@id/ticket_list_layout"
             android:layout_height="match_parent">
 
     </me.dm7.barcodescanner.zxing.ZXingScannerView>
 
+    <LinearLayout
+            android:id="@+id/pill_user_info"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="20dp"
+            android:layout_alignBottom="@+id/zxscan"
+            android:background="@drawable/pill_scanned_ticket_background"
+            android:alpha="0.5"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+        <ImageView
+                android:id="@+id/pill_user_image"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="10dp"/>
+
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/pill_user_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Anna Behrensmeyer"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/colorWhite"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+            <TextView
+                    android:id="@+id/pill_ticket_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="General admission"
+                    android:textStyle="normal"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorWhite"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="0dp"
+                    android:paddingBottom="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <ImageView
+                android:id="@+id/pill_checked_status_image"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/icon_ok"
+                android:padding="15dp"/>
+    </LinearLayout>
+
     <TextView
-            android:id="@+id/guest_list_layout"
+            android:id="@+id/ticket_list_layout"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:background="@color/colorAccent"
