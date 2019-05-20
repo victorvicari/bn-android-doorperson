@@ -2,7 +2,7 @@
     <string name="app_name">Door person</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email_address">Email Address</string>
-    <string name="password">Password</string>
+    <string name="password">Password (at least 6 characters)</string>
     <string name="login_to_your_account_lowercase">Login to your account</string>
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
     <string name="event_image">Event image</string>
@@ -49,4 +49,8 @@
     <string name="ticket_id">Ticket ID</string>
     <string name="reading_ticket">Reading ticket</string>
     <string name="no_internet_icon">No internet icon</string>
+    <string name="show">SHOW</string>
+    <string name="hide">HIDE</string>
+    <string name="please_enter_your_email_address">Please enter your email address</string>
+    <string name="please_enter_a_valid_password">Please enter a valid password</string>
 </resources>

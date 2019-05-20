@@ -44,27 +44,69 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="@dimen/fab_margin"
                 android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginBottom="30dp"
                 android:background="@color/edit_text_background"
                 android:hint="@string/email_address"
                 android:inputType="textEmailAddress"
-                android:paddingStart="30dp"
+                android:paddingStart="20dp"
                 android:paddingEnd="0dp"
-                android:textSize="16sp"/>
+                android:textSize="14sp"/>
 
-        <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/password"
+        <TextView
+                android:id="@+id/email_address_message"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginStart="@dimen/fab_margin"
+                android:layout_marginEnd="@dimen/fab_margin"
+                android:text="@string/please_enter_your_email_address"
+                android:textColor="@color/colorAccent"
+                android:visibility="invisible"/>
+
+        <LinearLayout
+                android:id="@+id/password_with_show_hide"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="@dimen/fab_margin"
                 android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginBottom="30dp"
-                android:background="@color/edit_text_background"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:paddingStart="30dp"
-                android:paddingEnd="0dp"
-                android:textSize="16sp"/>
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/password"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@color/edit_text_background"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="0dp"
+                    android:textSize="14sp"/>
+
+            <TextView
+                    android:id="@+id/show_hide_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/show"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorAccent"
+                    android:background="@color/edit_text_background"
+                    android:gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    />
+
+        </LinearLayout>
+
+        <TextView
+                android:id="@+id/password_message"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginStart="@dimen/fab_margin"
+                android:layout_marginEnd="@dimen/fab_margin"
+                android:text="@string/please_enter_a_valid_password"
+                android:textColor="@color/colorAccent"
+                android:visibility="invisible"/>
 
         <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/loginBtn"
@@ -72,12 +114,12 @@
                 android:layout_height="50dp"
                 android:layout_marginLeft="@dimen/fab_margin"
                 android:layout_marginRight="@dimen/fab_margin"
-                android:background="@drawable/button_border_1"
+                android:layout_marginTop="20dp"
                 android:gravity="center"
-                android:onClick="btnLoginClick"
+                android:background="@drawable/button_border_1"
                 android:text="@string/login_to_your_account_lowercase"
                 android:textColor="@android:color/white"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
         <android.support.v7.widget.AppCompatTextView
@@ -87,6 +129,7 @@
                 android:gravity="center"
                 android:text="@string/reset_your_password"
                 android:textSize="12sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:visibility="gone"/>
     </LinearLayout>
 </ScrollView>
