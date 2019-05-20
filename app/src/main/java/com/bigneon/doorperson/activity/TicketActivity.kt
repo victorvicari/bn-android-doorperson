@@ -13,7 +13,6 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -50,7 +49,6 @@ class TicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
@@ -75,7 +73,7 @@ class TicketActivity : AppCompatActivity() {
         price_and_ticket_type?.text =
             getContext().getString(R.string.price_ticket_type, priceInCents.div(100), ticketTypeName)
 
-        ticket_id.text = "#${ticketId?.takeLast(8)}"
+        ticket_id.text = "#" + ticketId?.takeLast(8)
 
         val ticketStatus = status?.toLowerCase()
         val statusRedeemed = getString(R.string.redeemed).toLowerCase()
@@ -201,7 +199,7 @@ class TicketActivity : AppCompatActivity() {
                                         )
                                         .setDuration(5000).show()
                                 } else {
-                                    if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                    if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
                                         // build alert dialog
                                         val dialogBuilder = AlertDialog.Builder(getContext())
 
@@ -216,7 +214,7 @@ class TicketActivity : AppCompatActivity() {
                                             }
                                             .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                 run {
-                                                    NetworkUtils.instance().setWiFiEnabled(true)
+                                                    NetworkUtils.instance().setWiFiEnabled(this, true)
                                                     redeemTicket()
                                                 }
                                             }
@@ -256,6 +254,16 @@ class TicketActivity : AppCompatActivity() {
             }
             SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)
         }
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

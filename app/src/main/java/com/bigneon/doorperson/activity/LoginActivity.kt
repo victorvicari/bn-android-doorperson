@@ -51,15 +51,12 @@ class LoginActivity : AppCompatActivity() {
         RestAPI.setContext(this)
         SyncController.setContext(this)
         SQLiteHelper.setContext(this)
-        NetworkUtils.setContext(this)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
-
         turn_on_wifi.setOnClickListener {
-            NetworkUtils.instance().setWiFiEnabled(true)
+            NetworkUtils.instance().setWiFiEnabled(this, true)
         }
 
         email_address.addTextChangedListener(object : TextWatcher {
@@ -127,9 +124,14 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
-        NetworkUtils.instance().removeNetworkStateListener(networkStateReceiverListener)
-        super.onPause()
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

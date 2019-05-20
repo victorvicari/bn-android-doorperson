@@ -20,6 +20,7 @@ import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemOffset
@@ -30,7 +31,6 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
 class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
-    private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
@@ -60,16 +60,13 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
+        setSupportActionBar(ticket_list_toolbar)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         ticketsDS = TicketsDS()
 
         SyncController.ticketListRefresher = this
-
-        setSupportActionBar(ticket_list_toolbar)
-
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -90,6 +87,16 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
         itemTouchHelper.attachToRecyclerView(ticket_list_view)
+
+        fun setAccessToken(accessToken: String?) {
+            if (accessToken == null) {
+                startActivity(Intent(getContext(), LoginActivity::class.java))
+            } else {
+                // Refresh/load ticket list initially
+                refreshTicketList(eventId)
+            }
+        }
+        RestAPI.accessToken(::setAccessToken)
 
         search_guest.post {
             search_guest.addTextChangedListener(object : TextWatcher {
@@ -117,7 +124,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables()
+            SyncController.synchronizeAllTables(true)
 
             // Refresh view from DB
             refreshTicketList(eventId)
@@ -125,9 +132,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
             // Hide swipe to refresh icon animation
             tickets_swipe_refresh_layout.isRefreshing = false
         }
+    }
 
-        // Refresh/load ticket list initially
-        refreshTicketList(eventId)
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -233,6 +242,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                     )!!.top else 0
             }
         })
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

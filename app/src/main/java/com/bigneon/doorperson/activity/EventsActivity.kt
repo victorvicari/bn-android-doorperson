@@ -44,7 +44,6 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventsDS = EventsDS()
@@ -69,7 +68,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables()
+            SyncController.synchronizeAllTables(true)
 
             // Refresh view from DB
             refreshEventList()
@@ -77,6 +76,11 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
             // Hide swipe to refresh icon animation
             events_layout.isRefreshing = false
         }
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
     }
 
     override fun refreshEventList() {
@@ -111,10 +115,16 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
                     eventListItemPosition =
                         (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                     eventListItemOffset =
-                        recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top
+                        if (recyclerView.layoutManager?.findViewByPosition(eventListItemPosition) != null)
+                            recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top else 0
                 }
             })
         }
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

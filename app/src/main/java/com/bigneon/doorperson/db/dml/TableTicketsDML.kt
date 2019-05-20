@@ -21,7 +21,7 @@ object TableTicketsDML {
     const val STATUS = "status"
 
     const val TABLE_TICKETS_CREATE =
-        ("create table $TABLE_TICKETS($TICKET_ID text not null, $EVENT_ID text not null, $USER_ID text null, $FIRST_NAME text null, $LAST_NAME text null, $EMAIL text null, $PHONE text null, $PROFILE_PIC_URL text null, $PRICE_IN_CENTS integer not null, $TICKET_TYPE_NAME text not null, $REDEEM_KEY text not null, $STATUS text not null);")
+        "create table $TABLE_TICKETS($TICKET_ID text not null, $EVENT_ID text not null, $USER_ID text null, $FIRST_NAME text null, $LAST_NAME text null, $EMAIL text null, $PHONE text null, $PROFILE_PIC_URL text null, $PRICE_IN_CENTS integer not null, $TICKET_TYPE_NAME text not null, $REDEEM_KEY text not null, $STATUS text not null);"
 
     const val TABLE_TICKETS_DELETE = "drop table if exists $TABLE_TICKETS"
 

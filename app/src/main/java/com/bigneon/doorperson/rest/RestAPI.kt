@@ -103,7 +103,7 @@ class RestAPI private constructor() {
         }
 
         fun accessToken(setAccessToken: (accessToken: String?) -> Unit) {
-            if (NetworkUtils.instance().isNetworkAvailable()) {
+            if (NetworkUtils.instance().isNetworkAvailable(context)) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") setAccessToken(null)
 
@@ -157,9 +157,9 @@ class RestAPI private constructor() {
             getScannableEventsCall.enqueue(getScannableEventsCallback)
         }
 
-        fun getTicketsForEvent(accessToken: String, eventId: String, setTickets: (ArrayList<TicketModel>?) -> Unit) {
+        fun getTicketsForEvent(accessToken: String, eventId: String, changesSince: String?, setTickets: (ArrayList<TicketModel>?) -> Unit) {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, null)
+                client().getTicketsForEvent(accessToken, eventId, changesSince, null)
             val getTicketsForEventCallback = object : Callback<TicketsResponse> {
                 override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
                     if (response.body() != null) {
