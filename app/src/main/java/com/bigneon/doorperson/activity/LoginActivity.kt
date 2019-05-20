@@ -3,7 +3,7 @@ package com.bigneon.doorperson.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
@@ -82,13 +82,15 @@ class LoginActivity : AppCompatActivity() {
         show_hide_password.setOnClickListener {
             show_hide_password.text =
                 if (show_hide_password.text == getString(R.string.show)) getString(R.string.hide) else getString(
-                    R.string.show)
+                    R.string.show
+                )
 
             showPassword = show_hide_password.text == getString(R.string.show)
             password.transformationMethod =
                 if (showPassword) PasswordTransformationMethod.getInstance() else HideReturnsTransformationMethod.getInstance()
         }
 
+        loginBtn.isIndeterminateProgressMode = true
         loginBtn.setOnClickListener {
             when {
                 email_address.text.toString().isEmpty() -> {
@@ -101,24 +103,33 @@ class LoginActivity : AppCompatActivity() {
                     val shake = loadAnimation(this, R.anim.shake)
                     password_with_show_hide.startAnimation(shake)
                 }
-                else -> try {
-                    val email = email_address.text.toString()
-                    val password = password.text.toString()
-                    fun setAccessToken(accessToken: String?) {
-                        if (accessToken == null) {
-                            Snackbar
-                                .make(it, "Username and/or password does not match!", Snackbar.LENGTH_LONG)
-                                .setDuration(5000).show()
-                            startActivity(Intent(getContext(), LoginActivity::class.java))
-                        } else {
-                            Crashlytics.setUserEmail(email)
-                            startActivity(Intent(getContext(), EventsActivity::class.java))
-                            finish()
-                        }
+                else -> {
+                    if (loginBtn.progress == 0) {
+                        loginBtn.progress = 30
                     }
-                    RestAPI.authenticate(email, password, ::setAccessToken)
-                } catch (e: Exception) {
-                    Log.e(TAG, e.message)
+                    Handler().postDelayed({
+                        try {
+                            val email = email_address.text.toString()
+                            val password = password.text.toString()
+                            fun setAccessToken(accessToken: String?) {
+                                if (accessToken == null) {
+                                    loginBtn.progress = 0
+                                    val shake = loadAnimation(this, R.anim.shake)
+                                    loginBtn.startAnimation(shake)
+                                } else {
+                                    Crashlytics.setUserEmail(email)
+                                    loginBtn.progress = 100
+                                    Handler().postDelayed({
+                                        startActivity(Intent(getContext(), EventsActivity::class.java))
+                                        finish()
+                                    }, 1000)
+                                }
+                            }
+                            RestAPI.authenticate(email, password, ::setAccessToken)
+                        } catch (e: Exception) {
+                            Log.e(TAG, e.message)
+                        }
+                    }, 3000)
                 }
             }
         }

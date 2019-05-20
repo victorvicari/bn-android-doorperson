@@ -108,19 +108,22 @@
                 android:textColor="@color/colorAccent"
                 android:visibility="invisible"/>
 
-        <android.support.v7.widget.AppCompatTextView
+        <com.dd.CircularProgressButton
                 android:id="@+id/loginBtn"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_marginLeft="@dimen/fab_margin"
-                android:layout_marginRight="@dimen/fab_margin"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
                 android:layout_marginTop="20dp"
-                android:gravity="center"
-                android:background="@drawable/button_border_1"
-                android:text="@string/login_to_your_account_lowercase"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:gravity="center"
+                app:cpb_cornerRadius="4dp"
+                app:cpb_textIdle="@string/login_to_your_account_lowercase"
+                app:cpb_textComplete="Login success!"
+                app:cpb_textError="Login failed!"/>
 
         <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/reset_your_password"
