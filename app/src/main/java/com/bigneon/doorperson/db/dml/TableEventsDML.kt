@@ -12,7 +12,7 @@ object TableEventsDML {
     const val PROMO_IMAGE_URL = "promo_image_url"
 
     const val TABLE_EVENTS_CREATE =
-        ("create table $TABLE_EVENTS($EVENT_ID text not null, $NAME text not null, $PROMO_IMAGE_URL text not null);")
+        "create table $TABLE_EVENTS($EVENT_ID text not null, $NAME text not null, $PROMO_IMAGE_URL text not null);"
 
     const val TABLE_EVENTS_DELETE = "drop table if exists $TABLE_EVENTS"
 }

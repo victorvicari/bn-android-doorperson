@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -40,7 +41,6 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventId = intent.getStringExtra("eventId")
@@ -68,6 +68,9 @@ class ScanningEventActivity : AppCompatActivity() {
         }
 
         scanning_event_layout.setOnRefreshListener {
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables(true)
+
             getEventSummary()
 
             // Hide swipe to refresh icon animation
@@ -89,6 +92,16 @@ class ScanningEventActivity : AppCompatActivity() {
             R.string._1_d_checked,
             ticketsDS!!.getCheckedTicketNumberForEvent(eventId)
         )
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

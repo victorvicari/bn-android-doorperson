@@ -230,7 +230,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             .setDuration(5000).show()
                                         success = true
                                     } else {
-                                        if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable()) {
+                                        if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
                                             // build alert dialog
                                             val dialogBuilder = AlertDialog.Builder(getContext())
 
@@ -245,7 +245,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                                 }
                                                 .setNegativeButton("Turn on the WiFi") { _, _ ->
                                                     run {
-                                                        NetworkUtils.instance().setWiFiEnabled(true)
+                                                        NetworkUtils.instance().setWiFiEnabled(this, true)
                                                         redeemTicket()
                                                     }
                                                 }
@@ -283,29 +283,6 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     .setDuration(5000).show()
                 mScannerView?.resumeCameraPreview(this)
                 return
-            }
-
-            fun showPillUserInfo(success: Boolean) {
-                pill_user_info.visibility = View.VISIBLE
-
-                val ticket = ticketsDS!!.getTicket(ticketId)
-                if (ticket != null) {
-
-                    if (!ticket.profilePicURL.isNullOrEmpty()) {
-                        Picasso
-                            .get() // give it the context
-                            .load(ticket.profilePicURL) // load the image
-                            .into(pill_user_image) // select the ImageView to load it into
-                    }
-
-                    pill_user_name.text = "${ticket?.firstName}, ${ticket?.lastName}"
-                    pill_ticket_type.text = ticket.ticketType
-
-                    Picasso
-                        .get()
-                        .load(if (success) com.bigneon.doorperson.R.drawable.icon_ok else com.bigneon.doorperson.R.drawable.icon_delete)
-                        .into(pill_checked_status_image)
-                }
             }
 
             if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
@@ -352,7 +329,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 .into(pill_user_image) // select the ImageView to load it into
         }
 
-        pill_user_name.text = "${ticket?.firstName}, ${ticket?.lastName}"
+        pill_user_name.text = ticket?.firstName + ", " + ticket?.lastName
         pill_ticket_type.text = ticket?.ticketType
 
         Picasso
