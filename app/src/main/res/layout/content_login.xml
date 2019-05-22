@@ -121,9 +121,9 @@
                 android:textAllCaps="false"
                 android:gravity="center"
                 app:cpb_cornerRadius="4dp"
-                app:cpb_textIdle="@string/login_to_your_account_lowercase"
-                app:cpb_textComplete="Login success!"
-                app:cpb_textError="Login failed!"/>
+                app:cpb_textIdle="@string/cpb_textIdle"
+                app:cpb_textComplete="@string/cpb_textComplete"
+                app:cpb_textError="@string/cpb_textError"/>
 
         <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/reset_your_password"

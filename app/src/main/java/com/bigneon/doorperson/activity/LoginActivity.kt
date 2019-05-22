@@ -95,13 +95,11 @@ class LoginActivity : AppCompatActivity() {
             when {
                 email_address.text.toString().isEmpty() -> {
                     email_address_message.visibility = View.VISIBLE
-                    val shake = loadAnimation(this, R.anim.shake)
-                    email_address.startAnimation(shake)
+                    email_address.startAnimation(loadAnimation(this, R.anim.shake))
                 }
                 password.text.toString().isEmpty() || password.text?.length!! < 7 -> {
                     password_message.visibility = View.VISIBLE
-                    val shake = loadAnimation(this, R.anim.shake)
-                    password_with_show_hide.startAnimation(shake)
+                    password_with_show_hide.startAnimation(loadAnimation(this, R.anim.shake))
                 }
                 else -> {
                     if (loginBtn.progress == 0) {
@@ -113,9 +111,11 @@ class LoginActivity : AppCompatActivity() {
                             val password = password.text.toString()
                             fun setAccessToken(accessToken: String?) {
                                 if (accessToken == null) {
-                                    loginBtn.progress = 0
-                                    val shake = loadAnimation(this, R.anim.shake)
-                                    loginBtn.startAnimation(shake)
+                                    loginBtn.progress = -1
+                                    loginBtn.startAnimation(loadAnimation(this, R.anim.shake))
+                                    Handler().postDelayed({
+                                        loginBtn.progress = 0
+                                    }, 3000)
                                 } else {
                                     Crashlytics.setUserEmail(email)
                                     loginBtn.progress = 100
