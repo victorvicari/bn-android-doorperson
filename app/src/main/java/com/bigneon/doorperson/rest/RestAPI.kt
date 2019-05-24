@@ -228,6 +228,10 @@ class RestAPI private constructor() {
                             ticket.userId = response.body()!!.user?.userId ?: ""
                             ticket.firstName = response.body()!!.user?.firstName ?: ""
                             ticket.lastName = response.body()!!.user?.lastName ?: ""
+                            ticket.email = response.body()!!.user?.email ?: ""
+                            ticket.phone = response.body()!!.user?.phone ?: ""
+                            ticket.profilePicURL = response.body()!!.user?.profilePicURL ?: ""
+                            ticket.eventId = response.body()!!.event?.id ?: ""
                             getTicketResult(true, ticket)
                             Log.e(TAG, "Redeem ticket $ticketId succeeded")
                         } else {

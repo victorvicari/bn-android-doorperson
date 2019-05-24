@@ -16,7 +16,9 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
 import android.widget.TextView.BufferType
+import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
@@ -31,6 +33,8 @@ import kotlinx.android.synthetic.main.activity_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.view.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
@@ -190,6 +194,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     } else {
                         fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
                             if (isRedeemed) {
+                                ticketsDS!!.updateTicket(ticket!!)
+
                                 ticketsDS!!.setRedeemedTicket(ticketId)
                                 Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
 
@@ -282,7 +288,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val jsonObjectData = jsonObj.getJSONObject("data")
             val redeemKey = jsonObjectData.getString("redeem_key")
             val ticketId = jsonObjectData.getString("id")
-            var ticket = ticketsDS!!.getTicket(ticketId)
+            val ticket = ticketsDS!!.getTicket(ticketId)
 
             if (ticket == null) {
                 Snackbar
@@ -341,12 +347,52 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 .into(pill_user_image) // select the ImageView to load it into
         }
 
-        pill_user_name.text = ticket?.firstName + ", " + ticket?.lastName
+        val firstAndLastName = "${ticket?.firstName}, ${ticket?.lastName}"
+        pill_user_name.text = firstAndLastName
         pill_ticket_type.text = ticket?.ticketType
+
+        pill_scanned_by.text = if(ticket?.redeemedBy != null) getString(R.string.pill_scanned_by_text, ticket.redeemedBy ?: "") else ""
+
+        var redeemedAt = ""
+        if (ticket?.redeemedAt != null) {
+            val formatLocal = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            val formatUTC = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            formatUTC.timeZone = TimeZone.getTimeZone("UTC")
+
+            val redeemedDate = formatLocal.parse(ticket.redeemedAt)
+            val nowDate = formatLocal.parse(formatUTC.format(Date()))
+            val diffInMilliseconds = Math.abs(nowDate.time - redeemedDate.time)
+
+            val seconds = diffInMilliseconds / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+
+            var showBegun = false
+            val redeemedAtBuilder = StringBuilder()
+            if (days > 0) {
+                redeemedAtBuilder.append("$days d ")
+                showBegun = true
+            }
+            if (hours % 24 > 0 || showBegun) {
+                redeemedAtBuilder.append("${hours % 24}h ")
+                showBegun = true
+            }
+            if (minutes % 60 > 0 || showBegun) {
+                redeemedAtBuilder.append("${minutes % 60}m ")
+                showBegun = true
+            }
+            if (seconds % 60 > 0 || showBegun) {
+                redeemedAtBuilder.append("${seconds % 60}s ")
+            }
+            redeemedAtBuilder.append("ago")
+            redeemedAt = redeemedAtBuilder.toString()
+        }
+        pill_scanned_time.text = redeemedAt
 
         Picasso
             .get()
-            .load(if (success) com.bigneon.doorperson.R.drawable.icon_ok else com.bigneon.doorperson.R.drawable.icon_delete)
+            .load(if (success) R.drawable.icon_ok else R.drawable.icon_delete)
             .into(pill_checked_status_image)
     }
 

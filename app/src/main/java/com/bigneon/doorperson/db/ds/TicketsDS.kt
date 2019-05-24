@@ -28,7 +28,9 @@ class TicketsDS : BaseDS() {
         TableTicketsDML.PRICE_IN_CENTS,
         TableTicketsDML.TICKET_TYPE_NAME,
         TableTicketsDML.REDEEM_KEY,
-        TableTicketsDML.STATUS
+        TableTicketsDML.STATUS,
+        TableTicketsDML.REDEEMED_BY,
+        TableTicketsDML.REDEEMED_AT
     )
 
     fun getTicket(ticketId: String): TicketModel? {
@@ -236,7 +238,9 @@ class TicketsDS : BaseDS() {
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
-        status: String
+        status: String,
+        redeemedBy: String?,
+        redeemedAt: String?
     ) {
         val values = ContentValues()
         values.put(TableTicketsDML.TICKET_ID, ticketId)
@@ -251,8 +255,29 @@ class TicketsDS : BaseDS() {
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
         values.put(TableTicketsDML.STATUS, status)
+        values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)
+        values.put(TableTicketsDML.REDEEMED_AT, redeemedAt)
 
         database?.insert(TableTicketsDML.TABLE_TICKETS, null, values)
+    }
+
+    fun updateTicket(ticketModel: TicketModel) {
+        updateTicket(
+            ticketModel.ticketId!!,
+            ticketModel.eventId!!,
+            ticketModel.userId!!,
+            ticketModel.firstName,
+            ticketModel.lastName,
+            ticketModel.email,
+            ticketModel.phone,
+            ticketModel.profilePicURL,
+            ticketModel.priceInCents!!,
+            ticketModel.ticketTypeName!!,
+            ticketModel.redeemKey!!,
+            ticketModel.status!!,
+            ticketModel.redeemedBy,
+            ticketModel.redeemedAt
+        )
     }
 
     fun updateTicket(
@@ -267,7 +292,9 @@ class TicketsDS : BaseDS() {
         priceInCents: Int,
         ticketTypeName: String,
         redeemKey: String,
-        status: String
+        status: String,
+        redeemedBy: String?,
+        redeemedAt: String?
     ) {
         val values = ContentValues()
         values.put(TableTicketsDML.EVENT_ID, eventId)
@@ -281,6 +308,8 @@ class TicketsDS : BaseDS() {
         values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
         values.put(TableTicketsDML.STATUS, status)
+        values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)
+        values.put(TableTicketsDML.REDEEMED_AT, redeemedAt)
 
         database?.update(
             TableTicketsDML.TABLE_TICKETS,
@@ -309,7 +338,9 @@ class TicketsDS : BaseDS() {
         ticketModel.priceInCents = cursor.getInt(index++)
         ticketModel.ticketType = cursor.getString(index++)
         ticketModel.redeemKey = cursor.getString(index++)
-        ticketModel.status = cursor.getString(index)
+        ticketModel.status = cursor.getString(index++)
+        ticketModel.redeemedBy = cursor.getString(index++)
+        ticketModel.redeemedAt = cursor.getString(index)
         return ticketModel
     }
 }

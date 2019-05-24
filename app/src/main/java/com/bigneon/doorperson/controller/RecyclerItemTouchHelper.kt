@@ -127,6 +127,8 @@ class RecyclerItemTouchHelper :
                     } else {
                         fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
                             if (isRedeemed) {
+                                ticketsDS!!.updateTicket(ticket!!)
+
                                 ticketsDS!!.setRedeemedTicket(ticketModel.ticketId!!)
                                 Log.d(TAG, "Ticket ID: ${ticketModel.ticketId!!} - REDEEMED in local ")
 

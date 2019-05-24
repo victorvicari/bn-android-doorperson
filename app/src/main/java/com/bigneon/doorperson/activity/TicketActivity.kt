@@ -94,6 +94,8 @@ class TicketActivity : AppCompatActivity() {
                     } else {
                         fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
                             if (isRedeemed) {
+                                ticketsDS!!.updateTicket(ticket!!)
+
                                 ticketsDS!!.setRedeemedTicket(ticketId)
                                 Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
 
