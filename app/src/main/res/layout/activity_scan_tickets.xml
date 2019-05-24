@@ -70,7 +70,7 @@
             android:background="@drawable/pill_scanned_ticket_background"
             android:alpha="0.5"
             android:orientation="horizontal"
-            android:visibility="visible">
+            android:visibility="gone">
 
         <ImageView
                 android:id="@+id/pill_user_image"
