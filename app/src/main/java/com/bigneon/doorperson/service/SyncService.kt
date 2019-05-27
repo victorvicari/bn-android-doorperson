@@ -7,13 +7,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
 import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.util.NetworkUtils
 
 class SyncService : Service() {
     private val syncAllTablesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             @Synchronized
-            if (!SyncController.syncInProgress && NetworkUtils.instance().isNetworkAvailable(context)) {
+            if (!SyncController.syncInProgress) {
                 SyncController.synchronizeAllTables(false)
             }
         }
