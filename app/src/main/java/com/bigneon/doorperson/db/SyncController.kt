@@ -18,6 +18,7 @@ import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils.Companion.MIN_TIMESTAMP
+import com.bigneon.doorperson.util.NetworkUtils
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -44,13 +45,18 @@ class SyncController {
             return context
         }
 
-        fun synchronizeAllTables(fullRefresh: Boolean) {
+        fun synchronizeAllTables(fullRefresh: Boolean): Boolean {
+            if (!NetworkUtils.instance().isNetworkAvailable(context))
+                return false
+
             if (!syncInProgress) {
                 Log.d(TAG, "SynchronizeAllTablesTask - STARTED")
                 SynchronizeAllTablesTask(fullRefresh).execute()
             } else {
                 Log.d(TAG, "Synchronization already in progress - SKIP")
             }
+
+            return true
         }
     }
 }

@@ -68,10 +68,10 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
-
-            // Refresh view from DB
-            refreshEventList()
+            if(SyncController.synchronizeAllTables(true)) {
+                // Refresh view from DB
+                refreshEventList()
+            }
 
             // Hide swipe to refresh icon animation
             events_layout.isRefreshing = false
