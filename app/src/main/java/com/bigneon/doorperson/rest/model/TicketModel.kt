@@ -38,9 +38,6 @@ class TicketModel {
     @SerializedName("ticket_type")
     internal var ticketType: String? = null
 
-    @SerializedName("ticket_type_name")
-    internal var ticketTypeName: String? = null
-
     @SerializedName("redeem_key")
     internal var redeemKey: String? = null
 

@@ -31,7 +31,7 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     var checkedIn: Boolean = false
     var ticketId: String? = null
     private var priceInCents: Int? = null
-    private var ticketTypeName: String? = null
+    private var ticketType: String? = null
 
 
     init {
@@ -51,12 +51,12 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     fun bind(ticket: TicketModel) {
         ticketId = ticket.ticketId
         priceInCents = ticket.priceInCents
-        ticketTypeName = ticket.ticketType
+        ticketType = ticket.ticketType
 
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
 
-        priceAndTicketTypeTextView?.text = context!!.getString(R.string.price_ticket_type, priceInCents?.div(100), ticketTypeName)
+        priceAndTicketTypeTextView?.text = context!!.getString(R.string.price_ticket_type, priceInCents?.div(100), ticketType)
 
         ticketIdTextView?.text = "#" + ticket.ticketId?.takeLast(8)
 

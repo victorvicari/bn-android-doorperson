@@ -1,9 +1,13 @@
 package com.bigneon.doorperson.rest
 
+import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.*
+import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.TicketResponse
+import com.bigneon.doorperson.rest.response.TicketsResponse
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -26,7 +30,7 @@ interface RestClient {
     fun getTicketsForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Query("changes_since") changesSince: String?, @Query("query") query: String?): Call<TicketsResponse>
 
     @POST("events/{event_id}/redeem/{ticket_id}")
-    fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<RedeemResponse>
+    fun redeemTicketForEvent(@Header("Authorization") token: String, @Path("event_id") eventId: String, @Path("ticket_id") ticketId: String, @Body redeemRequest: RedeemRequest): Call<TicketModel>
 
     @GET("tickets/{ticket_id}")
     fun getTicket(@Header("Authorization") token: String, @Path("ticket_id") ticketId: String): Call<TicketResponse>

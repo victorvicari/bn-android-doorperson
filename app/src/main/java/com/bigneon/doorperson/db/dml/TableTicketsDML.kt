@@ -16,7 +16,7 @@ object TableTicketsDML {
     const val PHONE = "phone"
     const val PROFILE_PIC_URL = "profile_pic_url"
     const val PRICE_IN_CENTS = "price_in_cents"
-    const val TICKET_TYPE_NAME = "ticket_type_name"
+    const val TICKET_TYPE = "ticket_type"
     const val REDEEM_KEY = "redeem_key"
     const val STATUS = "status"
     const val REDEEMED_BY = "redeemed_by"
@@ -25,7 +25,7 @@ object TableTicketsDML {
     const val TABLE_TICKETS_CREATE =
         "create table $TABLE_TICKETS($TICKET_ID text not null, $EVENT_ID text not null, $USER_ID text null, $FIRST_NAME text null, " +
                 "$LAST_NAME text null, $EMAIL text null, $PHONE text null, $PROFILE_PIC_URL text null, $PRICE_IN_CENTS integer not null, " +
-                "$TICKET_TYPE_NAME text not null, $REDEEM_KEY text not null, $STATUS text not null, $REDEEMED_BY text null, $REDEEMED_AT text null);"
+                "$TICKET_TYPE text not null, $REDEEM_KEY text not null, $STATUS text not null, $REDEEMED_BY text null, $REDEEMED_AT text null);"
 
     const val TABLE_TICKETS_DELETE = "drop table if exists $TABLE_TICKETS"
 }

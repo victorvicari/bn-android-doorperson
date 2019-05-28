@@ -26,7 +26,7 @@ class TicketsDS : BaseDS() {
         TableTicketsDML.PHONE,
         TableTicketsDML.PROFILE_PIC_URL,
         TableTicketsDML.PRICE_IN_CENTS,
-        TableTicketsDML.TICKET_TYPE_NAME,
+        TableTicketsDML.TICKET_TYPE,
         TableTicketsDML.REDEEM_KEY,
         TableTicketsDML.STATUS,
         TableTicketsDML.REDEEMED_BY,
@@ -236,7 +236,7 @@ class TicketsDS : BaseDS() {
         phone: String?,
         profilePicURL: String?,
         priceInCents: Int,
-        ticketTypeName: String,
+        ticketType: String,
         redeemKey: String,
         status: String,
         redeemedBy: String?,
@@ -252,7 +252,7 @@ class TicketsDS : BaseDS() {
         values.put(TableTicketsDML.PHONE, phone)
         values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
-        values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
+        values.put(TableTicketsDML.TICKET_TYPE, ticketType)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
         values.put(TableTicketsDML.STATUS, status)
         values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)
@@ -272,7 +272,7 @@ class TicketsDS : BaseDS() {
             ticketModel.phone,
             ticketModel.profilePicURL,
             ticketModel.priceInCents!!,
-            ticketModel.ticketTypeName!!,
+            ticketModel.ticketType!!,
             ticketModel.redeemKey!!,
             ticketModel.status!!,
             ticketModel.redeemedBy,
@@ -290,7 +290,7 @@ class TicketsDS : BaseDS() {
         phone: String?,
         profilePicURL: String?,
         priceInCents: Int,
-        ticketTypeName: String,
+        ticketType: String,
         redeemKey: String,
         status: String,
         redeemedBy: String?,
@@ -305,7 +305,7 @@ class TicketsDS : BaseDS() {
         values.put(TableTicketsDML.PHONE, phone)
         values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
         values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
-        values.put(TableTicketsDML.TICKET_TYPE_NAME, ticketTypeName)
+        values.put(TableTicketsDML.TICKET_TYPE, ticketType)
         values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
         values.put(TableTicketsDML.STATUS, status)
         values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)

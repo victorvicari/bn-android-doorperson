@@ -224,7 +224,7 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 intent.putExtra("firstName", ticket?.firstName)
                 intent.putExtra("lastName", ticket?.lastName)
                 intent.putExtra("priceInCents", ticket?.priceInCents)
-                intent.putExtra("ticketTypeName", ticket?.ticketType)
+                intent.putExtra("ticketType", ticket?.ticketType)
                 intent.putExtra("status", ticket?.status)
                 startActivity(intent)
             }

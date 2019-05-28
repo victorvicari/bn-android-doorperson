@@ -10,6 +10,7 @@ import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.db.SyncController.Companion.eventListRefresher
+import com.bigneon.doorperson.db.SyncController.Companion.getContext
 import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
 import com.bigneon.doorperson.db.ds.EventsDS
@@ -217,16 +218,22 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
                 val checkedTickets = ticketsDS.getAllCheckedTickets()
                 checkedTickets?.forEach { t ->
                     Log.d(TAG, "Ticket ID: ${t.ticketId} - UPLOADING on server")
-                    fun redeemTicketResult(isDuplicateTicket: Boolean) {
+
+                    fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
                         if (isDuplicateTicket) {
                             ticketsDS.setDuplicateTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE")
+                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE in local ")
                         } else {
-                            ticketsDS.setRedeemedTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED")
+                            if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                                ticketsDS.updateTicket(redeemedTicket)
+
+                                ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
+                            }
+                            ticketListRefresher?.refreshTicketList(t.eventId!!)
                         }
-                        ticketListRefresher?.refreshTicketList(t.eventId!!)
                     }
+
                     RestAPI.redeemTicketForEvent(
                         accessToken,
                         t.eventId!!,

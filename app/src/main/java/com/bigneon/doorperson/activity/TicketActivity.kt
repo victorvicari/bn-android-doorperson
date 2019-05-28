@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
@@ -87,38 +88,35 @@ class TicketActivity : AppCompatActivity() {
                     )
                 )
             } else {
-                fun redeemTicketResult(isDuplicateTicket: Boolean) {
+                fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
                     if (isDuplicateTicket) {
                         ticketsDS!!.setDuplicateTicket(ticketId)
                         Log.d(TAG, "Ticket ID: $ticketId - DUPLICATE in local ")
                     } else {
-                        fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
-                            if (isRedeemed) {
-                                ticketsDS!!.updateTicket(ticket!!)
+                        if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                            ticketsDS!!.updateTicket(redeemedTicket)
 
-                                ticketsDS!!.setRedeemedTicket(ticketId)
-                                Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
+                            ticketsDS!!.setRedeemedTicket(ticketId)
+                            Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
 
-                                scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
-                                scanning_ticket_layout.purchased_status?.visibility = View.GONE
-                                scanning_ticket_layout.complete_check_in?.visibility = View.GONE
+                            scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
+                            scanning_ticket_layout.purchased_status?.visibility = View.GONE
+                            scanning_ticket_layout.complete_check_in?.visibility = View.GONE
 
-                                Snackbar
-                                    .make(
-                                        scanning_ticket_layout,
-                                        "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
+                            Snackbar
+                                .make(
+                                    scanning_ticket_layout,
+                                    "Redeemed ${redeemedTicket.lastName + ", " + redeemedTicket.firstName}",
+                                    Snackbar.LENGTH_LONG
+                                )
+                                .setDuration(5000).show()
+                        } else {
+                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
+                                showDialog(getContext(), ticketId, redeemKey)
                             } else {
-                                if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
-                                    showDialog(getContext(), ticketId, redeemKey)
-                                } else {
-                                    Log.e(TAG, "ERROR: redeemTicketForEvent")
-                                }
+                                Log.e(TAG, "ERROR: redeemTicketForEvent")
                             }
                         }
-                        RestAPI.getTicket(accessToken, ticketId, ::getTicketResult)
                     }
                 }
 
@@ -127,10 +125,10 @@ class TicketActivity : AppCompatActivity() {
                 RestAPI.redeemTicketForEvent(
                     accessToken,
                     eventId!!,
-                    ticketId!!,
+                    ticketId,
                     ticket?.firstName!!,
                     ticket.lastName!!,
-                    redeemKey!!,
+                    redeemKey,
                     ::redeemTicketResult
                 )
             }
@@ -164,7 +162,7 @@ class TicketActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.bigneon.doorperson.R.layout.activity_ticket)
+        setContentView(R.layout.activity_ticket)
 
         AppUtils.checkLogged(getContext())
 
@@ -182,24 +180,24 @@ class TicketActivity : AppCompatActivity() {
         val firstName = intent.getStringExtra("firstName")
         val lastName = intent.getStringExtra("lastName")
         val priceInCents = intent.getIntExtra("priceInCents", 0)
-        val ticketTypeName = intent.getStringExtra("ticketTypeName")
+        val ticketType = intent.getStringExtra("ticketType")
         val status = intent.getStringExtra("status")
 
         last_name_and_first_name?.text =
-            getContext().getString(com.bigneon.doorperson.R.string.last_name_first_name, lastName, firstName)
+            getContext().getString(R.string.last_name_first_name, lastName, firstName)
         price_and_ticket_type?.text =
             getContext().getString(
-                com.bigneon.doorperson.R.string.price_ticket_type,
+                R.string.price_ticket_type,
                 priceInCents.div(100),
-                ticketTypeName
+                ticketType
             )
 
         ticket_id.text = "#" + ticketId?.takeLast(8)
 
         val ticketStatus = status?.toLowerCase()
-        val statusRedeemed = getString(com.bigneon.doorperson.R.string.redeemed).toLowerCase()
-        val statusChecked = getString(com.bigneon.doorperson.R.string.checked).toLowerCase()
-        val statusDuplicate = getString(com.bigneon.doorperson.R.string.duplicate).toLowerCase()
+        val statusRedeemed = getString(R.string.redeemed).toLowerCase()
+        val statusChecked = getString(R.string.checked).toLowerCase()
+        val statusDuplicate = getString(R.string.duplicate).toLowerCase()
 
         when (ticketStatus) {
             statusRedeemed -> {
@@ -237,7 +235,7 @@ class TicketActivity : AppCompatActivity() {
         }
 
         ticket_toolbar.navigationIcon!!.setColorFilter(
-            ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
+            ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
 

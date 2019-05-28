@@ -30,7 +30,6 @@ import com.google.zxing.Result
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
 import kotlinx.android.synthetic.main.activity_ticket.*
-import kotlinx.android.synthetic.main.content_ticket.view.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -54,7 +53,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         super.onCreate(savedInstanceState)
 
         // Set the scanner view as the content view
-        setContentView(com.bigneon.doorperson.R.layout.activity_scan_tickets)
+        setContentView(R.layout.activity_scan_tickets)
 
         AppUtils.checkLogged(getContext())
 
@@ -144,18 +143,18 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         }
     }
 
-    private fun checkInTicket(status: String, ticketId: String, redeemKey: String): Boolean {
+    private fun checkInTicket(status: String, ticketId: String, redeemKey: String) {
         val ticket = if (status == "PURCHASED") ticketsDS!!.setCheckedTicket(ticketId) else null
 
         if (ticket != null) {
             Snackbar
                 .make(
                     scan_tickets_layout,
-                    "Checked in ${ticket!!.lastName + ", " + ticket!!.firstName}",
+                    "Checked in ${ticket.lastName + ", " + ticket.firstName}",
                     Snackbar.LENGTH_LONG
                 )
                 .setDuration(5000).show()
-            return true
+            showPillUserInfo(true, ticketId)
         } else {
             Snackbar
                 .make(
@@ -164,12 +163,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     Snackbar.LENGTH_LONG
                 )
                 .setDuration(5000).show()
-            return false
+            showPillUserInfo(false, ticketId)
         }
     }
 
-    private fun redeemTicket(ticketId: String, redeemKey: String, firstName: String, lastName: String): Boolean {
-        var success = false
+    private fun redeemTicket(ticketId: String, redeemKey: String, firstName: String, lastName: String) {
         fun setAccessToken(accessToken: String?) {
             if (accessToken == null) {
                 Snackbar
@@ -185,45 +183,28 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         LoginActivity::class.java
                     )
                 )
-                success = false
+                showPillUserInfo(false, ticketId)
             } else {
-                fun redeemTicketResult(isDuplicateTicket: Boolean) {
+                fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
                     if (isDuplicateTicket) {
                         ticketsDS!!.setDuplicateTicket(ticketId)
                         Log.d(TAG, "Ticket ID: $ticketId - DUPLICATE in local ")
                     } else {
-                        fun getTicketResult(isRedeemed: Boolean, ticket: TicketModel?) {
-                            if (isRedeemed) {
-                                ticketsDS!!.updateTicket(ticket!!)
+                        if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                            ticketsDS!!.updateTicket(redeemedTicket)
 
-                                ticketsDS!!.setRedeemedTicket(ticketId)
-                                Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
+                            ticketsDS!!.setRedeemedTicket(ticketId)
+                            Log.d(TAG, "Ticket ID: $ticketId - REDEEMED in local ")
 
-                                scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
-                                scanning_ticket_layout.purchased_status?.visibility = View.GONE
-                                scanning_ticket_layout.complete_check_in?.visibility = View.GONE
-
-                                Snackbar
-                                    .make(
-                                        scanning_ticket_layout,
-                                        "Redeemed ${ticket?.lastName + ", " + ticket?.firstName}",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
-                                success = true
+                            showPillUserInfo(true, ticketId)
+                        } else {
+                            if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
+                                showDialog(getContext(), ticketId, redeemKey)
                             } else {
-                                if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(
-                                        this
-                                    )
-                                ) {
-                                    showDialog(getContext(), ticketId, redeemKey)
-                                    success = false
-                                } else {
-                                    Log.e(TAG, "ERROR: redeemTicketForEvent")
-                                }
+                                showPillUserInfo(false, ticketId)
+                                Log.e(TAG, "ERROR: redeemTicketForEvent")
                             }
                         }
-                        RestAPI.getTicket(accessToken, ticketId, ::getTicketResult)
                     }
                 }
 
@@ -239,7 +220,6 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             }
         }
         RestAPI.accessToken(::setAccessToken)
-        return success
     }
 
     private fun showDialog(context: Context, ticketId: String, redeemKey: String) {
@@ -309,23 +289,23 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 intent.putExtra("firstName", ticket?.firstName)
                 intent.putExtra("lastName", ticket?.lastName)
                 intent.putExtra("priceInCents", ticket?.priceInCents)
-                intent.putExtra("ticketTypeName", ticket?.ticketType)
+                intent.putExtra("ticketType", ticket?.ticketType)
                 intent.putExtra("status", ticket?.status)
                 startActivity(intent)
             } else {
-                var success = false
+//                var success = false
                 if (NetworkUtils.instance().isNetworkAvailable(getContext())) {
-                    success = redeemTicket(ticketId, redeemKey, ticket.firstName!!, ticket.lastName!!)
+                    /*success = */redeemTicket(ticketId, redeemKey, ticket.firstName!!, ticket.lastName!!)
                 } else {
                     if (SyncController.isOfflineModeEnabled) {
-                        success = checkInTicket(ticket.status!!, ticketId, redeemKey)
+                        /*success = */checkInTicket(ticket.status!!, ticketId, redeemKey)
                     } else {
                         Log.e(TAG, "ERROR: Internet is not available and offline mode is disabled!")
                     }
                 }
 
                 SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + ticket.eventId, ticket.ticketId)
-                showPillUserInfo(success, ticket.ticketId)
+//                showPillUserInfo(success, ticket.ticketId)
             }
 
             Log.v(TAG, rawResult.text) // Prints scan results
@@ -351,7 +331,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         pill_user_name.text = firstAndLastName
         pill_ticket_type.text = ticket?.ticketType
 
-        pill_scanned_by.text = if(ticket?.redeemedBy != null) getString(R.string.pill_scanned_by_text, ticket.redeemedBy ?: "") else ""
+        pill_scanned_by.text =
+            if (ticket?.redeemedBy != null) getString(R.string.pill_scanned_by_text, ticket.redeemedBy ?: "") else ""
 
         var redeemedAt = ""
         if (ticket?.redeemedAt != null) {
@@ -398,25 +379,25 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
     private fun setButtonText() {
         val text = SpannableString(
-            getString(com.bigneon.doorperson.R.string.check_in_mode) + " " + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
-                com.bigneon.doorperson.R.string.manual
+            getString(R.string.check_in_mode) + " " + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
+                R.string.manual
             ) else getString(
-                com.bigneon.doorperson.R.string.automatic
+                R.string.automatic
             ))
         )
         text.setSpan(
-            ForegroundColorSpan(getColor(com.bigneon.doorperson.R.color.colorWhite)),
+            ForegroundColorSpan(getColor(R.color.colorWhite)),
             0,
-            getString(com.bigneon.doorperson.R.string.check_in_mode).length,
+            getString(R.string.check_in_mode).length,
             0
         )
         text.setSpan(
-            ForegroundColorSpan(getColor(com.bigneon.doorperson.R.color.colorAccent)),
-            getString(com.bigneon.doorperson.R.string.check_in_mode).length + 1,
-            getString(com.bigneon.doorperson.R.string.check_in_mode).length + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
-                com.bigneon.doorperson.R.string.manual
+            ForegroundColorSpan(getColor(R.color.colorAccent)),
+            getString(R.string.check_in_mode).length + 1,
+            getString(R.string.check_in_mode).length + (if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) getString(
+                R.string.manual
             ).length else getString(
-                com.bigneon.doorperson.R.string.automatic
+                R.string.automatic
             ).length) + 1,
             0
         )
