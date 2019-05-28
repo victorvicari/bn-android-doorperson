@@ -1,7 +1,7 @@
 package com.bigneon.doorperson.db.dml
 
-import com.bigneon.doorperson.util.AppUtils.Companion.MAX_TIMESTAMP
-import com.bigneon.doorperson.util.AppUtils.Companion.MIN_TIMESTAMP
+import com.bigneon.doorperson.config.AppConstants.Companion.MAX_TIMESTAMP
+import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 
 /****************************************************
  * Copyright (c) 2016 - 2019.

@@ -8,7 +8,9 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.activity.IEventListRefresher
 import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.db.SyncController.Companion.eventListRefresher
+import com.bigneon.doorperson.db.SyncController.Companion.getContext
 import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
 import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
 import com.bigneon.doorperson.db.ds.EventsDS
@@ -17,8 +19,8 @@ import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
-import com.bigneon.doorperson.util.AppUtils.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.util.NetworkUtils
+
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -105,6 +107,22 @@ class DownloadSyncTask(
                         fun setTickets(tickets: ArrayList<TicketModel>?) {
                             tickets?.forEach { t ->
                                 if (ticketsDS.ticketExists(t.ticketId!!)) {
+                                    ticketsDS.updateTicket(
+                                        t.ticketId!!,
+                                        t.eventId!!,
+                                        t.userId!!,
+                                        t.firstName,
+                                        t.lastName,
+                                        t.email,
+                                        t.phone,
+                                        t.profilePicURL,
+                                        t.priceInCents!!,
+                                        t.ticketType!!,
+                                        t.redeemKey!!,
+                                        t.status?.toUpperCase()!!,
+                                        t.redeemedBy,
+                                        t.redeemedAt
+                                    )
                                     val ticket = ticketsDS.getTicket(t.ticketId!!)
                                     Log.d(
                                         TAG,
@@ -152,7 +170,9 @@ class DownloadSyncTask(
                                         t.priceInCents!!,
                                         t.ticketType!!,
                                         t.redeemKey!!,
-                                        t.status?.toUpperCase()!!
+                                        t.status?.toUpperCase()!!,
+                                        t.redeemedBy,
+                                        t.redeemedAt
                                     )
                                     Log.d(TAG, "Ticket ID: ${t.ticketId} - CREATED in local ")
                                 }
@@ -198,16 +218,22 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
                 val checkedTickets = ticketsDS.getAllCheckedTickets()
                 checkedTickets?.forEach { t ->
                     Log.d(TAG, "Ticket ID: ${t.ticketId} - UPLOADING on server")
-                    fun redeemTicketResult(isDuplicateTicket: Boolean) {
+
+                    fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
                         if (isDuplicateTicket) {
                             ticketsDS.setDuplicateTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE")
+                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE in local ")
                         } else {
-                            ticketsDS.setRedeemedTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED")
+                            if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                                ticketsDS.updateTicket(redeemedTicket)
+
+                                ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
+                            }
+                            ticketListRefresher?.refreshTicketList(t.eventId!!)
                         }
-                        ticketListRefresher?.refreshTicketList(t.eventId!!)
                     }
+
                     RestAPI.redeemTicketForEvent(
                         accessToken,
                         t.eventId!!,

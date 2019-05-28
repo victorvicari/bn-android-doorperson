@@ -13,7 +13,9 @@ import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
-import com.bigneon.doorperson.rest.response.*
+import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.TicketsResponse
 import com.bigneon.doorperson.util.NetworkUtils
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -157,7 +159,12 @@ class RestAPI private constructor() {
             getScannableEventsCall.enqueue(getScannableEventsCallback)
         }
 
-        fun getTicketsForEvent(accessToken: String, eventId: String, changesSince: String?, setTickets: (ArrayList<TicketModel>?) -> Unit) {
+        fun getTicketsForEvent(
+            accessToken: String,
+            eventId: String,
+            changesSince: String?,
+            setTickets: (ArrayList<TicketModel>?) -> Unit
+        ) {
             val getTicketsForEventCall =
                 client().getTicketsForEvent(accessToken, eventId, changesSince, null)
             val getTicketsForEventCallback = object : Callback<TicketsResponse> {
@@ -178,34 +185,40 @@ class RestAPI private constructor() {
         }
 
         fun redeemTicketForEvent(
-            accessToken: String, eventId: String, ticketId: String, firstName: String, lastName: String, redeemKey: String, redeemTicketResult: ((isDuplicateTicket: Boolean) -> Unit)?
+            accessToken: String,
+            eventId: String,
+            ticketId: String,
+            firstName: String,
+            lastName: String,
+            redeemKey: String,
+            redeemTicketResult: ((isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) -> Unit)?
         ) {
             try {
                 val redeemRequest = RedeemRequest()
                 redeemRequest.redeemKey = redeemKey
                 val redeemTicketForEventCall = client()
                     .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
-                val callbackRedeemTicketForEvent = object : Callback<RedeemResponse> {
-                    override fun onResponse(call: Call<RedeemResponse>, response: Response<RedeemResponse>) {
+                val callbackRedeemTicketForEvent = object : Callback<TicketModel> {
+                    override fun onResponse(call: Call<TicketModel>, response: Response<TicketModel>) {
                         if (response.body() != null) {
                             Log.e(TAG, "Redeem ticket for event $eventId succeeded")
-                            redeemTicketResult?.invoke(false)
+                            redeemTicketResult?.invoke(false, response.body())
                         } else {
                             if (response.code() == 409) {
                                 val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
                                 intent.putExtra("ticketId", ticketId)
                                 intent.putExtra("lastAndFirstName", "$lastName, $firstName")
                                 context.startActivity(intent)
-                                redeemTicketResult?.invoke(true)
+                                redeemTicketResult?.invoke(true, null)
                             } else {
-                                redeemTicketResult?.invoke(false)
+                                redeemTicketResult?.invoke(false, null)
                             }
                         }
                     }
 
-                    override fun onFailure(call: Call<RedeemResponse>, t: Throwable) {
+                    override fun onFailure(call: Call<TicketModel>, t: Throwable) {
                         Log.e(TAG, "Redeem ticket for event $eventId failed")
-                        redeemTicketResult?.invoke(false)
+                        redeemTicketResult?.invoke(false, null)
                     }
                 }
                 redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
@@ -214,7 +227,7 @@ class RestAPI private constructor() {
             }
         }
 
-        fun getTicket(
+        /*fun getTicket(
             accessToken: String,
             ticketId: String,
             getTicketResult: (isRedeemed: Boolean, ticket: TicketModel?) -> Unit
@@ -228,6 +241,10 @@ class RestAPI private constructor() {
                             ticket.userId = response.body()!!.user?.userId ?: ""
                             ticket.firstName = response.body()!!.user?.firstName ?: ""
                             ticket.lastName = response.body()!!.user?.lastName ?: ""
+                            ticket.email = response.body()!!.user?.email ?: ""
+                            ticket.phone = response.body()!!.user?.phone ?: ""
+                            ticket.profilePicURL = response.body()!!.user?.profilePicURL ?: ""
+                            ticket.eventId = response.body()!!.event?.id ?: ""
                             getTicketResult(true, ticket)
                             Log.e(TAG, "Redeem ticket $ticketId succeeded")
                         } else {
@@ -245,6 +262,6 @@ class RestAPI private constructor() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message)
             }
-        }
+        }*/
     }
 }

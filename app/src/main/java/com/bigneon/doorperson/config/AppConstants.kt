@@ -7,7 +7,8 @@ package com.bigneon.doorperson.config
  ****************************************************/
 interface AppConstants {
     companion object {
-        const val BASE_URL = "https://staging.api.bigneon.com"
+        const val BASE_URL = "https://dev.api.bigneon.com"
+//        const val BASE_URL = "https://staging.api.bigneon.com"
 //        const val BASE_URL = "https://api.staging.bigneon.com"
 
         const val PREFS_FILENAME = "com.bigneon.doorperson.prefs"
@@ -23,6 +24,11 @@ interface AppConstants {
         // DB const
         const val DATABASE_NAME = "doorperson.db"
         const val DATABASE_VERSION = 2
+
+        // Date constants
+        const val MIN_TIMESTAMP = "2000-01-01T00:00:00.000000"
+        const val MAX_TIMESTAMP = "2100-01-01T00:00:00.000000"
+        const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
 
     }
 
