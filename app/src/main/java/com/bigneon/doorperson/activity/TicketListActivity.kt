@@ -209,7 +209,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(adapterPosition: Int, view: View) {
-
                 val filteredList =
                     if (TicketListActivity.finallyFilteredTicketList.size > 0)
                         finallyFilteredTicketList else ticketList

@@ -3,6 +3,7 @@ package com.bigneon.doorperson.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -10,6 +11,8 @@ import android.view.View
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
+import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -68,7 +71,7 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            if(SyncController.synchronizeAllTables(true)) {
+            if (SyncController.synchronizeAllTables(true)) {
                 // Refresh view from DB
                 refreshEventList()
             }
@@ -103,6 +106,12 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
             eventsListView.addOnItemClickListener(object : OnItemClickListener {
                 override fun onItemClicked(position: Int, view: View) {
                     val eventId = eventList[position].id
+
+                    val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
+                    if (eventForSync.isNullOrEmpty()) {
+                        SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
+                        Handler().postDelayed({}, 3000) // Wait for 3s
+                    }
                     val intent = Intent(getContext(), ScanningEventActivity::class.java)
                     intent.putExtra("eventId", eventId)
                     startActivity(intent)

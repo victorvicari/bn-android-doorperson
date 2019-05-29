@@ -50,12 +50,12 @@ class ScanningEventActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        getEventSummary()
+
         scanning_events_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
-
-        getEventSummary()
 
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
