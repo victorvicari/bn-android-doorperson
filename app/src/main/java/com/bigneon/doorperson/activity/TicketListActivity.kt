@@ -20,7 +20,6 @@ import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemOffset
@@ -30,8 +29,7 @@ import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
-class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
-    private var eventId: String? = null
+class TicketListActivity : AppCompatActivity() {
     private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
     private var ticketsDS: TicketsDS? = null
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
@@ -44,8 +42,16 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 no_internet_toolbar_icon.visibility = View.VISIBLE
             }
         }
+    private var refreshTicketListener: SyncController.RefreshTicketListener =
+        object : SyncController.RefreshTicketListener {
+            override fun refreshTicketList(eventId: String) {
+                if (TicketListActivity.eventId == eventId)
+                    refreshList(eventId)
+            }
+        }
 
     companion object {
+        private var eventId: String? = null
         private var searchTextChanged: Boolean = false
         private var screenRotation: Boolean = false
         private var searchGuestText: String = ""
@@ -66,7 +72,6 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         ticketsDS = TicketsDS()
 
-        SyncController.ticketListRefresher = this
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -81,22 +86,44 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         eventId = intent.getStringExtra("eventId")
 
-        ticket_list_view.layoutManager =
-            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
         itemTouchHelper.attachToRecyclerView(ticket_list_view)
 
-        fun setAccessToken(accessToken: String?) {
-            if (accessToken == null) {
-                startActivity(Intent(getContext(), LoginActivity::class.java))
-            } else {
-                // Refresh/load ticket list initially
-                refreshTicketList(eventId)
+        ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
+            override fun onItemClicked(adapterPosition: Int, view: View) {
+                val filteredList =
+                    if (TicketListActivity.finallyFilteredTicketList.size > 0)
+                        finallyFilteredTicketList else ticketList
+
+                val ticket = filteredList?.get(adapterPosition)
+
+                val intent = Intent(getContext(), TicketActivity::class.java)
+                intent.putExtra("ticketId", ticket?.ticketId)
+                intent.putExtra("eventId", eventId)
+                intent.putExtra("redeemKey", ticket?.redeemKey)
+                intent.putExtra("searchGuestText", searchGuestText)
+                intent.putExtra("firstName", ticket?.firstName)
+                intent.putExtra("lastName", ticket?.lastName)
+                intent.putExtra("priceInCents", ticket?.priceInCents)
+                intent.putExtra("ticketType", ticket?.ticketType)
+                intent.putExtra("status", ticket?.status)
+                startActivity(intent)
             }
-        }
-        RestAPI.accessToken(::setAccessToken)
+        })
+
+        ticket_list_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                ticketListItemPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+
+                ticketListItemOffset =
+                    if (recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition) != null) recyclerView.layoutManager?.findViewByPosition(
+                        ticketListItemPosition
+                    )!!.top else 0
+            }
+        })
 
         search_guest.post {
             search_guest.addTextChangedListener(object : TextWatcher {
@@ -124,18 +151,18 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            if(SyncController.synchronizeAllTables(true)) {
-                // Refresh view from DB
-                refreshTicketList(eventId)
-            }
+            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             tickets_swipe_refresh_layout.isRefreshing = false
         }
+
+        refreshList(eventId)
     }
 
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.addRefreshTicketListener(refreshTicketListener)
         super.onStart()
     }
 
@@ -191,13 +218,16 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         }
     }
 
-    override fun refreshTicketList(eventId: String?) {
-        if (eventId != this.eventId)
+    private fun refreshList(eventId: String?) {
+        if (TicketListActivity.eventId != eventId)
             return
+
+        ticket_list_view.layoutManager =
+            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
         tickets_layout.loading_guests_progress_bar.visibility = View.GONE
 
-        ticketList = ticketsDS!!.getAllTicketsForEvent(this.eventId!!)
+        ticketList = ticketsDS!!.getAllTicketsForEvent(TicketListActivity.eventId!!)
         adaptListView(ticket_list_view)
 
         if (ticketListItemPosition >= 0) {
@@ -206,45 +236,11 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
                 ticketListItemOffset
             )
         }
-
-        ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
-            override fun onItemClicked(adapterPosition: Int, view: View) {
-                val filteredList =
-                    if (TicketListActivity.finallyFilteredTicketList.size > 0)
-                        finallyFilteredTicketList else ticketList
-
-                val ticket = filteredList?.get(adapterPosition)
-
-                val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", ticket?.ticketId)
-                intent.putExtra("eventId", eventId)
-                intent.putExtra("redeemKey", ticket?.redeemKey)
-                intent.putExtra("searchGuestText", searchGuestText)
-                intent.putExtra("firstName", ticket?.firstName)
-                intent.putExtra("lastName", ticket?.lastName)
-                intent.putExtra("priceInCents", ticket?.priceInCents)
-                intent.putExtra("ticketType", ticket?.ticketType)
-                intent.putExtra("status", ticket?.status)
-                startActivity(intent)
-            }
-        })
-
-        ticket_list_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                ticketListItemPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-
-                ticketListItemOffset =
-                    if (recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition) != null) recyclerView.layoutManager?.findViewByPosition(
-                        ticketListItemPosition
-                    )!!.top else 0
-            }
-        })
     }
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.removeRefreshTicketListener(refreshTicketListener)
         super.onStop()
     }
 
@@ -254,8 +250,4 @@ class TicketListActivity : AppCompatActivity(), ITicketListRefresher {
         startActivity(intent)
         finish()
     }
-}
-
-interface ITicketListRefresher {
-    fun refreshTicketList(eventId: String?)
 }

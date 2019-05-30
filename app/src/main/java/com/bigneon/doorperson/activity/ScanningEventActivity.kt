@@ -31,6 +31,13 @@ class ScanningEventActivity : AppCompatActivity() {
                 no_internet_toolbar_icon.visibility = View.VISIBLE
             }
         }
+    private var refreshTicketListener: SyncController.RefreshTicketListener =
+        object : SyncController.RefreshTicketListener {
+            override fun refreshTicketList(eventId: String) {
+                getEventSummary()
+                loading_tickets_progress_bar.visibility = View.GONE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -46,6 +53,8 @@ class ScanningEventActivity : AppCompatActivity() {
         eventId = intent.getStringExtra("eventId")
         ticketsDS = TicketsDS()
         eventsDS = EventsDS()
+        val showWaitingProgressBar = intent.getBooleanExtra("showWaitingProgressBar", false)
+        loading_tickets_progress_bar.visibility = if (showWaitingProgressBar) View.VISIBLE else View.GONE
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -69,9 +78,7 @@ class ScanningEventActivity : AppCompatActivity() {
 
         scanning_event_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            if(SyncController.synchronizeAllTables(true)) {
-                getEventSummary()
-            }
+            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             scanning_event_layout.isRefreshing = false
@@ -96,11 +103,13 @@ class ScanningEventActivity : AppCompatActivity() {
 
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.addRefreshTicketListener(refreshTicketListener)
         super.onStart()
     }
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.removeRefreshTicketListener(refreshTicketListener)
         super.onStop()
     }
 

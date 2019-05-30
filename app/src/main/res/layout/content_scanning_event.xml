@@ -10,6 +10,9 @@
         tools:showIn="@layout/activity_scanning_event"
         tools:context=".activity.ScanningEventActivity">
 
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -71,4 +74,13 @@
                 android:gravity="center"
                 android:text="@string/calculating"/>
     </LinearLayout>
+        <ProgressBar
+                android:id="@+id/loading_tickets_progress_bar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone"/>
+    </RelativeLayout>
 </android.support.v4.widget.SwipeRefreshLayout>

@@ -5,15 +5,14 @@ import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.activity.IEventListRefresher
-import com.bigneon.doorperson.activity.ITicketListRefresher
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController.Companion.eventListRefresher
 import com.bigneon.doorperson.db.SyncController.Companion.getContext
+import com.bigneon.doorperson.db.SyncController.Companion.refreshEventListeners
+import com.bigneon.doorperson.db.SyncController.Companion.refreshTicketListeners
 import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
+import com.bigneon.doorperson.db.SyncController.Companion.synchronizationListeners
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.SyncDS
 import com.bigneon.doorperson.db.ds.TicketsDS
@@ -31,14 +30,16 @@ import com.bigneon.doorperson.util.NetworkUtils
 class SyncController {
     companion object {
         private val TAG = SyncController::class.java.simpleName
-        var eventListRefresher: IEventListRefresher? = null
-        var ticketListRefresher: ITicketListRefresher? = null
 
         var isOfflineModeEnabled: Boolean = true
         var syncInProgress: Boolean = false
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
+
+        var synchronizationListeners: MutableList<SynchronizationListener> = ArrayList()
+        var refreshEventListeners: MutableList<RefreshEventListener> = ArrayList()
+        var refreshTicketListeners: MutableList<RefreshTicketListener> = ArrayList()
 
         fun setContext(con: Context) {
             context = con
@@ -61,23 +62,54 @@ class SyncController {
 
             return true
         }
+
+        fun addSynchronizationListener(listener: SynchronizationListener) {
+            synchronizationListeners.add(listener)
+        }
+
+        fun removeSynchronizationListener(listener: SynchronizationListener) {
+            synchronizationListeners.remove(listener)
+        }
+
+        fun addRefreshEventListener(listener: RefreshEventListener) {
+            refreshEventListeners.add(listener)
+        }
+
+        fun removeRefreshEventListener(listener: RefreshEventListener) {
+            refreshEventListeners.remove(listener)
+        }
+
+        fun addRefreshTicketListener(listener: RefreshTicketListener) {
+            refreshTicketListeners.add(listener)
+        }
+
+        fun removeRefreshTicketListener(listener: RefreshTicketListener) {
+            refreshTicketListeners.remove(listener)
+        }
+    }
+
+    interface SynchronizationListener {
+        fun onSyncStarted()
+        fun onSyncFinished()
+    }
+
+    interface RefreshEventListener {
+        fun refreshEventList()
+    }
+
+    interface RefreshTicketListener {
+        fun refreshTicketList(eventId: String)
     }
 }
 
 class SynchronizeAllTablesTask(private val fullRefresh: Boolean) :
     AsyncTask<Boolean, Unit, Unit>() {
     override fun doInBackground(vararg params: Boolean?) {
-        DownloadSyncTask(
-            eventListRefresher,
-            ticketListRefresher,
-            fullRefresh
-        ).execute()
+        DownloadSyncTask(fullRefresh).execute()
     }
 }
 
 class DownloadSyncTask(
-    private var eventListRefresher: IEventListRefresher?,
-    private var ticketListRefresher: ITicketListRefresher?,
     private var fullRefresh: Boolean
 ) : AsyncTask<Unit, Unit, Unit>() {
     private val TAG = DownloadSyncTask::class.java.simpleName
@@ -89,6 +121,8 @@ class DownloadSyncTask(
     override fun onPreExecute() {
         super.onPreExecute()
         syncInProgress = true
+        for (listener in synchronizationListeners)
+            listener.onSyncStarted()
         Log.d(TAG, "DownloadSyncTask - STARTED")
     }
 
@@ -141,8 +175,12 @@ class DownloadSyncTask(
                                                 }
                                         } else {
                                             if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
-                                                if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase() ||
-                                                    ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.duplicate).toLowerCase()
+                                                if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                        R.string.redeemed
+                                                    ).toLowerCase() ||
+                                                    ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                        R.string.duplicate
+                                                    ).toLowerCase()
                                                 ) {
                                                     Log.e(
                                                         TAG,
@@ -180,7 +218,8 @@ class DownloadSyncTask(
                                         Log.d(TAG, "Ticket ID: ${t.ticketId} - CREATED in local ")
                                     }
                                 }
-                                ticketListRefresher?.refreshTicketList(e.id!!)
+                                for (listener in refreshTicketListeners)
+                                    listener.refreshTicketList(e.id!!)
                             }
 
                             val changesSince = if (fullRefresh) MIN_TIMESTAMP else syncDS.getLastSyncTime(
@@ -191,7 +230,8 @@ class DownloadSyncTask(
                         }
                     }
                     // Refresh event list
-                    eventListRefresher?.refreshEventList()
+                    for (listener in refreshEventListeners)
+                        listener.refreshEventList()
                     syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
                 }
                 RestAPI.getScannableEvents(accessToken, ::setEvents)
@@ -234,7 +274,8 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
                                 ticketsDS.setRedeemedTicket(t.ticketId!!)
                                 Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
                             }
-                            ticketListRefresher?.refreshTicketList(t.eventId!!)
+                            for (listener in refreshTicketListeners)
+                                listener.refreshTicketList(t.eventId!!)
                         }
                     }
 
@@ -256,6 +297,8 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
     override fun onPostExecute(result: Unit?) {
         super.onPostExecute(result)
         syncInProgress = false
+        for (listener in synchronizationListeners)
+            listener.onSyncFinished()
         Log.d(TAG, "UploadSyncTask - FINISHED")
     }
 }
