@@ -20,6 +20,7 @@ interface AppConstants {
         const val CHECK_IN_MODE_AUTOMATIC = "A"
 
         const val LAST_CHECKED_TICKET_ID = "last_checked_ticket_id"
+        const val EVENT_FOR_SYNC = "event_for_sync"
 
         // DB const
         const val DATABASE_NAME = "doorperson.db"

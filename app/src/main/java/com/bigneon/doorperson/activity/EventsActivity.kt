@@ -10,10 +10,12 @@ import android.view.View
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
+import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.rest.RestAPI
+import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
@@ -22,8 +24,11 @@ import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
-class EventsActivity : AppCompatActivity(), IEventListRefresher {
+class EventsActivity : AppCompatActivity() {
     private var eventsDS: EventsDS? = null
+    private var eventsListView: RecyclerView? = null
+    private var eventList: ArrayList<EventModel>? = null
+
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
@@ -32,6 +37,13 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
             override fun networkUnavailable() {
                 no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
+
+    private var refreshEventListener: SyncController.RefreshEventListener =
+        object : SyncController.RefreshEventListener {
+            override fun refreshEventList() {
+                refreshList()
             }
         }
 
@@ -47,20 +59,39 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
         AppUtils.checkLogged(getContext())
 
         eventsDS = EventsDS()
-        SyncController.eventListRefresher = this
 
         // Start synchronization service
         startService(Intent(this, SyncService::class.java))
 
-        fun setAccessToken(accessToken: String?) {
-            if (accessToken == null) {
-                startActivity(Intent(getContext(), LoginActivity::class.java))
-            } else {
-                setSupportActionBar(events_toolbar)
-                refreshEventList()
+        eventsListView = events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
+
+        eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
+            override fun onItemClicked(position: Int, view: View) {
+                val eventId = eventList?.get(position)?.id
+                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
+                val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                if (eventForSync.isNullOrEmpty()) {
+                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
+                    SyncController.synchronizeAllTables(true)
+                    intent.putExtra("showWaitingProgressBar", true)
+                } else {
+                    intent.putExtra("showWaitingProgressBar", false)
+                }
+                intent.putExtra("eventId", eventId)
+                startActivity(intent)
             }
-        }
-        RestAPI.accessToken(::setAccessToken)
+        })
+
+        eventsListView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                eventListItemPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                eventListItemOffset =
+                    if (recyclerView.layoutManager?.findViewByPosition(eventListItemPosition) != null)
+                        recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top else 0
+            }
+        })
 
         profile_settings.setOnClickListener {
             startActivity(Intent(getContext(), ProfileActivity::class.java))
@@ -68,62 +99,41 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            if(SyncController.synchronizeAllTables(true)) {
-                // Refresh view from DB
-                refreshEventList()
-            }
+            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
-            events_layout.isRefreshing = false
+            events_layout.isRefreshing = false // TODO - Move after sync is done!
         }
+
+        refreshList()
     }
 
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.addRefreshEventListener(refreshEventListener)
         super.onStart()
     }
 
-    override fun refreshEventList() {
-        val eventsListView: RecyclerView =
-            events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
-        val eventList = eventsDS!!.getAllEvents()
+    private fun refreshList() {
+        eventList = eventsDS!!.getAllEvents()
         if (eventList != null) {
-            eventsListView.layoutManager =
+            eventsListView!!.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-            eventsListView.adapter = EventListAdapter(eventList)
+            eventsListView!!.adapter = EventListAdapter(eventList!!)
 
             if (eventListItemPosition >= 0) {
-                (eventsListView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                (eventsListView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     eventListItemPosition,
                     eventListItemOffset
                 )
             }
-
-            eventsListView.addOnItemClickListener(object : OnItemClickListener {
-                override fun onItemClicked(position: Int, view: View) {
-                    val eventId = eventList[position].id
-                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                    intent.putExtra("eventId", eventId)
-                    startActivity(intent)
-                }
-            })
-
-            eventsListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    eventListItemPosition =
-                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                    eventListItemOffset =
-                        if (recyclerView.layoutManager?.findViewByPosition(eventListItemPosition) != null)
-                            recyclerView.layoutManager?.findViewByPosition(eventListItemPosition)!!.top else 0
-                }
-            })
         }
     }
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.removeRefreshEventListener(refreshEventListener)
         super.onStop()
     }
 
@@ -133,6 +143,3 @@ class EventsActivity : AppCompatActivity(), IEventListRefresher {
     }
 }
 
-interface IEventListRefresher {
-    fun refreshEventList()
-}

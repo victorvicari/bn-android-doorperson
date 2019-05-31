@@ -10,11 +10,9 @@ import com.bigneon.doorperson.db.SyncController
 
 class SyncService : Service() {
     private val syncAllTablesReceiver = object : BroadcastReceiver() {
+        @Synchronized
         override fun onReceive(context: Context, intent: Intent) {
-            @Synchronized
-            if (!SyncController.syncInProgress) {
-                SyncController.synchronizeAllTables(false)
-            }
+            SyncController.synchronizeAllTables(false)
         }
     }
 
