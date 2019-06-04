@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
@@ -30,6 +31,13 @@ class ScanningEventActivity : AppCompatActivity() {
                 no_internet_toolbar_icon.visibility = View.VISIBLE
             }
         }
+    private var refreshTicketListener: SyncController.RefreshTicketListener =
+        object : SyncController.RefreshTicketListener {
+            override fun refreshTicketList(eventId: String) {
+                getEventSummary()
+                loading_tickets_progress_bar.visibility = View.GONE
+            }
+        }
 
     private fun getContext(): Context {
         return this
@@ -40,22 +48,23 @@ class ScanningEventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
 
-        NetworkUtils.instance().addNetworkStateListener(networkStateReceiverListener)
         AppUtils.checkLogged(getContext())
 
         eventId = intent.getStringExtra("eventId")
         ticketsDS = TicketsDS()
         eventsDS = EventsDS()
+        val showWaitingProgressBar = intent.getBooleanExtra("showWaitingProgressBar", false)
+        loading_tickets_progress_bar.visibility = if (showWaitingProgressBar) View.VISIBLE else View.GONE
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        getEventSummary()
 
         scanning_events_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), R.color.colorAccent),
             PorterDuff.Mode.SRC_ATOP
         )
-
-        getEventSummary()
 
         scanning_events_toolbar.setNavigationOnClickListener {
             startActivity(Intent(getContext(), EventsActivity::class.java))
@@ -68,7 +77,8 @@ class ScanningEventActivity : AppCompatActivity() {
         }
 
         scanning_event_layout.setOnRefreshListener {
-            getEventSummary()
+            // Sync local DB with remote server
+            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             scanning_event_layout.isRefreshing = false
@@ -89,6 +99,18 @@ class ScanningEventActivity : AppCompatActivity() {
             R.string._1_d_checked,
             ticketsDS!!.getCheckedTicketNumberForEvent(eventId)
         )
+    }
+
+    override fun onStart() {
+        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.addRefreshTicketListener(refreshTicketListener)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        SyncController.removeRefreshTicketListener(refreshTicketListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {

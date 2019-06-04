@@ -42,4 +42,10 @@ class TicketModel {
     internal var redeemKey: String? = null
 
     internal var status: String? = null
+
+    @SerializedName("redeemed_by")
+    internal var redeemedBy: String? = null
+
+    @SerializedName("redeemed_at")
+    internal var redeemedAt: String? = null
 }

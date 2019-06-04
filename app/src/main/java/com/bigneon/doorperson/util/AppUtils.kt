@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,7 +22,7 @@ class AppUtils {
         var ticketListItemOffset = 0
 
         fun getCurrentTimestamp(): String {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMANY)
+            val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
             dateFormat.timeZone = TimeZone.getTimeZone("CET")
             val date = Date()
             return dateFormat.format(date)

@@ -5,16 +5,22 @@ import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import com.bigneon.doorperson.R
-import com.bigneon.doorperson.activity.IEventListRefresher
-import com.bigneon.doorperson.activity.ITicketListRefresher
-import com.bigneon.doorperson.db.SyncController.Companion.eventListRefresher
+import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
+import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.db.SyncController.Companion.getContext
+import com.bigneon.doorperson.db.SyncController.Companion.refreshEventListeners
+import com.bigneon.doorperson.db.SyncController.Companion.refreshTicketListeners
 import com.bigneon.doorperson.db.SyncController.Companion.syncInProgress
-import com.bigneon.doorperson.db.SyncController.Companion.ticketListRefresher
+import com.bigneon.doorperson.db.SyncController.Companion.synchronizationListeners
 import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.db.ds.SyncDS
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.NetworkUtils
+
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -24,14 +30,16 @@ import com.bigneon.doorperson.rest.model.TicketModel
 class SyncController {
     companion object {
         private val TAG = SyncController::class.java.simpleName
-        var eventListRefresher: IEventListRefresher? = null
-        var ticketListRefresher: ITicketListRefresher? = null
 
         var isOfflineModeEnabled: Boolean = true
         var syncInProgress: Boolean = false
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
+
+        var synchronizationListeners: MutableList<SynchronizationListener> = ArrayList()
+        var refreshEventListeners: MutableList<RefreshEventListener> = ArrayList()
+        var refreshTicketListeners: MutableList<RefreshTicketListener> = ArrayList()
 
         fun setContext(con: Context) {
             context = con
@@ -41,39 +49,80 @@ class SyncController {
             return context
         }
 
-        fun synchronizeAllTables() {
+        fun synchronizeAllTables(fullRefresh: Boolean): Boolean {
+            if (!NetworkUtils.instance().isNetworkAvailable(context))
+                return false
+
             if (!syncInProgress) {
                 Log.d(TAG, "SynchronizeAllTablesTask - STARTED")
-                SynchronizeAllTablesTask().execute()
+                SynchronizeAllTablesTask(fullRefresh).execute()
             } else {
                 Log.d(TAG, "Synchronization already in progress - SKIP")
             }
+
+            return true
         }
+
+        fun addSynchronizationListener(listener: SynchronizationListener) {
+            synchronizationListeners.add(listener)
+        }
+
+        fun removeSynchronizationListener(listener: SynchronizationListener) {
+            synchronizationListeners.remove(listener)
+        }
+
+        fun addRefreshEventListener(listener: RefreshEventListener) {
+            refreshEventListeners.add(listener)
+        }
+
+        fun removeRefreshEventListener(listener: RefreshEventListener) {
+            refreshEventListeners.remove(listener)
+        }
+
+        fun addRefreshTicketListener(listener: RefreshTicketListener) {
+            refreshTicketListeners.add(listener)
+        }
+
+        fun removeRefreshTicketListener(listener: RefreshTicketListener) {
+            refreshTicketListeners.remove(listener)
+        }
+    }
+
+    interface SynchronizationListener {
+        fun onSyncStarted()
+        fun onSyncFinished()
+    }
+
+    interface RefreshEventListener {
+        fun refreshEventList()
+    }
+
+    interface RefreshTicketListener {
+        fun refreshTicketList(eventId: String)
     }
 }
 
-class SynchronizeAllTablesTask :
-    AsyncTask<Unit, Unit, Unit>() {
-    override fun doInBackground(vararg params: Unit?) {
-        DownloadSyncTask(
-            eventListRefresher,
-            ticketListRefresher
-        ).execute()
+class SynchronizeAllTablesTask(private val fullRefresh: Boolean) :
+    AsyncTask<Boolean, Unit, Unit>() {
+    override fun doInBackground(vararg params: Boolean?) {
+        DownloadSyncTask(fullRefresh).execute()
     }
 }
 
 class DownloadSyncTask(
-    private var eventListRefresher: IEventListRefresher?,
-    private var ticketListRefresher: ITicketListRefresher?
+    private var fullRefresh: Boolean
 ) : AsyncTask<Unit, Unit, Unit>() {
     private val TAG = DownloadSyncTask::class.java.simpleName
 
     private val eventsDS: EventsDS = EventsDS()
     private val ticketsDS: TicketsDS = TicketsDS()
+    private val syncDS: SyncDS = SyncDS()
 
     override fun onPreExecute() {
         super.onPreExecute()
         syncInProgress = true
+        for (listener in synchronizationListeners)
+            listener.onSyncStarted()
         Log.d(TAG, "DownloadSyncTask - STARTED")
     }
 
@@ -90,54 +139,100 @@ class DownloadSyncTask(
                             Log.d(TAG, "createEvent - ${e.id}")
                         }
 
-                        fun setTickets(tickets: ArrayList<TicketModel>?) {
-                            tickets?.forEach { t ->
-                                if (ticketsDS.ticketExists(t.ticketId!!)) {
-                                    val ticket = ticketsDS.getTicket(t.ticketId!!)
-                                    Log.d(
-                                        TAG,
-                                        "Ticket ID: ${t.ticketId} - Status on server: ${t.status}, status in local ${ticket?.status} "
-                                    )
-                                    if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
-                                        if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase() ||
-                                            ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.duplicate).toLowerCase()
-                                        ) {
-                                            Log.e(
-                                                TAG,
-                                                "ERROR: Illegal ticket state! On server: ${t.status}, on device ${ticket.status}"
-                                            )
+                        val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + e.id!!)
+                        if (!eventForSync.isNullOrEmpty()) {
+                            fun setTickets(tickets: ArrayList<TicketModel>?) {
+                                tickets?.forEach { t ->
+                                    if (ticketsDS.ticketExists(t.ticketId!!)) {
+                                        ticketsDS.updateTicket(
+                                            t.ticketId!!,
+                                            t.eventId!!,
+                                            t.userId!!,
+                                            t.firstName,
+                                            t.lastName,
+                                            t.email,
+                                            t.phone,
+                                            t.profilePicURL,
+                                            t.priceInCents!!,
+                                            t.ticketType!!,
+                                            t.redeemKey!!,
+                                            t.status?.toUpperCase()!!,
+                                            t.redeemedBy,
+                                            t.redeemedAt
+                                        )
+                                        val ticket = ticketsDS.getTicket(t.ticketId!!)
+                                        Log.d(
+                                            TAG,
+                                            "Ticket ID: ${t.ticketId} - Status on server: ${t.status}, status in local ${ticket?.status} "
+                                        )
+
+                                        if (fullRefresh) {
+                                            if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
+                                                ticketsDS.setPurchasedTicket(t.ticketId!!)
+                                            } else
+                                                if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
+                                                    ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                                }
+                                        } else {
+                                            if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) { // Ticket is PURCHASED on server
+                                                if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                        R.string.redeemed
+                                                    ).toLowerCase() ||
+                                                    ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                        R.string.duplicate
+                                                    ).toLowerCase()
+                                                ) {
+                                                    Log.e(
+                                                        TAG,
+                                                        "ERROR: Illegal ticket state! On server: ${t.status}, on device ${ticket.status}"
+                                                    )
+                                                }
+                                            } else
+                                                if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
+                                                    if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(
+                                                            R.string.purchased
+                                                        ).toLowerCase()
+                                                    ) {
+                                                        ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                                        Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED in local ")
+                                                    }
+                                                }
                                         }
-                                    } else
-                                        if (t.status?.toLowerCase() == SyncController.getContext().getString(R.string.redeemed).toLowerCase()) { // Ticket is REDEEMED on server
-                                            if (ticket?.status?.toLowerCase() == SyncController.getContext().getString(R.string.purchased).toLowerCase()) {
-                                                ticketsDS.setRedeemedTicket(t.ticketId!!)
-                                                Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED in local ")
-                                            }
-                                        }
-                                } else {
-                                    ticketsDS.createTicket(
-                                        t.ticketId!!,
-                                        t.eventId!!,
-                                        t.userId!!,
-                                        t.firstName,
-                                        t.lastName,
-                                        t.email,
-                                        t.phone,
-                                        t.profilePicURL,
-                                        t.priceInCents!!,
-                                        t.ticketType!!,
-                                        t.redeemKey!!,
-                                        t.status?.toUpperCase()!!
-                                    )
-                                    Log.d(TAG, "Ticket ID: ${t.ticketId} - CREATED in local ")
+                                    } else {
+                                        ticketsDS.createTicket(
+                                            t.ticketId!!,
+                                            t.eventId!!,
+                                            t.userId!!,
+                                            t.firstName,
+                                            t.lastName,
+                                            t.email,
+                                            t.phone,
+                                            t.profilePicURL,
+                                            t.priceInCents!!,
+                                            t.ticketType!!,
+                                            t.redeemKey!!,
+                                            t.status?.toUpperCase()!!,
+                                            t.redeemedBy,
+                                            t.redeemedAt
+                                        )
+                                        Log.d(TAG, "Ticket ID: ${t.ticketId} - CREATED in local ")
+                                    }
                                 }
+                                for (listener in refreshTicketListeners)
+                                    listener.refreshTicketList(e.id!!)
                             }
-                            ticketListRefresher?.refreshTicketList(e.id!!)
+
+                            val changesSince = if (fullRefresh) MIN_TIMESTAMP else syncDS.getLastSyncTime(
+                                AppConstants.SyncTableName.TICKETS,
+                                false
+                            )
+                            RestAPI.getTicketsForEvent(accessToken, e.id!!, changesSince, ::setTickets)
                         }
-                        RestAPI.getTicketsForEvent(accessToken, e.id!!, ::setTickets)
                     }
                     // Refresh event list
-                    eventListRefresher?.refreshEventList()
+                    for (listener in refreshEventListeners)
+                        listener.refreshEventList()
+                    syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
                 }
                 RestAPI.getScannableEvents(accessToken, ::setEvents)
             }
@@ -167,16 +262,23 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
                 val checkedTickets = ticketsDS.getAllCheckedTickets()
                 checkedTickets?.forEach { t ->
                     Log.d(TAG, "Ticket ID: ${t.ticketId} - UPLOADING on server")
-                    fun redeemTicketResult(isDuplicateTicket: Boolean) {
+
+                    fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
                         if (isDuplicateTicket) {
                             ticketsDS.setDuplicateTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE")
+                            Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE in local ")
                         } else {
-                            ticketsDS.setRedeemedTicket(t.ticketId!!)
-                            Log.d(TAG, "Ticket ID: ${t.ticketId} - REDEEMED")
+                            if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                                ticketsDS.updateTicket(redeemedTicket)
+
+                                ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
+                            }
+                            for (listener in refreshTicketListeners)
+                                listener.refreshTicketList(t.eventId!!)
                         }
-                        ticketListRefresher?.refreshTicketList(t.eventId!!)
                     }
+
                     RestAPI.redeemTicketForEvent(
                         accessToken,
                         t.eventId!!,
@@ -195,6 +297,8 @@ class UploadSyncTask : AsyncTask<Unit, Unit, Unit>() {
     override fun onPostExecute(result: Unit?) {
         super.onPostExecute(result)
         syncInProgress = false
+        for (listener in synchronizationListeners)
+            listener.onSyncFinished()
         Log.d(TAG, "UploadSyncTask - FINISHED")
     }
 }

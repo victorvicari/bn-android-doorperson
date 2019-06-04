@@ -22,16 +22,16 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     private var ticketIdTextView: TextView? = null
     var redeemedStatusTextView: TextView? = null
     var checkedStatusTextView: TextView? = null
-    var checkedNoInternetImageView: ImageView? = null
-    var duplicateStatusTextView: TextView? = null
+    private var checkedNoInternetImageView: ImageView? = null
+    private var duplicateStatusTextView: TextView? = null
     var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
     private var context: Context? = null
     var checkedIn: Boolean = false
     var ticketId: String? = null
-    var priceInCents: Int? = null
-    var ticketTypeName: String? = null
+    private var priceInCents: Int? = null
+    private var ticketType: String? = null
 
 
     init {
@@ -51,14 +51,14 @@ class TicketViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     fun bind(ticket: TicketModel) {
         ticketId = ticket.ticketId
         priceInCents = ticket.priceInCents
-        ticketTypeName = ticket.ticketType
+        ticketType = ticket.ticketType
 
         lastNameAndFirstNameTextView?.text =
             context!!.getString(R.string.last_name_first_name, ticket.lastName, ticket.firstName)
 
-        priceAndTicketTypeTextView?.text = context!!.getString(R.string.price_ticket_type, priceInCents?.div(100), ticketTypeName)
+        priceAndTicketTypeTextView?.text = context!!.getString(R.string.price_ticket_type, priceInCents?.div(100), ticketType)
 
-        ticketIdTextView?.text = "#${ticket.ticketId?.takeLast(8)}"
+        ticketIdTextView?.text = "#" + ticket.ticketId?.takeLast(8)
 
         val ticketStatus = ticket.status?.toLowerCase()
         val statusRedeemed = context!!.getString(R.string.redeemed).toLowerCase()

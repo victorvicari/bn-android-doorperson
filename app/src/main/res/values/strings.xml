@@ -2,8 +2,7 @@
     <string name="app_name">Door person</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email_address">Email Address</string>
-    <string name="password">Password</string>
-    <string name="login_to_your_account_lowercase">Login to your account</string>
+    <string name="password">Password (at least 6 characters)</string>
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
     <string name="event_image">Event image</string>
     <string name="event_right_arrow">Event right arrow</string>
@@ -42,11 +41,20 @@
     <string name="disable_offline_mode">Disable offline mode</string>
     <string name="offline_mode_enabled">Offline mode is enabled</string>
     <string name="offline_mode_disabled">Offline mode is disabled</string>
-    <string name="title_activity_duplicate_ticket_checkin">DuplicateTicketCheckinActivity</string>
     <string name="warning">WARNING!</string>
     <string name="duplicate_ticket_msg">Duplicate ticket detected!!!\nTicket has already been redeemed!\n\nTicket: %1$s\nUser: %2$s</string>
     <string name="go_back">GO BACK</string>
     <string name="ticket_id">Ticket ID</string>
     <string name="reading_ticket">Reading ticket</string>
     <string name="no_internet_icon">No internet icon</string>
+    <string name="show">SHOW</string>
+    <string name="hide">HIDE</string>
+    <string name="please_enter_your_email_address">Please enter your email address</string>
+    <string name="please_enter_a_valid_password">Please enter a valid password</string>
+    <string name="pill_checked_status_image">Pill checked status image</string>
+    <string name="pill_user_image">Pill user image</string>
+    <string name="cpb_textIdle">Login to your account</string>
+    <string name="cpb_textComplete">Login success!</string>
+    <string name="cpb_textError">Invalid Username/Password</string>
+    <string name="pill_scanned_by_text">Scanned by: %1$s</string>
 </resources>
