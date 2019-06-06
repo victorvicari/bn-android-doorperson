@@ -55,6 +55,6 @@
     <string name="pill_user_image">Pill user image</string>
     <string name="cpb_textIdle">Login to your account</string>
     <string name="cpb_textComplete">Login success!</string>
-    <string name="cpb_textError">Invalid Username/Password</string>
+    <string name="cpb_textError">Invalid Email/Password</string>
     <string name="pill_scanned_by_text">Scanned by: %1$s</string>
 </resources>
