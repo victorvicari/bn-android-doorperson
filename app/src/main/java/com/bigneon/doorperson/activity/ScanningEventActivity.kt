@@ -33,9 +33,10 @@ class ScanningEventActivity : AppCompatActivity() {
         }
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
+            override fun refreshTicketList(eventId: String, loadInProgress: Boolean) {
                 getEventSummary()
-                loading_tickets_progress_bar.visibility = View.GONE
+                loading_tickets_progress_bar.visibility =
+                    if (loadInProgress && loading_tickets_progress_bar.visibility == View.GONE) View.VISIBLE else View.GONE
             }
         }
 

@@ -44,9 +44,11 @@ class TicketListActivity : AppCompatActivity() {
         }
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
-                if (TicketListActivity.eventId == eventId)
+            override fun refreshTicketList(eventId: String, loadInProgress: Boolean) {
+                if (TicketListActivity.eventId == eventId) {
+                    loading_guests_progress_bar.visibility = if (loadInProgress) View.VISIBLE else View.GONE
                     refreshList(eventId)
+                }
             }
         }
 
@@ -158,6 +160,7 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         refreshList(eventId)
+        tickets_layout.loading_guests_progress_bar.visibility = View.GONE
     }
 
     override fun onStart() {
@@ -224,8 +227,6 @@ class TicketListActivity : AppCompatActivity() {
 
         ticket_list_view.layoutManager =
             LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-
-        tickets_layout.loading_guests_progress_bar.visibility = View.GONE
 
         ticketList = ticketsDS!!.getAllTicketsForEvent(TicketListActivity.eventId!!)
         adaptListView(ticket_list_view)

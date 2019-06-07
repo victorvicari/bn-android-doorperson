@@ -163,10 +163,12 @@ class RestAPI private constructor() {
             accessToken: String,
             eventId: String,
             changesSince: String?,
+            limit: Int?,
+            page: Int?,
             setTickets: (ArrayList<TicketModel>?) -> Unit
         ) {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, changesSince, null)
+                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, null)
             val getTicketsForEventCallback = object : Callback<TicketsResponse> {
                 override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
                     if (response.body() != null) {
