@@ -15,11 +15,16 @@ open class BaseDS {
 
     @Throws(SQLException::class)
     protected fun open() {
+        if (database != null && database!!.isOpen)
+            return
         database = dbHelper.writableDatabase
     }
 
     // TODO - Analyze where to close DS
-//    protected fun close() {
-//        dbHelper.close()
-//    }
+    protected fun close() {
+        if (database == null || !database!!.isOpen)
+            return
+        dbHelper.close()
+        database = null
+    }
 }
