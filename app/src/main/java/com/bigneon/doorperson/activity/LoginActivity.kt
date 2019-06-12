@@ -14,7 +14,6 @@ import android.view.View
 import android.view.animation.AnimationUtils.loadAnimation
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
@@ -50,7 +49,6 @@ class LoginActivity : AppCompatActivity() {
         SharedPrefs.setContext(this)
         RestAPI.setContext(this)
         SyncController.setContext(this)
-        SQLiteHelper.setContext(this)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
