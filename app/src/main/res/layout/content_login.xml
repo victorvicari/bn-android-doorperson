@@ -31,7 +31,7 @@
 
         <android.support.v7.widget.AppCompatTextView
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="150dp"
                 android:gravity="center"
                 android:text="@string/welcome_back"
                 android:textColor="@android:color/black"
@@ -67,7 +67,7 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="@dimen/fab_margin"
                 android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
             <android.support.v7.widget.AppCompatEditText
