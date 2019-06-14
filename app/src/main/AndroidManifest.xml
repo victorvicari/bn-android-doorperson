@@ -4,6 +4,7 @@
           package="com.bigneon.doorperson"
           tools:ignore="GoogleAppIndexingWarning">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -16,15 +17,13 @@
     <application
             android:allowBackup="true"
             android:fullBackupContent="@xml/backup_descriptor"
+            android:hardwareAccelerated="false"
             android:icon="@drawable/heart_large"
             android:label="@string/app_name"
+            android:largeHeap="true"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme"
-            android:hardwareAccelerated="false"
-            android:largeHeap="true">
-
-
+            android:theme="@style/AppTheme">
         <service
                 android:name=".service.SyncService"
                 android:exported="false">
@@ -68,6 +67,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <receiver
                 android:name=".receiver.NetworkStateReceiver"
                 android:label="NetworkStateReceiver">
