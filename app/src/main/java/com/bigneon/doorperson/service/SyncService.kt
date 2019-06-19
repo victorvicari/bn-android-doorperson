@@ -6,13 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
-import com.bigneon.doorperson.db.SyncController
 
 class SyncService : Service() {
     private val syncAllTablesReceiver = object : BroadcastReceiver() {
         @Synchronized
         override fun onReceive(context: Context, intent: Intent) {
-            SyncController.synchronizeAllTables(false)
+//            SyncController.synchronizeAllTables(false)
         }
     }
 
@@ -28,7 +27,7 @@ class SyncService : Service() {
         registerReceiver(syncAllTablesReceiver, filter)
 
         //Initial sync
-        SyncController.synchronizeAllTables(false)
+//        SyncController.synchronizeAllTables(false)
 
         return super.onStartCommand(intent, flags, startId)
     }

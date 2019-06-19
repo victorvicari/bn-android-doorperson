@@ -52,14 +52,14 @@ class SyncController {
             if (!NetworkUtils.instance().isNetworkAvailable(context))
                 return false
 
-            Thread(Runnable {
+//            Thread(Runnable {
                 if (!syncInProgress) {
                     Log.d(TAG, "SynchronizeAllTablesTask - STARTED")
                     SynchronizeAllTablesTask(fullRefresh).execute()
                 } else {
                     Log.d(TAG, "Synchronization already in progress - SKIP")
                 }
-            }).start()
+//            }).start()
 
             return true
         }

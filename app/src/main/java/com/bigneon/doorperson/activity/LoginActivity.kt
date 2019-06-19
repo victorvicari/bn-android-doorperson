@@ -133,6 +133,31 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // TODO - REMOVE AFTER TEST
+        /*try {
+            val email = "superuser@test.com"
+            val password = "password"
+            fun setAccessToken(accessToken: String?) {
+                if (accessToken == null) {
+                    loginBtn.progress = -1
+                    loginBtn.startAnimation(loadAnimation(this, R.anim.shake))
+                    Handler().postDelayed({
+                        loginBtn.progress = 0
+                    }, 3000)
+                } else {
+                    Crashlytics.setUserEmail(email)
+                    loginBtn.progress = 100
+                    Handler().postDelayed({
+                        startActivity(Intent(getContext(), EventsActivity::class.java))
+                        finish()
+                    }, 1000)
+                }
+            }
+            RestAPI.authenticate(email, password, ::setAccessToken)
+        } catch (e: Exception) {
+            Log.e(TAG, e.message)
+        }*/
     }
 
     override fun onStart() {

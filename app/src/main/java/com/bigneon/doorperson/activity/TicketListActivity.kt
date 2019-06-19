@@ -153,7 +153,7 @@ class TicketListActivity : AppCompatActivity() {
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+//            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             tickets_swipe_refresh_layout.isRefreshing = false

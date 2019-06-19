@@ -79,7 +79,7 @@ class ScanningEventActivity : AppCompatActivity() {
 
         scanning_event_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+//            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             scanning_event_layout.isRefreshing = false
