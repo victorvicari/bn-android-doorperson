@@ -33,9 +33,10 @@ class ScanningEventActivity : AppCompatActivity() {
         }
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
+            override fun refreshTicketList(eventId: String, page: Int) {
                 getEventSummary()
-                loading_tickets_progress_bar.visibility = View.GONE
+                // TODO - Implement progress bar considering page and total ticket number
+                //loading_tickets_progress_bar.visibility = View.GONE
             }
         }
 
@@ -78,7 +79,7 @@ class ScanningEventActivity : AppCompatActivity() {
 
         scanning_event_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+//            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             scanning_event_layout.isRefreshing = false

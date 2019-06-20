@@ -7,6 +7,7 @@ import android.util.Log
 import com.bigneon.doorperson.activity.DuplicateTicketCheckinActivity
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
+import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -163,10 +164,12 @@ class RestAPI private constructor() {
             accessToken: String,
             eventId: String,
             changesSince: String?,
+            limit: Int?,
+            page: Int?,
             setTickets: (ArrayList<TicketModel>?) -> Unit
         ) {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, changesSince, null)
+                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, null)
             val getTicketsForEventCallback = object : Callback<TicketsResponse> {
                 override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
                     if (response.body() != null) {
@@ -178,6 +181,30 @@ class RestAPI private constructor() {
 
                 override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
                     Log.e(TAG, "Getting tickets for event $eventId failed")
+                }
+            }
+
+            getTicketsForEventCall.enqueue(getTicketsForEventCallback)
+        }
+
+        fun getTotalNumberOfTicketsForEvent(
+            accessToken: String,
+            eventId: String,
+            setTotalNumberOfTickets: (Int?) -> Unit
+        ) {
+            val getTicketsForEventCall =
+                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0,null)
+            val getTicketsForEventCallback = object : Callback<TicketsResponse> {
+                override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
+                    if (response.body() != null) {
+                        setTotalNumberOfTickets(response.body()?.paging?.total)
+                    } else {
+                        Log.e(TAG, "Getting total number of tickets for event $eventId failed")
+                    }
+                }
+
+                override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
+                    Log.e(TAG, "Getting total number of tickets for event $eventId failed")
                 }
             }
 

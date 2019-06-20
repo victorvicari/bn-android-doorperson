@@ -44,7 +44,7 @@ class TicketListActivity : AppCompatActivity() {
         }
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
+            override fun refreshTicketList(eventId: String, page: Int) {
                 if (TicketListActivity.eventId == eventId)
                     refreshList(eventId)
             }
@@ -151,7 +151,7 @@ class TicketListActivity : AppCompatActivity() {
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+//            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             tickets_swipe_refresh_layout.isRefreshing = false

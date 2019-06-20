@@ -1,10 +1,9 @@
 package com.bigneon.doorperson.db
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.bigneon.doorperson.BigNeonApplication
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.db.dml.TableEventsDML
 import com.bigneon.doorperson.db.dml.TableSyncDML
@@ -16,18 +15,20 @@ import com.bigneon.doorperson.db.dml.TableTicketsDML
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
 class SQLiteHelper : SQLiteOpenHelper(
-    context,
+    BigNeonApplication.context,
     AppConstants.DATABASE_NAME,
     null,
     AppConstants.DATABASE_VERSION
 ) {
     companion object {
+        val instance = SQLiteHelper()
 
-        @SuppressLint("StaticFieldLeak")
-        private lateinit var context: Context
+        fun getDB(): SQLiteDatabase {
+            return instance.writableDatabase
+        }
 
-        fun setContext(con: Context) {
-            context = con
+        fun closeDB(db: SQLiteDatabase) {
+            db.close()
         }
     }
 
