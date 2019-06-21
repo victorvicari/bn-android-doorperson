@@ -30,6 +30,7 @@ class SyncController {
         var syncInProgress: Boolean = false
         var refreshEventListeners: MutableList<RefreshEventListener> = ArrayList()
         var refreshTicketListeners: MutableList<RefreshTicketListener> = ArrayList()
+        var loadingTicketListeners: MutableList<LoadingTicketListener> = ArrayList()
 
         fun setContext(con: Context) {
             context = con
@@ -44,152 +45,200 @@ class SyncController {
                 return false
 
             if (!syncInProgress) {
-                Log.d(TAG, "Synchronization started")
+                Thread(Runnable {
+                    Log.d(TAG, "Synchronization started")
 
-                val eventsDS = EventsDS()
-                val ticketsDS = TicketsDS()
-                val syncDS = SyncDS()
+                    val eventsDS = EventsDS()
+                    val ticketsDS = TicketsDS()
+                    val syncDS = SyncDS()
 
-                fun uploadSynchronization(accessToken: String) {
-                    val checkedTickets = ticketsDS.getAllCheckedTickets()
-                    checkedTickets?.forEach { t ->
-                        Log.d(TAG, "Ticket ID: ${t.ticketId} - UPLOADING on server")
+                    fun uploadSynchronization(accessToken: String) {
+                        val checkedTickets = ticketsDS.getAllCheckedTickets()
+                        checkedTickets?.forEach { t ->
+                            Log.d(TAG, "Ticket ID: ${t.ticketId} - UPLOADING on server")
 
-                        fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
-                            if (isDuplicateTicket) {
-                                ticketsDS.setDuplicateTicket(t.ticketId!!)
-                                Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE in local ")
-                            } else {
-                                if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
-                                    ticketsDS.updateTicket(redeemedTicket)
+                            fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
+                                if (isDuplicateTicket) {
+                                    ticketsDS.setDuplicateTicket(t.ticketId!!)
+                                    Log.d(TAG, "Ticket ID: ${t.ticketId} - DUPLICATE in local ")
+                                } else {
+                                    if (redeemedTicket?.status?.toLowerCase() == getContext().getString(R.string.redeemed).toLowerCase()) {
+                                        ticketsDS.updateTicket(redeemedTicket)
 
-                                    ticketsDS.setRedeemedTicket(t.ticketId!!)
-                                    Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
+                                        ticketsDS.setRedeemedTicket(t.ticketId!!)
+                                        Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
+                                    }
+                                    for (listener in refreshTicketListeners)
+                                        listener.refreshTicketList(t.eventId!!, 0)
                                 }
-                                for (listener in refreshTicketListeners)
-                                    listener.refreshTicketList(t.eventId!!, 0)
                             }
+
+                            RestAPI.redeemTicketForEvent(
+                                accessToken,
+                                t.eventId!!,
+                                t.ticketId!!,
+                                t.firstName!!,
+                                t.lastName!!,
+                                t.redeemKey!!,
+                                ::redeemTicketResult
+                            )
                         }
 
-                        RestAPI.redeemTicketForEvent(
-                            accessToken,
-                            t.eventId!!,
-                            t.ticketId!!,
-                            t.firstName!!,
-                            t.lastName!!,
-                            t.redeemKey!!,
-                            ::redeemTicketResult
-                        )
+                        syncInProgress = false
                     }
 
-                    syncInProgress = false
-                }
+                    fun downloadSynchronization(accessToken: String) {
+                        fun setEvents(events: ArrayList<EventModel>?) {
+                            if (events != null) {
+                                fun updateTicketsForEvents() {
+                                    var j = 0
+                                    fun updateTicketsForEvent(e: EventModel) {
+                                        val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + e.id!!)
+                                        if (!eventForSync.isNullOrEmpty()) {
+                                            //val initialLoading = ticketsDS.getAllTicketNumberForEvent(e.id!!) == 0
 
-                fun downloadSynchronization(accessToken: String) {
-                    fun setEvents(events: ArrayList<EventModel>?) {
-                        if (events != null) {
-                            fun updateTicketsForEvents() {
-                                var j = 0
-                                fun updateTicketsForEvent(e: EventModel) {
-                                    val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + e.id!!)
-                                    if (!eventForSync.isNullOrEmpty()) {
-                                        val initialLoading = ticketsDS.getAllTicketNumberForEvent(e.id!!) == 0
+                                            var page = 0
+                                            fun loadPageOfTickets() {
+                                                fun setTickets(tickets: ArrayList<TicketModel>?) {
+                                                    if (!tickets.isNullOrEmpty()) {
+//                                                        if (initialLoading)
+//                                                            ticketsDS.createTicketList(tickets)
+//                                                        else
+                                                            ticketsDS.createOrUpdateTicketList(tickets)
+                                                    }
 
-                                        var page = 0
-                                        fun loadPageOfTickets() {
-                                            fun setTickets(tickets: ArrayList<TicketModel>?) {
-                                                if (!tickets.isNullOrEmpty()) {
-                                                    if (initialLoading)
-                                                        ticketsDS.createTicketList(tickets)
-                                                    else
-                                                        ticketsDS.createOrUpdateTicketList(tickets)
+                                                    page++
+
+                                                    for (listener in refreshTicketListeners)
+                                                        listener.refreshTicketList(e.id!!, page)
+
+                                                    // If the loaded ticket list isn't empty, proceed with loading of another page
+                                                    if (!tickets.isNullOrEmpty())
+                                                        loadPageOfTickets()
                                                 }
 
-                                                page++
-
-                                                for (listener in refreshTicketListeners)
-                                                    listener.refreshTicketList(e.id!!, page)
-
-                                                // If the loaded ticket list isn't empty, proceed with loading of another page
-                                                if (!tickets.isNullOrEmpty())
-                                                    loadPageOfTickets()
-                                            }
-
-                                            val changesSince =
-                                                if (fullRefresh) AppConstants.MIN_TIMESTAMP else syncDS.getLastSyncTime(
-                                                    AppConstants.SyncTableName.TICKETS,
-                                                    false
+                                                val changesSince =
+                                                    if (fullRefresh) AppConstants.MIN_TIMESTAMP else syncDS.getLastSyncTime(
+                                                        AppConstants.SyncTableName.TICKETS,
+                                                        false
+                                                    )
+                                                RestAPI.getTicketsForEvent(
+                                                    accessToken,
+                                                    e.id!!,
+                                                    changesSince,
+                                                    AppConstants.SYNC_PAGE_LIMIT,
+                                                    page,
+                                                    ::setTickets
                                                 )
-                                            RestAPI.getTicketsForEvent(
-                                                accessToken,
-                                                e.id!!,
-                                                changesSince,
-                                                AppConstants.SYNC_PAGE_LIMIT,
-                                                page,
-                                                ::setTickets
-                                            )
+                                            }
+                                            loadPageOfTickets() // First call of recursive load
                                         }
-                                        loadPageOfTickets() // First call of recursive load
-                                    }
 
-                                    if (++j < events.size) {
-                                        updateTicketsForEvent(events[j])
-                                    } else {
-                                        // Upload synchronization
-                                        uploadSynchronization(accessToken)
+                                        if (++j < events.size) {
+                                            updateTicketsForEvent(events[j])
+                                        } else {
+                                            // Upload synchronization
+                                            uploadSynchronization(accessToken)
+                                        }
                                     }
+                                    updateTicketsForEvent(events[j])
                                 }
-                                updateTicketsForEvent(events[j])
-                            }
 
-                            var i = 0
-                            fun updateEvent(e: EventModel) {
-                                fun setTotalNumberOfTickets(total: Int?) {
-                                    if (eventsDS.eventExists(e.id!!)) {
-                                        eventsDS.updateEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
-                                        Log.d(TAG, "updateEvent - ${e.id}")
-                                    } else {
-                                        eventsDS.createEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
-                                        Log.d(TAG, "createEvent - ${e.id}")
+                                var i = 0
+                                fun updateEvent(e: EventModel) {
+                                    fun setTotalNumberOfTickets(total: Int?) {
+                                        if (eventsDS.eventExists(e.id!!)) {
+                                            eventsDS.updateEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
+                                            Log.d(TAG, "updateEvent - ${e.id}")
+                                        } else {
+                                            eventsDS.createEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
+                                            Log.d(TAG, "createEvent - ${e.id}")
+                                        }
+
+                                        if (++i < events.size) {
+                                            updateEvent(events[i])
+                                        } else {
+                                            // Refresh event list
+                                            for (listener in refreshEventListeners)
+                                                listener.refreshEventList()
+                                            syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, false)
+
+                                            updateTicketsForEvents()
+                                        }
                                     }
-
-                                    if (++i < events.size) {
-                                        updateEvent(events[i])
-                                    } else {
-                                        // Refresh event list
-                                        for (listener in refreshEventListeners)
-                                            listener.refreshEventList()
-
-                                        updateTicketsForEvents()
-                                    }
+                                    RestAPI.getTotalNumberOfTicketsForEvent(
+                                        accessToken,
+                                        e.id!!,
+                                        ::setTotalNumberOfTickets
+                                    )
                                 }
-                                RestAPI.getTotalNumberOfTicketsForEvent(accessToken, e.id!!, ::setTotalNumberOfTickets)
-                            }
 
-                            updateEvent(events[i])
-                        } else {
-                            // Upload synchronization
-                            uploadSynchronization(accessToken)
+                                updateEvent(events[i])
+                            } else {
+                                // Upload synchronization
+                                uploadSynchronization(accessToken)
+                            }
+                        }
+                        RestAPI.getScannableEvents(accessToken, ::setEvents)
+                    }
+
+                    fun setAccessTokenForEvent(accessToken: String?) {
+                        if (accessToken != null) {
+                            syncInProgress = true
+
+                            // Download synchronization
+                            downloadSynchronization(accessToken)
                         }
                     }
-                    RestAPI.getScannableEvents(accessToken, ::setEvents)
-                }
 
-                fun setAccessTokenForEvent(accessToken: String?) {
-                    if (accessToken != null) {
-                        syncInProgress = true
-
-                        // Download synchronization
-                        downloadSynchronization(accessToken)
-                    }
-                }
-
-                RestAPI.accessToken(::setAccessTokenForEvent)
+                    RestAPI.accessToken(::setAccessTokenForEvent)
+                }).start()
             } else {
                 Log.d(TAG, "Synchronization already in progress - SKIP")
             }
 
             return true
+        }
+
+        fun loadTicketsForEvent(eventId: String) {
+            fun setAccessTokenForEvent(accessToken: String?) {
+                if (accessToken != null) {
+                    val ticketsDS = TicketsDS()
+                    var page = 0
+                    fun loadPageOfTickets() {
+                        fun setTickets(tickets: ArrayList<TicketModel>?) {
+                            if (!tickets.isNullOrEmpty()) {
+                                ticketsDS.createTicketList(tickets)
+                            }
+
+                            page++
+
+                            for (listener in refreshTicketListeners)
+                                listener.refreshTicketList(eventId, page)
+
+                            // If the loaded ticket list isn't empty, proceed with loading of another page
+                            if (!tickets.isNullOrEmpty())
+                                loadPageOfTickets()
+                            else {
+                                for (listener in loadingTicketListeners)
+                                    listener.finish()
+                            }
+                        }
+
+                        RestAPI.getTicketsForEvent(
+                            accessToken,
+                            eventId,
+                            AppConstants.MIN_TIMESTAMP,
+                            AppConstants.SYNC_PAGE_LIMIT,
+                            page,
+                            ::setTickets
+                        )
+                    }
+                    loadPageOfTickets() // First call of recursive load
+                }
+            }
+
+            RestAPI.accessToken(::setAccessTokenForEvent)
         }
 
         fun addRefreshEventListener(listener: RefreshEventListener) {
@@ -207,6 +256,14 @@ class SyncController {
         fun removeRefreshTicketListener(listener: RefreshTicketListener) {
             refreshTicketListeners.remove(listener)
         }
+
+        fun addLoadingTicketListener(listener: LoadingTicketListener) {
+            loadingTicketListeners.add(listener)
+        }
+
+        fun removeLoadingTicketListener(listener: LoadingTicketListener) {
+            loadingTicketListeners.remove(listener)
+        }
     }
 
     interface RefreshEventListener {
@@ -215,5 +272,9 @@ class SyncController {
 
     interface RefreshTicketListener {
         fun refreshTicketList(eventId: String, page: Int)
+    }
+
+    interface LoadingTicketListener {
+        fun finish()
     }
 }

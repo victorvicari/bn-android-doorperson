@@ -104,90 +104,13 @@ class EventsDS {
         SQLiteHelper.closeDB(db)
     }
 
-    /*
-    fun getEvent(eventId: String): EventModel? {
-        database?.query(
-            TABLE_EVENTS,
-            allColumns,
-            EVENT_ID + " = '" + eventId + "'",
-            null,
-            null,
-            null,
-            null
-        )?.use {
-            if (it.moveToFirst()) {
-                return cursorToEvent(it)
-            }
-        } ?: return null
-        return null
-    }
-
-    fun getAllEvents(): ArrayList<EventModel>? {
-        val eventModels = ArrayList<EventModel>()
-
-        database?.query(TABLE_EVENTS, allColumns, null, null, null, null, null)?.use {
-            if (it.moveToFirst()) {
-                while (!it.isAfterLast) {
-                    val projectModel = cursorToEvent(it)
-                    eventModels.add(projectModel)
-                    it.moveToNext()
-                }
-                return eventModels
-            }
-        } ?: return null
-        return null
-    }
-
-    fun eventExists(eventId: String): Boolean {
-        database?.rawQuery(
-            "select count(*) from " + TABLE_EVENTS + " where " + EVENT_ID + " = '" + eventId + "'",
-            null
-        )?.use {
-            if (it.moveToFirst()) {
-                val count = it.getInt(0)
-                return count > 0
-            }
-        } ?: return false
-
-        return false
-    }
-
-    fun createEvent(
-        eventId: String,
-        name: String,
-        promoImageURL: String
-    ) {
-        val values = ContentValues()
-        values.put(EVENT_ID, eventId)
-        values.put(NAME, name)
-        values.put(PROMO_IMAGE_URL, promoImageURL)
-
-        database?.insert(TABLE_EVENTS, null, values)
-    }
-
-    fun updateEvent(
-        eventId: String,
-        name: String,
-        promoImageURL: String
-    ) {
-        val values = ContentValues()
-        values.put(NAME, name)
-        values.put(PROMO_IMAGE_URL, promoImageURL)
-
-        database?.update(TABLE_EVENTS, values, EVENT_ID + " = '" + eventId + "'", null)
-    }
-
-    fun deleteEvent(eventId: String) {
-        println("EventModel deleted with pk: $eventId")
-        database?.delete(TABLE_EVENTS, EVENT_ID + " = '" + eventId + "'", null)
-    }
-*/
     private fun cursorToEvent(cursor: Cursor): EventModel {
         val eventModel = EventModel()
         var index = 0
         eventModel.id = cursor.getString(index++)
         eventModel.name = cursor.getString(index++)
-        eventModel.promoImageURL = cursor.getString(index)
+        eventModel.promoImageURL = cursor.getString(index++)
+        eventModel.totalNumOfTickets = cursor.getInt(index)
         return eventModel
     }
 }

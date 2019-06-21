@@ -72,10 +72,7 @@ class EventsActivity : AppCompatActivity() {
                 val intent = Intent(getContext(), ScanningEventActivity::class.java)
                 if (eventForSync.isNullOrEmpty()) {
                     SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
-                    SyncController.synchronizeAllTables(true)
-                    intent.putExtra("showWaitingProgressBar", true)
-                } else {
-                    intent.putExtra("showWaitingProgressBar", false)
+//                    SyncController.synchronizeAllTables(true)
                 }
                 intent.putExtra("eventId", eventId)
                 startActivity(intent)

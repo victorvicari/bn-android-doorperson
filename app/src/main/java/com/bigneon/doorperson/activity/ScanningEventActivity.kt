@@ -34,9 +34,21 @@ class ScanningEventActivity : AppCompatActivity() {
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
             override fun refreshTicketList(eventId: String, page: Int) {
-                getEventSummary()
+                getLoadedSummary()
                 // TODO - Implement progress bar considering page and total ticket number
-                //loading_tickets_progress_bar.visibility = View.GONE
+            }
+        }
+
+    private var loadingTicketListener: SyncController.LoadingTicketListener =
+        object : SyncController.LoadingTicketListener {
+            override fun finish() {
+                scanning_events_button.visibility = View.VISIBLE
+                loading_events_button.visibility = View.GONE
+                loading_events_button.isEnabled = true
+                number_of_loaded.visibility = View.GONE
+                number_of_redeemed.visibility = View.VISIBLE
+                number_of_checked.visibility = View.VISIBLE
+                getEventSummary()
             }
         }
 
@@ -54,13 +66,25 @@ class ScanningEventActivity : AppCompatActivity() {
         eventId = intent.getStringExtra("eventId")
         ticketsDS = TicketsDS()
         eventsDS = EventsDS()
-        val showWaitingProgressBar = intent.getBooleanExtra("showWaitingProgressBar", false)
-        loading_tickets_progress_bar.visibility = if (showWaitingProgressBar) View.VISIBLE else View.GONE
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        getEventSummary()
+        if(ticketsDS!!.getAllTicketNumberForEvent(eventId) == 0) {
+            loading_events_button.visibility = View.VISIBLE
+            scanning_events_button.visibility = View.GONE
+            number_of_loaded.visibility = View.VISIBLE
+            number_of_redeemed.visibility = View.GONE
+            number_of_checked.visibility = View.GONE
+            getLoadedSummary()
+        } else {
+            scanning_events_button.visibility = View.VISIBLE
+            loading_events_button.visibility = View.GONE
+            number_of_loaded.visibility = View.GONE
+            number_of_redeemed.visibility = View.VISIBLE
+            number_of_checked.visibility = View.VISIBLE
+            getEventSummary()
+        }
 
         scanning_events_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), R.color.colorAccent),
@@ -77,6 +101,11 @@ class ScanningEventActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        loading_events_button.setOnClickListener {
+            loading_events_button.isEnabled = false
+            SyncController.loadTicketsForEvent(eventId)
+        }
+
         scanning_event_layout.setOnRefreshListener {
             // Sync local DB with remote server
 //            SyncController.synchronizeAllTables(true)
@@ -84,6 +113,15 @@ class ScanningEventActivity : AppCompatActivity() {
             // Hide swipe to refresh icon animation
             scanning_event_layout.isRefreshing = false
         }
+    }
+
+    private fun getLoadedSummary() {
+        val event = eventsDS!!.getEvent(eventId)
+        number_of_loaded.text = getString(
+                R.string._1_d_of_2_d_loaded,
+            ticketsDS!!.getAllTicketNumberForEvent(eventId),
+            event?.totalNumOfTickets
+        )
     }
 
     private fun getEventSummary() {
@@ -105,12 +143,14 @@ class ScanningEventActivity : AppCompatActivity() {
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
         SyncController.addRefreshTicketListener(refreshTicketListener)
+        SyncController.addLoadingTicketListener(loadingTicketListener)
         super.onStart()
     }
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         SyncController.removeRefreshTicketListener(refreshTicketListener)
+        SyncController.removeLoadingTicketListener(loadingTicketListener)
         super.onStop()
     }
 
