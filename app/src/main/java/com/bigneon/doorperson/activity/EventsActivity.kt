@@ -72,7 +72,6 @@ class EventsActivity : AppCompatActivity() {
                 val intent = Intent(getContext(), ScanningEventActivity::class.java)
                 if (eventForSync.isNullOrEmpty()) {
                     SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
-//                    SyncController.synchronizeAllTables(true)
                 }
                 intent.putExtra("eventId", eventId)
                 startActivity(intent)
@@ -96,7 +95,7 @@ class EventsActivity : AppCompatActivity() {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-//            SyncController.synchronizeAllTables(true)
+            SyncController.synchronizeAllTables(true)
 
             // Hide swipe to refresh icon animation
             events_layout.isRefreshing = false // TODO - Move after sync is done!

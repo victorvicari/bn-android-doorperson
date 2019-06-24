@@ -33,9 +33,8 @@ class ScanningEventActivity : AppCompatActivity() {
         }
     private var refreshTicketListener: SyncController.RefreshTicketListener =
         object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String, page: Int) {
+            override fun refreshTicketList(eventId: String) {
                 getLoadedSummary()
-                // TODO - Implement progress bar considering page and total ticket number
             }
         }
 
@@ -44,11 +43,15 @@ class ScanningEventActivity : AppCompatActivity() {
             override fun finish() {
                 scanning_events_button.visibility = View.VISIBLE
                 loading_events_button.visibility = View.GONE
-                loading_events_button.isEnabled = true
                 number_of_loaded.visibility = View.GONE
                 number_of_redeemed.visibility = View.VISIBLE
                 number_of_checked.visibility = View.VISIBLE
                 getEventSummary()
+                loading_events_button.isEnabled = true
+                scanning_event_layout.isEnabled = true
+
+                // Hide swipe to refresh icon animation
+                scanning_event_layout.isRefreshing = false
             }
         }
 
@@ -70,13 +73,14 @@ class ScanningEventActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        if(ticketsDS!!.getAllTicketNumberForEvent(eventId) == 0) {
+        if (ticketsDS!!.getAllTicketNumberForEvent(eventId) == 0) {
             loading_events_button.visibility = View.VISIBLE
             scanning_events_button.visibility = View.GONE
             number_of_loaded.visibility = View.VISIBLE
             number_of_redeemed.visibility = View.GONE
             number_of_checked.visibility = View.GONE
             getLoadedSummary()
+            scanning_event_layout.isEnabled = false
         } else {
             scanning_events_button.visibility = View.VISIBLE
             loading_events_button.visibility = View.GONE
@@ -84,6 +88,7 @@ class ScanningEventActivity : AppCompatActivity() {
             number_of_redeemed.visibility = View.VISIBLE
             number_of_checked.visibility = View.VISIBLE
             getEventSummary()
+            scanning_event_layout.isEnabled = true
         }
 
         scanning_events_toolbar.navigationIcon!!.setColorFilter(
@@ -92,7 +97,8 @@ class ScanningEventActivity : AppCompatActivity() {
         )
 
         scanning_events_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), EventsActivity::class.java))
+            if (loading_events_button.isEnabled)
+                startActivity(Intent(getContext(), EventsActivity::class.java))
         }
 
         scanning_events_button.setOnClickListener {
@@ -107,18 +113,19 @@ class ScanningEventActivity : AppCompatActivity() {
         }
 
         scanning_event_layout.setOnRefreshListener {
-            // Sync local DB with remote server
-//            SyncController.synchronizeAllTables(true)
-
-            // Hide swipe to refresh icon animation
-            scanning_event_layout.isRefreshing = false
+            if (scanning_event_layout.isEnabled) {
+                scanning_event_layout.isEnabled = false
+                scanning_event_layout.isRefreshing = true
+                // Sync local DB with remote server
+                SyncController.updateEvent(eventId)
+            }
         }
     }
 
     private fun getLoadedSummary() {
         val event = eventsDS!!.getEvent(eventId)
         number_of_loaded.text = getString(
-                R.string._1_d_of_2_d_loaded,
+            R.string._1_d_of_2_d_loaded,
             ticketsDS!!.getAllTicketNumberForEvent(eventId),
             event?.totalNumOfTickets
         )

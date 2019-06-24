@@ -204,6 +204,7 @@ class RestAPI private constructor() {
                 }
 
                 override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
+                    setTotalNumberOfTickets(-1)
                     Log.e(TAG, "Getting total number of tickets for event $eventId failed")
                 }
             }

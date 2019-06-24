@@ -69,7 +69,7 @@ class SyncController {
                                         Log.d(TAG, "Ticket ID: ${t.ticketId!!} - REDEEMED in local ")
                                     }
                                     for (listener in refreshTicketListeners)
-                                        listener.refreshTicketList(t.eventId!!, 0)
+                                        listener.refreshTicketList(t.eventId!!)
                                 }
                             }
 
@@ -95,22 +95,17 @@ class SyncController {
                                     fun updateTicketsForEvent(e: EventModel) {
                                         val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + e.id!!)
                                         if (!eventForSync.isNullOrEmpty()) {
-                                            //val initialLoading = ticketsDS.getAllTicketNumberForEvent(e.id!!) == 0
-
                                             var page = 0
                                             fun loadPageOfTickets() {
                                                 fun setTickets(tickets: ArrayList<TicketModel>?) {
                                                     if (!tickets.isNullOrEmpty()) {
-//                                                        if (initialLoading)
-//                                                            ticketsDS.createTicketList(tickets)
-//                                                        else
-                                                            ticketsDS.createOrUpdateTicketList(tickets)
+                                                        ticketsDS.createOrUpdateTicketList(tickets)
                                                     }
 
                                                     page++
 
                                                     for (listener in refreshTicketListeners)
-                                                        listener.refreshTicketList(e.id!!, page)
+                                                        listener.refreshTicketList(e.id!!)
 
                                                     // If the loaded ticket list isn't empty, proceed with loading of another page
                                                     if (!tickets.isNullOrEmpty())
@@ -145,14 +140,27 @@ class SyncController {
                                 }
 
                                 var i = 0
-                                fun updateEvent(e: EventModel) {
+                                fun updateEvent(event: EventModel) {
                                     fun setTotalNumberOfTickets(total: Int?) {
-                                        if (eventsDS.eventExists(e.id!!)) {
-                                            eventsDS.updateEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
-                                            Log.d(TAG, "updateEvent - ${e.id}")
+                                        if (total == -1) {
+                                            // TODO - REST call failed, skip it!!!
+                                        }
+                                        if (eventsDS.eventExists(event.id!!)) {
+                                            eventsDS.updateEvent(
+                                                event.id!!,
+                                                event.name!!,
+                                                event.promoImageURL!!,
+                                                total ?: 0
+                                            )
+                                            Log.d(TAG, "updateEvent - ${event.id}")
                                         } else {
-                                            eventsDS.createEvent(e.id!!, e.name!!, e.promoImageURL!!, total ?: 0)
-                                            Log.d(TAG, "createEvent - ${e.id}")
+                                            eventsDS.createEvent(
+                                                event.id!!,
+                                                event.name!!,
+                                                event.promoImageURL!!,
+                                                total ?: 0
+                                            )
+                                            Log.d(TAG, "createEvent - ${event.id}")
                                         }
 
                                         if (++i < events.size) {
@@ -168,7 +176,7 @@ class SyncController {
                                     }
                                     RestAPI.getTotalNumberOfTicketsForEvent(
                                         accessToken,
-                                        e.id!!,
+                                        event.id!!,
                                         ::setTotalNumberOfTickets
                                     )
                                 }
@@ -200,6 +208,64 @@ class SyncController {
             return true
         }
 
+        fun updateEvent(eventId: String) {
+            fun setAccessTokenForEvent(accessToken: String?) {
+                if (accessToken != null) {
+                    val eventsDS = EventsDS()
+                    val ticketsDS = TicketsDS()
+
+                    fun setTotalNumberOfTickets(total: Int?) {
+                        val event = eventsDS.getEvent(eventId)
+                        if (eventsDS.eventExists(eventId)) {
+                            eventsDS.updateEvent(eventId, event?.name!!, event.promoImageURL!!, total ?: 0)
+                            Log.d(TAG, "updateEvent - ${event.id}")
+                        } else {
+                            eventsDS.createEvent(eventId, event?.name!!, event.promoImageURL!!, total ?: 0)
+                            Log.d(TAG, "createEvent - $eventId")
+                        }
+
+                        var page = 0
+                        fun loadPageOfTickets() {
+                            fun setTickets(tickets: ArrayList<TicketModel>?) {
+                                if (!tickets.isNullOrEmpty()) {
+                                    ticketsDS.createOrUpdateTicketList(tickets)
+                                }
+
+                                page++
+
+                                for (listener in refreshTicketListeners)
+                                    listener.refreshTicketList(eventId)
+
+                                // If the loaded ticket list isn't empty, proceed with loading of another page
+                                if (!tickets.isNullOrEmpty()) {
+                                    loadPageOfTickets()
+                                } else {
+                                    for (listener in loadingTicketListeners)
+                                        listener.finish()
+                                }
+                            }
+
+                            RestAPI.getTicketsForEvent(
+                                accessToken,
+                                eventId,
+                                AppConstants.MIN_TIMESTAMP,
+                                AppConstants.SYNC_PAGE_LIMIT,
+                                page,
+                                ::setTickets
+                            )
+                        }
+                        loadPageOfTickets() // First call of recursive load
+                    }
+                    RestAPI.getTotalNumberOfTicketsForEvent(
+                        accessToken,
+                        eventId,
+                        ::setTotalNumberOfTickets
+                    )
+                }
+            }
+            RestAPI.accessToken(::setAccessTokenForEvent)
+        }
+
         fun loadTicketsForEvent(eventId: String) {
             fun setAccessTokenForEvent(accessToken: String?) {
                 if (accessToken != null) {
@@ -214,7 +280,7 @@ class SyncController {
                             page++
 
                             for (listener in refreshTicketListeners)
-                                listener.refreshTicketList(eventId, page)
+                                listener.refreshTicketList(eventId)
 
                             // If the loaded ticket list isn't empty, proceed with loading of another page
                             if (!tickets.isNullOrEmpty())
@@ -271,7 +337,7 @@ class SyncController {
     }
 
     interface RefreshTicketListener {
-        fun refreshTicketList(eventId: String, page: Int)
+        fun refreshTicketList(eventId: String)
     }
 
     interface LoadingTicketListener {
