@@ -2,31 +2,32 @@ package com.bigneon.doorperson.db.ds
 
 import android.content.ContentValues
 import android.database.Cursor
-import com.bigneon.doorperson.db.dml.TableEventsDML
+import com.bigneon.doorperson.db.SQLiteHelper
+import com.bigneon.doorperson.db.dml.TableEventsDML.NAME
+import com.bigneon.doorperson.db.dml.TableEventsDML.PROMO_IMAGE_URL
+import com.bigneon.doorperson.db.dml.TableEventsDML.TABLE_EVENTS
+import com.bigneon.doorperson.db.dml.TableEventsDML.TOTAL_NUM_OF_TICKETS
+import com.bigneon.doorperson.db.dml.TableTicketsDML.EVENT_ID
 import com.bigneon.doorperson.rest.model.EventModel
-import java.util.*
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
-class EventsDS : BaseDS() {
-    init {
-        open()
-    }
-
+class EventsDS {
     private val allColumns = arrayOf(
-        TableEventsDML.EVENT_ID,
-        TableEventsDML.NAME,
-        TableEventsDML.PROMO_IMAGE_URL
+        EVENT_ID,
+        NAME,
+        PROMO_IMAGE_URL,
+        TOTAL_NUM_OF_TICKETS
     )
 
     fun getEvent(eventId: String): EventModel? {
-        database?.query(
-            TableEventsDML.TABLE_EVENTS,
+        SQLiteHelper.getDB().query(
+            TABLE_EVENTS,
             allColumns,
-            TableEventsDML.EVENT_ID + " = '" + eventId + "'",
+            "$EVENT_ID = '$eventId'",
             null,
             null,
             null,
@@ -42,7 +43,7 @@ class EventsDS : BaseDS() {
     fun getAllEvents(): ArrayList<EventModel>? {
         val eventModels = ArrayList<EventModel>()
 
-        database?.query(TableEventsDML.TABLE_EVENTS, allColumns, null, null, null, null, null)?.use {
+        SQLiteHelper.getDB().query(TABLE_EVENTS, allColumns, null, null, null, null, null)?.use {
             if (it.moveToFirst()) {
                 while (!it.isAfterLast) {
                     val projectModel = cursorToEvent(it)
@@ -56,8 +57,8 @@ class EventsDS : BaseDS() {
     }
 
     fun eventExists(eventId: String): Boolean {
-        database?.rawQuery(
-            "select count(*) from " + TableEventsDML.TABLE_EVENTS + " where " + TableEventsDML.EVENT_ID + " = '" + eventId + "'",
+        SQLiteHelper.getDB().rawQuery(
+            "select count(*) from $TABLE_EVENTS where $EVENT_ID = '$eventId'",
             null
         )?.use {
             if (it.moveToFirst()) {
@@ -72,31 +73,35 @@ class EventsDS : BaseDS() {
     fun createEvent(
         eventId: String,
         name: String,
-        promoImageURL: String
+        promoImageURL: String,
+        total: Int
+
     ) {
         val values = ContentValues()
-        values.put(TableEventsDML.EVENT_ID, eventId)
-        values.put(TableEventsDML.NAME, name)
-        values.put(TableEventsDML.PROMO_IMAGE_URL, promoImageURL)
+        values.put(EVENT_ID, eventId)
+        values.put(NAME, name)
+        values.put(PROMO_IMAGE_URL, promoImageURL)
+        values.put(TOTAL_NUM_OF_TICKETS, total)
 
-        database?.insert(TableEventsDML.TABLE_EVENTS, null, values)
+        val db = SQLiteHelper.getDB()
+        db.insert(TABLE_EVENTS, null, values)
+        SQLiteHelper.closeDB(db)
     }
 
     fun updateEvent(
         eventId: String,
         name: String,
-        promoImageURL: String
+        promoImageURL: String,
+        total: Int
     ) {
         val values = ContentValues()
-        values.put(TableEventsDML.NAME, name)
-        values.put(TableEventsDML.PROMO_IMAGE_URL, promoImageURL)
+        values.put(NAME, name)
+        values.put(PROMO_IMAGE_URL, promoImageURL)
+        values.put(TOTAL_NUM_OF_TICKETS, total)
 
-        database?.update(TableEventsDML.TABLE_EVENTS, values, TableEventsDML.EVENT_ID + " = '" + eventId + "'", null)
-    }
-
-    fun deleteEvent(eventId: String) {
-        println("EventModel deleted with pk: $eventId")
-        database?.delete(TableEventsDML.TABLE_EVENTS, TableEventsDML.EVENT_ID + " = '" + eventId + "'", null)
+        val db = SQLiteHelper.getDB()
+        db.update(TABLE_EVENTS, values, "$EVENT_ID = '$eventId'", null)
+        SQLiteHelper.closeDB(db)
     }
 
     private fun cursorToEvent(cursor: Cursor): EventModel {
@@ -104,7 +109,8 @@ class EventsDS : BaseDS() {
         var index = 0
         eventModel.id = cursor.getString(index++)
         eventModel.name = cursor.getString(index++)
-        eventModel.promoImageURL = cursor.getString(index)
+        eventModel.promoImageURL = cursor.getString(index++)
+        eventModel.totalNumOfTickets = cursor.getInt(index)
         return eventModel
     }
 }

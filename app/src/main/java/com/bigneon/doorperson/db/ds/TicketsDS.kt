@@ -2,42 +2,267 @@ package com.bigneon.doorperson.db.ds
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.dml.TableTicketsDML
+import com.bigneon.doorperson.db.dml.TableTicketsDML.EMAIL
+import com.bigneon.doorperson.db.dml.TableTicketsDML.EVENT_ID
+import com.bigneon.doorperson.db.dml.TableTicketsDML.FIRST_NAME
+import com.bigneon.doorperson.db.dml.TableTicketsDML.LAST_NAME
+import com.bigneon.doorperson.db.dml.TableTicketsDML.PHONE
+import com.bigneon.doorperson.db.dml.TableTicketsDML.PRICE_IN_CENTS
+import com.bigneon.doorperson.db.dml.TableTicketsDML.PROFILE_PIC_URL
+import com.bigneon.doorperson.db.dml.TableTicketsDML.REDEEMED_AT
+import com.bigneon.doorperson.db.dml.TableTicketsDML.REDEEMED_BY
+import com.bigneon.doorperson.db.dml.TableTicketsDML.REDEEM_KEY
+import com.bigneon.doorperson.db.dml.TableTicketsDML.STATUS
+import com.bigneon.doorperson.db.dml.TableTicketsDML.TABLE_TICKETS
+import com.bigneon.doorperson.db.dml.TableTicketsDML.TICKET_ID
+import com.bigneon.doorperson.db.dml.TableTicketsDML.TICKET_TYPE
+import com.bigneon.doorperson.db.dml.TableTicketsDML.USER_ID
 import com.bigneon.doorperson.rest.model.TicketModel
-import java.util.*
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
-class TicketsDS : BaseDS() {
-    init {
-        open()
-    }
+class TicketsDS {
 
     private val allColumns = arrayOf(
-        TableTicketsDML.TICKET_ID,
-        TableTicketsDML.EVENT_ID,
-        TableTicketsDML.USER_ID,
-        TableTicketsDML.FIRST_NAME,
-        TableTicketsDML.LAST_NAME,
-        TableTicketsDML.EMAIL,
-        TableTicketsDML.PHONE,
-        TableTicketsDML.PROFILE_PIC_URL,
-        TableTicketsDML.PRICE_IN_CENTS,
-        TableTicketsDML.TICKET_TYPE,
-        TableTicketsDML.REDEEM_KEY,
-        TableTicketsDML.STATUS,
-        TableTicketsDML.REDEEMED_BY,
-        TableTicketsDML.REDEEMED_AT
+        TICKET_ID,
+        EVENT_ID,
+        USER_ID,
+        FIRST_NAME,
+        LAST_NAME,
+        EMAIL,
+        PHONE,
+        PROFILE_PIC_URL,
+        PRICE_IN_CENTS,
+        TICKET_TYPE,
+        REDEEM_KEY,
+        STATUS,
+        REDEEMED_BY,
+        REDEEMED_AT
     )
 
-    fun getTicket(ticketId: String): TicketModel? {
-        database?.query(
+    fun getAllTicketNumberForEvent(eventId: String): Int {
+        SQLiteHelper.getDB().rawQuery(
+            "select count(*) from $TABLE_TICKETS where $EVENT_ID = '$eventId'",
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                it.moveToFirst()
+                val count = it.getInt(0)
+                it.close()
+                return count
+            }
+        } ?: return 0
+        return 0
+    }
+
+    fun ticketExists(ticketId: String): Boolean {
+        SQLiteHelper.getDB().rawQuery(
+            "select count(*) from $TABLE_TICKETS where $TICKET_ID = '$ticketId'",
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                it.close()
+                return count > 0
+            }
+        } ?: return false
+        return false
+    }
+
+    private fun createTicket(db: SQLiteDatabase, ticketModel: TicketModel) {
+        createTicket(
+            db,
+            ticketModel.ticketId!!,
+            ticketModel.eventId!!,
+            ticketModel.userId!!,
+            ticketModel.firstName,
+            ticketModel.lastName,
+            ticketModel.email,
+            ticketModel.phone,
+            ticketModel.profilePicURL,
+            ticketModel.priceInCents!!,
+            ticketModel.ticketType!!,
+            ticketModel.redeemKey!!,
+            ticketModel.status!!.toUpperCase(),
+            ticketModel.redeemedBy,
+            ticketModel.redeemedAt
+        )
+    }
+
+    private fun createTicket(
+        db: SQLiteDatabase,
+        ticketId: String,
+        eventId: String,
+        userId: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        phone: String?,
+        profilePicURL: String?,
+        priceInCents: Int,
+        ticketType: String,
+        redeemKey: String,
+        status: String,
+        redeemedBy: String?,
+        redeemedAt: String?
+    ) {
+        val values = ContentValues()
+        values.put(TICKET_ID, ticketId)
+        values.put(EVENT_ID, eventId)
+        values.put(USER_ID, userId)
+        values.put(FIRST_NAME, firstName)
+        values.put(LAST_NAME, lastName)
+        values.put(EMAIL, email)
+        values.put(PHONE, phone)
+        values.put(PROFILE_PIC_URL, profilePicURL)
+        values.put(PRICE_IN_CENTS, priceInCents)
+        values.put(TICKET_TYPE, ticketType)
+        values.put(REDEEM_KEY, redeemKey)
+        values.put(STATUS, status.toUpperCase())
+        values.put(REDEEMED_BY, redeemedBy)
+        values.put(REDEEMED_AT, redeemedAt)
+
+        db.insert(TABLE_TICKETS, null, values)
+    }
+
+    fun updateTicket(ticketModel: TicketModel) {
+        updateTicket(SQLiteHelper.getDB(), ticketModel)
+    }
+
+    private fun updateTicket(db: SQLiteDatabase, ticketModel: TicketModel) {
+        updateTicket(
+            db,
+            ticketModel.ticketId!!,
+            ticketModel.eventId!!,
+            ticketModel.userId!!,
+            ticketModel.firstName,
+            ticketModel.lastName,
+            ticketModel.email,
+            ticketModel.phone,
+            ticketModel.profilePicURL,
+            ticketModel.priceInCents!!,
+            ticketModel.ticketType!!,
+            ticketModel.redeemKey!!,
+            ticketModel.status!!.toUpperCase(),
+            ticketModel.redeemedBy,
+            ticketModel.redeemedAt
+        )
+    }
+
+    private fun updateTicket(
+        db: SQLiteDatabase,
+        ticketId: String,
+        eventId: String,
+        userId: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        phone: String?,
+        profilePicURL: String?,
+        priceInCents: Int,
+        ticketType: String,
+        redeemKey: String,
+        status: String,
+        redeemedBy: String?,
+        redeemedAt: String?
+    ) {
+        val values = ContentValues()
+        values.put(EVENT_ID, eventId)
+        values.put(USER_ID, userId)
+        values.put(FIRST_NAME, firstName)
+        values.put(LAST_NAME, lastName)
+        values.put(EMAIL, email)
+        values.put(PHONE, phone)
+        values.put(PROFILE_PIC_URL, profilePicURL)
+        values.put(PRICE_IN_CENTS, priceInCents)
+        values.put(TICKET_TYPE, ticketType)
+        values.put(REDEEM_KEY, redeemKey)
+        values.put(STATUS, status.toUpperCase())
+        values.put(REDEEMED_BY, redeemedBy)
+        values.put(REDEEMED_AT, redeemedAt)
+
+        db.update(
             TableTicketsDML.TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
+            null
+        )
+    }
+
+    fun createTicketList(tickets: ArrayList<TicketModel>) {
+        val db = SQLiteHelper.getDB()
+        db.beginTransaction()
+        tickets.forEach {
+            createTicket(db, it)
+        }
+        db.setTransactionSuccessful()
+        db.endTransaction()
+        SQLiteHelper.closeDB(db)
+    }
+
+    fun createOrUpdateTicketList(tickets: ArrayList<TicketModel>) {
+        val db = SQLiteHelper.getDB()
+        db.beginTransaction()
+        tickets.forEach {
+            if (ticketExists(it.ticketId!!)) {
+                updateTicket(db, it)
+            } else {
+                createTicket(db, it)
+            }
+        }
+        db.setTransactionSuccessful()
+        db.endTransaction()
+        SQLiteHelper.closeDB(db)
+    }
+
+    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
+
+        SQLiteHelper.getDB().query(
+            TABLE_TICKETS,
             allColumns,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
+            "$STATUS = 'CHECKED'",
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val ticket = cursorToTicket(it)
+                    ticketModels.add(ticket)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
+    }
+
+    fun setDuplicateTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(STATUS, "DUPLICATE")
+        SQLiteHelper.getDB().update(
+            TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
+            null
+        )
+        return getTicket(ticketId)
+    }
+
+    fun getTicket(ticketId: String): TicketModel? {
+        SQLiteHelper.getDB().query(
+            TABLE_TICKETS,
+            allColumns,
+            "$TICKET_ID = '$ticketId'",
             null,
             null,
             null,
@@ -52,13 +277,25 @@ class TicketsDS : BaseDS() {
         return null
     }
 
+    fun setRedeemedTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(STATUS, "REDEEMED")
+        SQLiteHelper.getDB().update(
+            TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
+            null
+        )
+        return getTicket(ticketId)
+    }
+
     fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
-        database?.query(
-            TableTicketsDML.TABLE_TICKETS,
+        SQLiteHelper.getDB().query(
+            TABLE_TICKETS,
             allColumns,
-            TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
+            "$EVENT_ID = '$eventId'",
             null,
             null,
             null,
@@ -77,66 +314,22 @@ class TicketsDS : BaseDS() {
         return null
     }
 
-    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
-        val ticketModels = ArrayList<TicketModel>()
-
-        database?.query(
-            TableTicketsDML.TABLE_TICKETS,
-            allColumns,
-            TableTicketsDML.STATUS + " = 'CHECKED'",
-            null,
-            null,
-            null,
+    fun setCheckedTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(STATUS, "CHECKED")
+        SQLiteHelper.getDB().update(
+            TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
             null
-        )?.use {
-            if (it.moveToFirst()) {
-                while (!it.isAfterLast) {
-                    val ticket = cursorToTicket(it)
-                    ticketModels.add(ticket)
-                    it.moveToNext()
-                }
-                it.close()
-                return ticketModels
-            }
-        } ?: return null
-        return null
-    }
-
-    fun getAllTickets(): ArrayList<TicketModel>? {
-        val ticketModels = ArrayList<TicketModel>()
-
-        database?.query(TableTicketsDML.TABLE_TICKETS, allColumns, null, null, null, null, null)?.use {
-            if (it.moveToFirst()) {
-                while (!it.isAfterLast) {
-                    val projectModel = cursorToTicket(it)
-                    ticketModels.add(projectModel)
-                    it.moveToNext()
-                }
-                it.close()
-                return ticketModels
-            }
-        } ?: return null
-        return null
-    }
-
-    fun ticketExists(ticketId: String): Boolean {
-        database?.rawQuery(
-            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )?.use {
-            if (it.moveToFirst()) {
-                val count = it.getInt(0)
-                it.close()
-                return count > 0
-            }
-        } ?: return false
-        return false
+        )
+        return getTicket(ticketId)
     }
 
     fun getRedeemedTicketNumberForEvent(eventId: String): Int {
-        database?.rawQuery(
-            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
-                    TableTicketsDML.STATUS + " = 'REDEEMED'",
+        SQLiteHelper.getDB().rawQuery(
+            "select count(*) from " + TABLE_TICKETS + " where " + EVENT_ID + " = '" + eventId + "' and " +
+                    STATUS + " = 'REDEEMED'",
             null
         )?.use {
             if (it.moveToFirst()) {
@@ -149,9 +342,9 @@ class TicketsDS : BaseDS() {
     }
 
     fun getCheckedTicketNumberForEvent(eventId: String): Int {
-        database?.rawQuery(
-            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "' and " +
-                    TableTicketsDML.STATUS + " = 'CHECKED'",
+        SQLiteHelper.getDB().rawQuery(
+            "select count(*) from " + TABLE_TICKETS + " where " + EVENT_ID + " = '" + eventId + "' and " +
+                    STATUS + " = 'CHECKED'",
             null
         )?.use {
             if (it.moveToFirst()) {
@@ -161,167 +354,6 @@ class TicketsDS : BaseDS() {
             }
         } ?: return 0
         return 0
-    }
-
-    fun getAllTicketNumberForEvent(eventId: String): Int {
-        database?.rawQuery(
-            "select count(*) from " + TableTicketsDML.TABLE_TICKETS + " where " + TableTicketsDML.EVENT_ID + " = '" + eventId + "'",
-            null
-        )?.use {
-            if (it.moveToFirst()) {
-                it.moveToFirst()
-                val count = it.getInt(0)
-                it.close()
-                return count
-            }
-        } ?: return 0
-        return 0
-    }
-
-    fun setCheckedTicket(ticketId: String): TicketModel? {
-        val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "CHECKED")
-        database?.update(
-            TableTicketsDML.TABLE_TICKETS,
-            values,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )
-        return getTicket(ticketId)
-    }
-
-    fun setPurchasedTicket(ticketId: String): TicketModel? {
-        val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "PURCHASED")
-        database?.update(
-            TableTicketsDML.TABLE_TICKETS,
-            values,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )
-        return getTicket(ticketId)
-    }
-
-    fun setRedeemedTicket(ticketId: String): TicketModel? {
-        val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "REDEEMED")
-        database?.update(
-            TableTicketsDML.TABLE_TICKETS,
-            values,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )
-        return getTicket(ticketId)
-    }
-
-    fun setDuplicateTicket(ticketId: String): TicketModel? {
-        val values = ContentValues()
-        values.put(TableTicketsDML.STATUS, "DUPLICATE")
-        database?.update(
-            TableTicketsDML.TABLE_TICKETS,
-            values,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )
-        return getTicket(ticketId)
-    }
-
-    fun createTicket(
-        ticketId: String,
-        eventId: String,
-        userId: String,
-        firstName: String?,
-        lastName: String?,
-        email: String?,
-        phone: String?,
-        profilePicURL: String?,
-        priceInCents: Int,
-        ticketType: String,
-        redeemKey: String,
-        status: String,
-        redeemedBy: String?,
-        redeemedAt: String?
-    ) {
-        val values = ContentValues()
-        values.put(TableTicketsDML.TICKET_ID, ticketId)
-        values.put(TableTicketsDML.EVENT_ID, eventId)
-        values.put(TableTicketsDML.USER_ID, userId)
-        values.put(TableTicketsDML.FIRST_NAME, firstName)
-        values.put(TableTicketsDML.LAST_NAME, lastName)
-        values.put(TableTicketsDML.EMAIL, email)
-        values.put(TableTicketsDML.PHONE, phone)
-        values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
-        values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
-        values.put(TableTicketsDML.TICKET_TYPE, ticketType)
-        values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
-        values.put(TableTicketsDML.STATUS, status)
-        values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)
-        values.put(TableTicketsDML.REDEEMED_AT, redeemedAt)
-
-        database?.insert(TableTicketsDML.TABLE_TICKETS, null, values)
-    }
-
-    fun updateTicket(ticketModel: TicketModel) {
-        updateTicket(
-            ticketModel.ticketId!!,
-            ticketModel.eventId!!,
-            ticketModel.userId!!,
-            ticketModel.firstName,
-            ticketModel.lastName,
-            ticketModel.email,
-            ticketModel.phone,
-            ticketModel.profilePicURL,
-            ticketModel.priceInCents!!,
-            ticketModel.ticketType!!,
-            ticketModel.redeemKey!!,
-            ticketModel.status!!,
-            ticketModel.redeemedBy,
-            ticketModel.redeemedAt
-        )
-    }
-
-    fun updateTicket(
-        ticketId: String,
-        eventId: String,
-        userId: String,
-        firstName: String?,
-        lastName: String?,
-        email: String?,
-        phone: String?,
-        profilePicURL: String?,
-        priceInCents: Int,
-        ticketType: String,
-        redeemKey: String,
-        status: String,
-        redeemedBy: String?,
-        redeemedAt: String?
-    ) {
-        val values = ContentValues()
-        values.put(TableTicketsDML.EVENT_ID, eventId)
-        values.put(TableTicketsDML.USER_ID, userId)
-        values.put(TableTicketsDML.FIRST_NAME, firstName)
-        values.put(TableTicketsDML.LAST_NAME, lastName)
-        values.put(TableTicketsDML.EMAIL, email)
-        values.put(TableTicketsDML.PHONE, phone)
-        values.put(TableTicketsDML.PROFILE_PIC_URL, profilePicURL)
-        values.put(TableTicketsDML.PRICE_IN_CENTS, priceInCents)
-        values.put(TableTicketsDML.TICKET_TYPE, ticketType)
-        values.put(TableTicketsDML.REDEEM_KEY, redeemKey)
-        values.put(TableTicketsDML.STATUS, status)
-        values.put(TableTicketsDML.REDEEMED_BY, redeemedBy)
-        values.put(TableTicketsDML.REDEEMED_AT, redeemedAt)
-
-        database?.update(
-            TableTicketsDML.TABLE_TICKETS,
-            values,
-            TableTicketsDML.TICKET_ID + " = '" + ticketId + "'",
-            null
-        )
-    }
-
-    fun deleteTicket(ticketId: String) {
-        println("TicketModel deleted with pk: $ticketId")
-        database?.delete(TableTicketsDML.TABLE_TICKETS, TableTicketsDML.TICKET_ID + " = '" + ticketId + "'", null)
     }
 
     private fun cursorToTicket(cursor: Cursor): TicketModel {
@@ -338,7 +370,7 @@ class TicketsDS : BaseDS() {
         ticketModel.priceInCents = cursor.getInt(index++)
         ticketModel.ticketType = cursor.getString(index++)
         ticketModel.redeemKey = cursor.getString(index++)
-        ticketModel.status = cursor.getString(index++)
+        ticketModel.status = cursor.getString(index++).toUpperCase()
         ticketModel.redeemedBy = cursor.getString(index++)
         ticketModel.redeemedAt = cursor.getString(index)
         return ticketModel

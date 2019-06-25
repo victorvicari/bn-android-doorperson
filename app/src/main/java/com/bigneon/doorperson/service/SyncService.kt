@@ -1,6 +1,6 @@
 package com.bigneon.doorperson.service
 
-import android.app.Service
+import android.app.IntentService
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,7 +8,7 @@ import android.content.IntentFilter
 import android.os.IBinder
 import com.bigneon.doorperson.db.SyncController
 
-class SyncService : Service() {
+class SyncService : IntentService("SyncService") {
     private val syncAllTablesReceiver = object : BroadcastReceiver() {
         @Synchronized
         override fun onReceive(context: Context, intent: Intent) {
@@ -27,10 +27,12 @@ class SyncService : Service() {
         filter.addAction("android.intent.action.TIME_TICK")
         registerReceiver(syncAllTablesReceiver, filter)
 
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onHandleIntent(intent: Intent?) {
         //Initial sync
         SyncController.synchronizeAllTables(false)
-
-        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {

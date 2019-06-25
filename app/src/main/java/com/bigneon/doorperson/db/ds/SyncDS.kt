@@ -5,7 +5,11 @@ import android.database.Cursor
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.MAX_TIMESTAMP
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
-import com.bigneon.doorperson.db.dml.TableSyncDML
+import com.bigneon.doorperson.db.SQLiteHelper
+import com.bigneon.doorperson.db.dml.TableSyncDML.LAST_SYNC_TIME
+import com.bigneon.doorperson.db.dml.TableSyncDML.SYNC_DIRECTION
+import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_NAME
+import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_SYNC
 import com.bigneon.doorperson.rest.model.SyncModel
 import com.bigneon.doorperson.util.AppUtils
 
@@ -14,22 +18,18 @@ import com.bigneon.doorperson.util.AppUtils
  * All right reserved!
  * Created by SRKI-ST on 09.04.2019..
  ****************************************************/
-class SyncDS : BaseDS() {
-    init {
-        open()
-    }
-
+class SyncDS {
     private val allColumns = arrayOf(
-        TableSyncDML.TABLE_NAME,
-        TableSyncDML.SYNC_DIRECTION,
-        TableSyncDML.LAST_SYNC_TIME
+        TABLE_NAME,
+        SYNC_DIRECTION,
+        LAST_SYNC_TIME
     )
 
     fun getLastSyncTime(syncTableName: AppConstants.SyncTableName, upload: Boolean): String? {
-        database?.query(
-            TableSyncDML.TABLE_SYNC,
+        SQLiteHelper.getDB().query(
+            TABLE_SYNC,
             allColumns,
-            (TableSyncDML.TABLE_NAME + " = \"" + syncTableName + "\" and " + TableSyncDML.SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            (TABLE_NAME + " = \"" + syncTableName + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
             null,
             null,
             null,
@@ -53,12 +53,12 @@ class SyncDS : BaseDS() {
     fun setLastSyncTime(syncTableName: AppConstants.SyncTableName, upload: Boolean) {
         val values = ContentValues()
 
-        values.put(TableSyncDML.LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
+        values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
 
-        database?.update(
-            TableSyncDML.TABLE_SYNC,
+        SQLiteHelper.getDB().update(
+            TABLE_SYNC,
             values,
-            (TableSyncDML.TABLE_NAME + " = \"" + syncTableName + "\" and " + TableSyncDML.SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            (TABLE_NAME + " = \"" + syncTableName + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
             null
         )
     }

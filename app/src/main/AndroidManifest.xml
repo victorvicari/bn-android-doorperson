@@ -15,6 +15,7 @@
     <uses-permission-sdk-23 android:name="android.permission.CAMERA"/>
 
     <application
+            android:name=".BigNeonApplication"
             android:allowBackup="true"
             android:fullBackupContent="@xml/backup_descriptor"
             android:hardwareAccelerated="false"

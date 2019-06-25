@@ -49,6 +49,14 @@ class TicketListActivity : AppCompatActivity() {
                     refreshList(eventId)
             }
         }
+    private var loadingTicketListener: SyncController.LoadingTicketListener =
+        object : SyncController.LoadingTicketListener {
+            override fun finish() {
+                tickets_swipe_refresh_layout.isEnabled = true
+                // Hide swipe to refresh icon animation
+                tickets_swipe_refresh_layout.isRefreshing = false
+            }
+        }
 
     companion object {
         private var eventId: String? = null
@@ -89,6 +97,8 @@ class TicketListActivity : AppCompatActivity() {
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
         itemTouchHelper.attachToRecyclerView(ticket_list_view)
+
+        tickets_swipe_refresh_layout.isEnabled = ticketsDS!!.getAllTicketNumberForEvent(eventId!!) != 0
 
         ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(adapterPosition: Int, view: View) {
@@ -150,11 +160,12 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
-            // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+            if (tickets_swipe_refresh_layout.isEnabled) {
+                tickets_swipe_refresh_layout.isEnabled = false
 
-            // Hide swipe to refresh icon animation
-            tickets_swipe_refresh_layout.isRefreshing = false
+                // Sync local DB with remote server
+                SyncController.updateEvent(eventId!!)
+            }
         }
 
         refreshList(eventId)
@@ -163,6 +174,7 @@ class TicketListActivity : AppCompatActivity() {
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
         SyncController.addRefreshTicketListener(refreshTicketListener)
+        SyncController.addLoadingTicketListener(loadingTicketListener)
         super.onStart()
     }
 
@@ -241,6 +253,7 @@ class TicketListActivity : AppCompatActivity() {
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
         SyncController.removeRefreshTicketListener(refreshTicketListener)
+        SyncController.removeLoadingTicketListener(loadingTicketListener)
         super.onStop()
     }
 
