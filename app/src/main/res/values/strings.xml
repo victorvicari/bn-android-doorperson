@@ -59,4 +59,6 @@
     <string name="cpb_textComplete">Login success!</string>
     <string name="cpb_textError">Invalid Email/Password</string>
     <string name="pill_scanned_by_text">Scanned by: %1$s</string>
+    <string name="loading">Loading…</string>
+    <string name="no_network_connection">No network connection</string>
 </resources>

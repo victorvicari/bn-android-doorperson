@@ -18,10 +18,10 @@ import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.list_item_ticket.view.*
@@ -134,7 +134,7 @@ class RecyclerItemTouchHelper :
                             viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
                             viewHolder.purchasedStatusTextView?.visibility = View.GONE
                         } else {
-                            if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(
+                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(
                                     viewHolder.itemView.context
                                 )
                             ) {
@@ -146,7 +146,7 @@ class RecyclerItemTouchHelper :
                                     .setCancelable(false)
                                     .setPositiveButton("Turn on the offline mode") { _, _ ->
                                         run {
-                                            SyncController.isOfflineModeEnabled = true
+                                            isOfflineModeEnabled = true
                                             checkInTicket(ticketModel, viewHolder)
                                         }
                                     }
@@ -190,7 +190,7 @@ class RecyclerItemTouchHelper :
             .setCancelable(false)
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
-                    SyncController.isOfflineModeEnabled = true
+                    isOfflineModeEnabled = true
                     checkInTicket(ticketModel, viewHolder)
                 }
             }
@@ -238,7 +238,7 @@ class RecyclerItemTouchHelper :
                                     viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                 redeemTicket(ticketModel, viewHolder)
                             }
-                            SyncController.isOfflineModeEnabled -> {
+                            isOfflineModeEnabled -> {
                                 ticketModel.status =
                                     viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                 checkInTicket(ticketModel, viewHolder)

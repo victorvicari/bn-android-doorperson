@@ -13,12 +13,12 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.*

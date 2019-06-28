@@ -29,29 +29,29 @@ class NetworkUtils {
         private const val WIFI_STATE_CHANGED = "android.net.wifi.WIFI_STATE_CHANGED"
     }
 
-    private var networkStateReceiver: NetworkStateReceiver = NetworkStateReceiver()
-    private var registeredListenersMap: ArrayList<NetworkStateReceiver.NetworkStateReceiverListener> = ArrayList()
+    private var networkStateReceiver = NetworkStateReceiver()
+    private var registeredListeners: ArrayList<NetworkStateReceiver.NetworkStateReceiverListener> = ArrayList()
 
     fun addNetworkStateListener(context: Context,
         networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
     ) {
-        if (!registeredListenersMap.contains(networkStateReceiverListener)) {
+        if (!registeredListeners.contains(networkStateReceiverListener)) {
             networkStateReceiver.addListener(networkStateReceiverListener)
             val intentFilter = IntentFilter()
             intentFilter.addAction(CONNECTIVITY_ACTION)
             intentFilter.addAction(WIFI_STATE_CHANGED)
             context.registerReceiver(networkStateReceiver, intentFilter)
-            registeredListenersMap.add(networkStateReceiverListener)
+            registeredListeners.add(networkStateReceiverListener)
         }
     }
 
     fun removeNetworkStateListener(context: Context,
         networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
     ) {
-        if (registeredListenersMap.contains(networkStateReceiverListener)) {
+        if (registeredListeners.contains(networkStateReceiverListener)) {
             context.unregisterReceiver(networkStateReceiver)
             networkStateReceiver.removeListener(networkStateReceiverListener)
-            registeredListenersMap.remove(networkStateReceiverListener)
+            registeredListeners.remove(networkStateReceiverListener)
         }
     }
 

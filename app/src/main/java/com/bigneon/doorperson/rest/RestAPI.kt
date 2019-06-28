@@ -141,6 +141,32 @@ class RestAPI private constructor() {
             }
         }
 
+        // Synchronous call
+        fun accessToken(): String? {
+            if (NetworkUtils.instance().isNetworkAvailable(context)) {
+                val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
+                if (refreshToken == "") return null
+
+                val refreshTokenRequest = RefreshTokenRequest()
+                refreshTokenRequest.refreshToken = refreshToken
+                val refreshTokenCall = client().refreshToken(refreshTokenRequest)
+
+                val accessToken = refreshTokenCall.execute().body()
+                return if (accessToken != null) {
+                    SharedPrefs.setProperty(AppConstants.REFRESH_TOKEN, accessToken.refreshToken)
+                    SharedPrefs.setProperty(AppConstants.ACCESS_TOKEN, accessToken.accessToken)
+                    "Bearer " + accessToken.accessToken
+                } else
+                    null
+            } else { // Not connected
+                val accessToken = SharedPrefs.getProperty(AppConstants.ACCESS_TOKEN) ?: ""
+                return if (accessToken == "")
+                    null
+                else
+                    "Bearer $accessToken"
+            }
+        }
+
         fun getScannableEvents(accessToken: String, setEvents: (ArrayList<EventModel>?) -> Unit) {
             val getScannableEventsCall = client().getScannableEvents(accessToken)
             val getScannableEventsCallback = object : Callback<EventsResponse> {
@@ -158,6 +184,12 @@ class RestAPI private constructor() {
             }
 
             getScannableEventsCall.enqueue(getScannableEventsCallback)
+        }
+
+        // Synchronous call
+        fun getScannableEvents(accessToken: String): ArrayList<EventModel>? {
+            val getScannableEventsCall = client().getScannableEvents(accessToken)
+            return getScannableEventsCall.execute().body()?.data
         }
 
         fun getTicketsForEvent(
@@ -187,13 +219,26 @@ class RestAPI private constructor() {
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
         }
 
+        // Synchronous call
+        fun getTicketsForEvent(
+            accessToken: String,
+            eventId: String,
+            changesSince: String?,
+            limit: Int?,
+            page: Int?
+        ): ArrayList<TicketModel>? {
+            val getTicketsForEventCall =
+                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, null)
+            return getTicketsForEventCall.execute().body()?.data
+        }
+
         fun getTotalNumberOfTicketsForEvent(
             accessToken: String,
             eventId: String,
             setTotalNumberOfTickets: (Int?) -> Unit
         ) {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0,null)
+                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0, null)
             val getTicketsForEventCallback = object : Callback<TicketsResponse> {
                 override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
                     if (response.body() != null) {

@@ -61,7 +61,7 @@ class TicketsDS {
         return 0
     }
 
-    fun ticketExists(ticketId: String): Boolean {
+    private fun ticketExists(ticketId: String): Boolean {
         SQLiteHelper.getDB().rawQuery(
             "select count(*) from $TABLE_TICKETS where $TICKET_ID = '$ticketId'",
             null

@@ -20,11 +20,11 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils
 import com.google.zxing.Result
 import com.squareup.picasso.Picasso
@@ -198,7 +198,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
                             showPillUserInfo(true, ticketId)
                         } else {
-                            if (!SyncController.isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
+                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
                                 showDialog(getContext(), ticketId, redeemKey)
                             } else {
                                 showPillUserInfo(false, ticketId)
@@ -233,7 +233,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             .setCancelable(false)
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
-                    SyncController.isOfflineModeEnabled = true
+                    isOfflineModeEnabled = true
                     checkInTicket(ticket?.status!!, ticketId, redeemKey)
                 }
             }
@@ -297,7 +297,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 if (NetworkUtils.instance().isNetworkAvailable(getContext())) {
                     /*success = */redeemTicket(ticketId, redeemKey, ticket.firstName!!, ticket.lastName!!)
                 } else {
-                    if (SyncController.isOfflineModeEnabled) {
+                    if (isOfflineModeEnabled) {
                         /*success = */checkInTicket(ticket.status!!, ticketId, redeemKey)
                     } else {
                         Log.e(TAG, "ERROR: Internet is not available and offline mode is disabled!")

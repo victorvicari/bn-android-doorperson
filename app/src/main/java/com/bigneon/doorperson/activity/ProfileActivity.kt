@@ -9,8 +9,8 @@ import android.support.v7.app.AppCompatActivity
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.content_profile.*
 

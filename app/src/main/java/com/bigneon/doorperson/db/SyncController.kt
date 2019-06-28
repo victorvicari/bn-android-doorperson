@@ -26,7 +26,6 @@ class SyncController {
         @SuppressLint("StaticFieldLeak")
         private lateinit var context: Context
 
-        var isOfflineModeEnabled: Boolean = true
         var syncInProgress: Boolean = false
         var refreshEventListeners: MutableList<RefreshEventListener> = ArrayList()
         var refreshTicketListeners: MutableList<RefreshTicketListener> = ArrayList()

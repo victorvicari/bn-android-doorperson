@@ -21,6 +21,8 @@ class AppUtils {
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
 
+        var isOfflineModeEnabled: Boolean = true
+
         fun getCurrentTimestamp(): String {
             val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
             dateFormat.timeZone = TimeZone.getTimeZone("CET")

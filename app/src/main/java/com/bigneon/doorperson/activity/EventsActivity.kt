@@ -12,10 +12,8 @@ import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
@@ -25,9 +23,7 @@ import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
 class EventsActivity : AppCompatActivity() {
-    private var eventsDS: EventsDS? = null
     private var eventsListView: RecyclerView? = null
-    private var eventList: ArrayList<EventModel>? = null
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -40,12 +36,12 @@ class EventsActivity : AppCompatActivity() {
             }
         }
 
-    private var refreshEventListener: SyncController.RefreshEventListener =
-        object : SyncController.RefreshEventListener {
-            override fun refreshEventList() {
-                refreshList()
-            }
-        }
+//    private var refreshEventListener: SyncController.RefreshEventListener =
+//        object : SyncController.RefreshEventListener {
+//            override fun refreshEventList() {
+//                refreshList()
+//            }
+//        }
 
     private fun getContext(): Context {
         return this
@@ -53,12 +49,9 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
-
+        EventDataHandler.setContext(this)
         AppUtils.checkLogged(getContext())
-
-        eventsDS = EventsDS()
 
         // Start synchronization service
         startService(Intent(this, SyncService::class.java))
@@ -67,6 +60,7 @@ class EventsActivity : AppCompatActivity() {
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
+                val eventList = EventDataHandler.getAllEvents()
                 val eventId = eventList?.get(position)?.id
                 val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
                 val intent = Intent(getContext(), ScanningEventActivity::class.java)
@@ -95,7 +89,9 @@ class EventsActivity : AppCompatActivity() {
 
         events_layout.setOnRefreshListener {
             // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
+//            SyncController.synchronizeAllTables(true)
+
+            refreshList()
 
             // Hide swipe to refresh icon animation
             events_layout.isRefreshing = false // TODO - Move after sync is done!
@@ -106,20 +102,20 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.addRefreshEventListener(refreshEventListener)
+//        SyncController.addRefreshEventListener(refreshEventListener)
         super.onStart()
     }
 
     private fun refreshList() {
-        eventList = eventsDS!!.getAllEvents()
+        val eventList = EventDataHandler.loadAllEvents()
         if (eventList != null) {
-            eventsListView!!.layoutManager =
+            eventsListView?.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-            eventsListView!!.adapter = EventListAdapter(eventList!!)
+            eventsListView?.adapter = EventListAdapter(eventList)
 
             if (eventListItemPosition >= 0) {
-                (eventsListView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                (eventsListView?.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     eventListItemPosition,
                     eventListItemOffset
                 )
@@ -129,7 +125,7 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.removeRefreshEventListener(refreshEventListener)
+//        SyncController.removeRefreshEventListener(refreshEventListener)
         super.onStop()
     }
 
