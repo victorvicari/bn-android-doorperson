@@ -9,6 +9,7 @@ import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.rest.request.AuthRequest
@@ -16,6 +17,7 @@ import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
+import com.bigneon.doorperson.rest.response.TicketResponse
 import com.bigneon.doorperson.rest.response.TicketsResponse
 import com.bigneon.doorperson.util.NetworkUtils
 import okhttp3.Interceptor
@@ -257,6 +259,17 @@ class RestAPI private constructor() {
             getTicketsForEventCall.enqueue(getTicketsForEventCallback)
         }
 
+        // Synchronous call
+        fun getTotalNumberOfTicketsForEvent(
+            accessToken: String,
+            eventId: String
+        ): Int? {
+            val getTicketsForEventCall =
+                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0, null)
+
+            return getTicketsForEventCall.execute().body()?.paging?.total
+        }
+
         fun redeemTicketForEvent(
             accessToken: String,
             eventId: String,
@@ -300,7 +313,48 @@ class RestAPI private constructor() {
             }
         }
 
-        /*fun getTicket(
+        fun getEvent(
+            accessToken: String,
+            eventId: String,
+            getEvent: (EventModel?) -> Unit
+        ) {
+            val getEventCall = client().getEvent(accessToken, eventId)
+
+            val getEventCallback = object : Callback<EventModel> {
+                override fun onResponse(call: Call<EventModel>, response: Response<EventModel>) {
+                    if (response.body() != null) {
+                        getEvent(response.body())
+                    } else {
+                        getEvent(null)
+                    }
+                }
+
+                override fun onFailure(call: Call<EventModel>, t: Throwable) {
+                    getEvent(null)
+                }
+            }
+            getEventCall.enqueue(getEventCallback)
+        }
+
+        // Synchronous call
+        fun getEvent(
+            accessToken: String,
+            eventId: String
+        ): EventModel? {
+            val getEventCall = client().getEvent(accessToken, eventId)
+            return getEventCall.execute().body()
+        }
+
+        // Synchronous call
+        fun getEventDashboard(
+            accessToken: String,
+            eventId: String
+        ): EventDashboardModel? {
+            val getEventDashboardCall = client().getEventDashboard(accessToken, eventId)
+            return getEventDashboardCall.execute().body()?.event
+        }
+
+        fun getTicket(
             accessToken: String,
             ticketId: String,
             getTicketResult: (isRedeemed: Boolean, ticket: TicketModel?) -> Unit
@@ -335,6 +389,6 @@ class RestAPI private constructor() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message)
             }
-        }*/
+        }
     }
 }

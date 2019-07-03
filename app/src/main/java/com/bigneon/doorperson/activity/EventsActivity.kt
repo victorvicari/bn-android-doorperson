@@ -10,11 +10,8 @@ import android.view.View
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
-import com.bigneon.doorperson.config.AppConstants
-import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
@@ -51,22 +48,22 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
         EventDataHandler.setContext(this)
+
         AppUtils.checkLogged(getContext())
 
         // Start synchronization service
-        startService(Intent(this, SyncService::class.java))
+        //startService(Intent(this, SyncService::class.java))
 
         eventsListView = events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
-                val eventList = EventDataHandler.getAllEvents()
-                val eventId = eventList?.get(position)?.id
-                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
+                val eventId = EventDataHandler.getEventByPosition(position)?.id
+//                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
+//                if (eventForSync.isNullOrEmpty()) {
+//                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
+//                }
                 val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                if (eventForSync.isNullOrEmpty()) {
-                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
-                }
                 intent.putExtra("eventId", eventId)
                 startActivity(intent)
             }
@@ -88,9 +85,6 @@ class EventsActivity : AppCompatActivity() {
         }
 
         events_layout.setOnRefreshListener {
-            // Sync local DB with remote server
-//            SyncController.synchronizeAllTables(true)
-
             refreshList()
 
             // Hide swipe to refresh icon animation
@@ -107,12 +101,13 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun refreshList() {
-        val eventList = EventDataHandler.loadAllEvents()
-        if (eventList != null) {
+        val events = EventDataHandler.loadAllEvents()
+        if (events != null) {
             eventsListView?.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-            eventsListView?.adapter = EventListAdapter(eventList)
+            eventsListView?.adapter = EventListAdapter(events)
+            EventDataHandler.storeEvents(events)
 
             if (eventListItemPosition >= 0) {
                 (eventsListView?.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(

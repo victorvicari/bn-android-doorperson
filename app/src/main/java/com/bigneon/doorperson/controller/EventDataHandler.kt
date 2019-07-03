@@ -18,8 +18,8 @@ class EventDataHandler {
     companion object {
         private val TAG = EventDataHandler::class.java.simpleName
 
-        private var eventList: ArrayList<EventModel> = ArrayList()
-        private var eventsDS: EventsDS = EventsDS()
+        //var eventList: ArrayList<EventModel> = ArrayList()
+        var eventsDS: EventsDS = EventsDS()
         private var context: Context? = null
 
 
@@ -27,14 +27,26 @@ class EventDataHandler {
             context = con
         }
 
+        fun storeEvents(events: ArrayList<EventModel>?) {
+            if (events != null) {
+                for (event in events) {
+                    if (eventsDS.eventExists(event.id!!)) {
+                        eventsDS.updateEvent(event.id!!, event.name!!, event.promoImageURL!!)
+                    } else {
+                        eventsDS.createEvent(event.id!!, event.name!!, event.promoImageURL!!)
+                    }
+                }
+            }
+        }
+
         fun loadAllEvents(): ArrayList<EventModel>? {
             when {
                 context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                    val eventList: ArrayList<EventModel> = ArrayList()
                     doAsync {
-                        eventList.clear()
                         val accessToken: String? = RestAPI.accessToken()
                         RestAPI.getScannableEvents(accessToken!!)?.let { eventList.addAll(it) }
-                    }.get()
+                    }.get() // get() is important to wait until doAsync is finished
                     return eventList
                 }
                 isOfflineModeEnabled -> // Return events from local DB
@@ -46,8 +58,42 @@ class EventDataHandler {
             return null
         }
 
-        fun getAllEvents(): ArrayList<EventModel>? {
-            return eventList
+        fun getEventByID(eventId: String): EventModel? {
+            when {
+                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                    var event: EventModel? = null
+                    doAsync {
+                        val accessToken: String? = RestAPI.accessToken()
+                        RestAPI.getEvent(accessToken!!, eventId)?.let { event = it }
+                    }.get() // get() is important to wait until doAsync is finished
+                    return event
+                }
+                isOfflineModeEnabled -> // Return events from local DB
+                    return eventsDS.getEvent(eventId)
+                else -> {
+                    Log.e(TAG, "Getting scannable events failed")
+                }
+            }
+            return null
+        }
+
+        fun getEventByPosition(pos: Int): EventModel? {
+            when {
+                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                    val eventList: ArrayList<EventModel> = ArrayList()
+                    doAsync {
+                        val accessToken: String? = RestAPI.accessToken()
+                        RestAPI.getScannableEvents(accessToken!!)?.let { eventList.addAll(it) }
+                    }.get() // get() is important to wait until doAsync is finished
+                    return eventList[pos]
+                }
+                isOfflineModeEnabled ->  // Return events from local DB
+                    return eventsDS.getAllEvents()?.get(pos)
+                else -> {
+                    Log.e(TAG, "Getting scannable events failed")
+                }
+            }
+            return null
         }
     }
 }

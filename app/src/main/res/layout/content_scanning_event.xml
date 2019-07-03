@@ -29,27 +29,6 @@
                 android:text="@string/scanning_event"/>
 
         <LinearLayout
-                android:id="@+id/loading_events_button"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="@drawable/scan_tickets_button_background"
-                android:layout_margin="20dp"
-                android:visibility="gone">
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginStart="10dp"
-                    android:textColor="@color/colorAccent"
-                    android:text="@string/load_tickets"/>
-        </LinearLayout>
-
-        <LinearLayout
                 android:id="@+id/scanning_events_button"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
@@ -74,17 +53,6 @@
                     android:textColor="@color/colorAccent"
                     android:text="@string/scan_tickets"/>
         </LinearLayout>
-
-        <TextView
-                android:id="@+id/number_of_loaded"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorBlack"
-                android:gravity="center"
-                android:text="@string/calculating"
-                android:visibility="gone"/>
 
         <TextView
                 android:id="@+id/number_of_redeemed"

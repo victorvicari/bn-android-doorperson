@@ -12,7 +12,6 @@ import com.bigneon.doorperson.adapter.BaseAdapter.FooterType
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.config.AppConstants.Companion.PAGE_LIMIT
-import com.bigneon.doorperson.db.SyncController
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -38,21 +37,21 @@ class TicketListActivity : AppCompatActivity(), BaseAdapter.OnItemClickListener,
                 no_internet_toolbar_icon.visibility = View.VISIBLE
             }
         }
-    private var refreshTicketListener: SyncController.RefreshTicketListener =
-        object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
-//                if (TicketListActivityOLD.eventId == eventId)
-//                    refreshList(eventId)
-            }
-        }
-    private var loadingTicketListener: SyncController.LoadingTicketListener =
-        object : SyncController.LoadingTicketListener {
-            override fun finish() {
-                tickets_swipe_refresh_layout.isEnabled = true
-                // Hide swipe to refresh icon animation
-                tickets_swipe_refresh_layout.isRefreshing = false
-            }
-        }
+//    private var refreshTicketListener: SyncController.RefreshTicketListener =
+//        object : SyncController.RefreshTicketListener {
+//            override fun refreshTicketList(eventId: String) {
+////                if (TicketListActivityOLD.eventId == eventId)
+////                    refreshList(eventId)
+//            }
+//        }
+//    private var loadingTicketListener: SyncController.LoadingTicketListener =
+//        object : SyncController.LoadingTicketListener {
+//            override fun finish() {
+//                tickets_swipe_refresh_layout.isEnabled = true
+//                // Hide swipe to refresh icon animation
+//                tickets_swipe_refresh_layout.isRefreshing = false
+//            }
+//        }
 
     private var ticketListAdapter: TicketListAdapter? = null
 
@@ -93,8 +92,8 @@ class TicketListActivity : AppCompatActivity(), BaseAdapter.OnItemClickListener,
                         }
                     }
 
-                    for (listener in SyncController.refreshTicketListeners)
-                        listener.refreshTicketList(eventId)
+//                    for (listener in SyncController.refreshTicketListeners)
+//                        listener.refreshTicketList(eventId)
                 }
 
                 RestAPI.getTicketsForEvent(
@@ -183,15 +182,15 @@ class TicketListActivity : AppCompatActivity(), BaseAdapter.OnItemClickListener,
 
     override fun onStart() {
         NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.addRefreshTicketListener(refreshTicketListener)
-        SyncController.addLoadingTicketListener(loadingTicketListener)
+//        SyncController.addRefreshTicketListener(refreshTicketListener)
+//        SyncController.addLoadingTicketListener(loadingTicketListener)
         super.onStart()
     }
 
     override fun onStop() {
         NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.removeRefreshTicketListener(refreshTicketListener)
-        SyncController.removeLoadingTicketListener(loadingTicketListener)
+//        SyncController.removeRefreshTicketListener(refreshTicketListener)
+//        SyncController.removeLoadingTicketListener(loadingTicketListener)
         super.onStop()
     }
 

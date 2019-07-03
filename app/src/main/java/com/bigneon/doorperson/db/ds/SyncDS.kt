@@ -6,6 +6,7 @@ import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.MAX_TIMESTAMP
 import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.db.SQLiteHelper
+import com.bigneon.doorperson.db.dml.TableSyncDML.EVENT_ID
 import com.bigneon.doorperson.db.dml.TableSyncDML.LAST_SYNC_TIME
 import com.bigneon.doorperson.db.dml.TableSyncDML.SYNC_DIRECTION
 import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_NAME
@@ -21,24 +22,25 @@ import com.bigneon.doorperson.util.AppUtils
 class SyncDS {
     private val allColumns = arrayOf(
         TABLE_NAME,
+        EVENT_ID,
         SYNC_DIRECTION,
         LAST_SYNC_TIME
     )
 
-    fun getLastSyncTime(syncTableName: AppConstants.SyncTableName, upload: Boolean): String? {
+    fun getLastSyncTime(syncTableName: AppConstants.SyncTableName, eventId: String, upload: Boolean): String? {
         SQLiteHelper.getDB().query(
             TABLE_SYNC,
             allColumns,
-            (TABLE_NAME + " = \"" + syncTableName + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            (TABLE_NAME + " = \"" + syncTableName + "\" and " + EVENT_ID + " = \"" + eventId + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
             null,
             null,
             null,
             null
         )?.use {
-            if (it.moveToFirst()) {
+            return if (it.moveToFirst()) {
                 val syncModel = cursorToSync(it)
                 it.close()
-                return syncModel.lastSyncTime
+                syncModel.lastSyncTime
             } else {
                 if (upload) {
                     MAX_TIMESTAMP
@@ -47,26 +49,47 @@ class SyncDS {
                 }
             }
         } ?: return null
-        return null
     }
 
-    fun setLastSyncTime(syncTableName: AppConstants.SyncTableName, upload: Boolean) {
-        val values = ContentValues()
-
-        values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
-
-        SQLiteHelper.getDB().update(
+    fun setLastSyncTime(syncTableName: AppConstants.SyncTableName, eventId: String, upload: Boolean) {
+        SQLiteHelper.getDB().query(
             TABLE_SYNC,
-            values,
-            (TABLE_NAME + " = \"" + syncTableName + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            allColumns,
+            (TABLE_NAME + " = \"" + syncTableName + "\" and " + EVENT_ID + " = \"" + eventId + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            null,
+            null,
+            null,
             null
-        )
+        )?.use {
+            if (it.moveToFirst()) {
+                // Update existing
+                val values = ContentValues()
+
+                values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
+
+                SQLiteHelper.getDB().update(
+                    TABLE_SYNC,
+                    values,
+                    (TABLE_NAME + " = \"" + syncTableName + "\" and " + EVENT_ID + " = \"" + eventId + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+                    null
+                )
+            } else {
+                // Create new
+                val values = ContentValues()
+                values.put(TABLE_NAME, syncTableName.toString())
+                values.put(EVENT_ID, eventId)
+                values.put(SYNC_DIRECTION, if (upload) "U" else "D")
+                values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
+                SQLiteHelper.getDB().insert(TABLE_SYNC, null, values)
+            }
+        }
     }
 
     private fun cursorToSync(cursor: Cursor): SyncModel {
         val syncModel = SyncModel()
         var index = 0
         syncModel.tableName = cursor.getString(index++)
+        syncModel.eventId = cursor.getString(index++)
         syncModel.syncDirection = cursor.getString(index++)
         syncModel.lastSyncTime = cursor.getString(index)
         return syncModel
