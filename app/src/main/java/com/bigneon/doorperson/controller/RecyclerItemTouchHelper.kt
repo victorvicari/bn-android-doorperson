@@ -21,8 +21,11 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.list_item_ticket.view.*
 import java.util.*
@@ -134,9 +137,7 @@ class RecyclerItemTouchHelper :
                             viewHolder.redeemedStatusTextView?.visibility = View.VISIBLE
                             viewHolder.purchasedStatusTextView?.visibility = View.GONE
                         } else {
-                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(
-                                    viewHolder.itemView.context
-                                )
+                            if (!isOfflineModeEnabled() && !isNetworkAvailable()
                             ) {
                                 // build alert dialog
                                 val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
@@ -146,14 +147,13 @@ class RecyclerItemTouchHelper :
                                     .setCancelable(false)
                                     .setPositiveButton("Turn on the offline mode") { _, _ ->
                                         run {
-                                            isOfflineModeEnabled = true
+                                            enableOfflineMode()
                                             checkInTicket(ticketModel, viewHolder)
                                         }
                                     }
                                     .setNegativeButton("Turn on the WiFi") { _, _ ->
                                         run {
-                                            NetworkUtils.instance()
-                                                .setWiFiEnabled(viewHolder.itemView.context, true)
+                                            setWiFiEnabled(true)
                                             redeemTicket(ticketModel, viewHolder)
                                         }
                                     }
@@ -190,14 +190,13 @@ class RecyclerItemTouchHelper :
             .setCancelable(false)
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
-                    isOfflineModeEnabled = true
+                    enableOfflineMode()
                     checkInTicket(ticketModel, viewHolder)
                 }
             }
             .setNegativeButton("Turn on the WiFi") { _, _ ->
                 run {
-                    NetworkUtils.instance()
-                        .setWiFiEnabled(viewHolder.itemView.context, true)
+                    setWiFiEnabled(true)
                     redeemTicket(ticketModel, viewHolder)
                 }
             }
@@ -233,12 +232,12 @@ class RecyclerItemTouchHelper :
                         ticketsDS = TicketsDS()
 
                         when {
-                            NetworkUtils.instance().isNetworkAvailable(viewHolder.itemView.context) -> {
+                            isNetworkAvailable() -> {
                                 ticketModel.status =
                                     viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                 redeemTicket(ticketModel, viewHolder)
                             }
-                            isOfflineModeEnabled -> {
+                            isOfflineModeEnabled() -> {
                                 ticketModel.status =
                                     viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                 checkInTicket(ticketModel, viewHolder)

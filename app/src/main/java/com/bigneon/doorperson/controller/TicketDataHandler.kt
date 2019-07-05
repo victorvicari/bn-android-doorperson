@@ -1,16 +1,16 @@
 package com.bigneon.doorperson.controller
 
-import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.service.StoreTicketsService
-import com.bigneon.doorperson.util.AppUtils
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import org.jetbrains.anko.doAsync
 
 
@@ -24,22 +24,10 @@ class TicketDataHandler {
         private val TAG = TicketDataHandler::class.java.simpleName
 
         var ticketsDS: TicketsDS = TicketsDS()
-        private var context: Context? = null
-
-
-        fun setContext(con: Context) {
-            context = con
-        }
-
-        fun storeTickets(eventId: String) {
-            val i = Intent(context, StoreTicketsService::class.java)
-            i.putExtra("eventId", eventId)
-            context?.startService(i)
-        }
 
         fun loadPageOfTickets(eventId: String, page: Int): List<TicketModel>? {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                isNetworkAvailable() -> {
                     var tickets: ArrayList<TicketModel>? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -51,7 +39,7 @@ class TicketDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return tickets
                 }
-                AppUtils.isOfflineModeEnabled -> // Return events from local DB
+                isOfflineModeEnabled() -> // Return events from local DB
                     return ticketsDS.getAllTicketsForEvent(eventId) // TODO - implement paging!!!
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
@@ -62,7 +50,7 @@ class TicketDataHandler {
 
         fun getRedeemedTicketNumberForEvent(eventId: String): Int {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                isNetworkAvailable() -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -70,7 +58,7 @@ class TicketDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return eventDashboardModel?.ticketsRedeemed ?: 0
                 }
-                AppUtils.isOfflineModeEnabled -> // Return events from local DB
+                isOfflineModeEnabled() -> // Return events from local DB
                     return ticketsDS.getRedeemedTicketNumberForEvent(eventId)
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
@@ -81,7 +69,7 @@ class TicketDataHandler {
 
         fun getAllTicketNumberForEvent(eventId: String): Int {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                isNetworkAvailable() -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -89,7 +77,7 @@ class TicketDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return (eventDashboardModel?.soldUnreserved ?: 0) + (eventDashboardModel?.soldHeld ?: 0)
                 }
-                AppUtils.isOfflineModeEnabled -> // Return events from local DB
+                isOfflineModeEnabled() -> // Return events from local DB
                     return ticketsDS.getAllTicketNumberForEvent(eventId)
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
@@ -100,6 +88,32 @@ class TicketDataHandler {
 
         fun getCheckedTicketNumberForEvent(eventId: String): Int {
             return ticketsDS.getCheckedTicketNumberForEvent(eventId)
+        }
+
+        fun storeTickets(eventId: String) {
+            val i = Intent(context, StoreTicketsService::class.java)
+            i.putExtra("eventId", eventId)
+            context?.startService(i)
+        }
+
+        fun redeemTicket(eventId: String, ticketId: String, redeemKey: String, firstName: String, lastName: String) {
+            fun setAccessToken(accessToken: String?) {
+                if (accessToken != null) {
+                    fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
+
+                    }
+                    RestAPI.redeemTicketForEvent(
+                        accessToken,
+                        eventId,
+                        ticketId,
+                        firstName,
+                        lastName,
+                        redeemKey,
+                        ::redeemTicketResult
+                    )
+                }
+            }
+            RestAPI.accessToken(::setAccessToken)
         }
     }
 }

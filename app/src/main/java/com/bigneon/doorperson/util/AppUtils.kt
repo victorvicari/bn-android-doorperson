@@ -1,7 +1,7 @@
 package com.bigneon.doorperson.util
 
-import android.content.Context
 import android.content.Intent
+import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.activity.LoginActivity
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
@@ -21,7 +21,19 @@ class AppUtils {
         var ticketListItemPosition = -1
         var ticketListItemOffset = 0
 
-        var isOfflineModeEnabled: Boolean = true
+        private var isOfflineModeEnabled: Boolean = true
+
+        fun isOfflineModeEnabled(): Boolean {
+            return isOfflineModeEnabled
+        }
+
+        fun enableOfflineMode() {
+            isOfflineModeEnabled = true
+        }
+
+        fun disableOfflineMode() {
+            isOfflineModeEnabled = false
+        }
 
         fun getCurrentTimestamp(): String {
             val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
@@ -30,10 +42,10 @@ class AppUtils {
             return dateFormat.format(date)
         }
 
-        fun checkLogged(context: Context) {
+        fun checkLogged() {
             val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN)
              if (refreshToken.isNullOrEmpty()) {
-                context.startActivity(Intent(context, LoginActivity::class.java))
+                 context?.startActivity(Intent(context, LoginActivity::class.java))
             }
         }
     }

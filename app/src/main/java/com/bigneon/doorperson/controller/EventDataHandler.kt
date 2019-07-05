@@ -1,12 +1,12 @@
 package com.bigneon.doorperson.controller
 
-import android.content.Context
 import android.util.Log
+import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import org.jetbrains.anko.doAsync
 
 /****************************************************
@@ -20,12 +20,6 @@ class EventDataHandler {
 
         //var eventList: ArrayList<EventModel> = ArrayList()
         var eventsDS: EventsDS = EventsDS()
-        private var context: Context? = null
-
-
-        fun setContext(con: Context) {
-            context = con
-        }
 
         fun storeEvents(events: ArrayList<EventModel>?) {
             if (events != null) {
@@ -41,7 +35,7 @@ class EventDataHandler {
 
         fun loadAllEvents(): ArrayList<EventModel>? {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                isNetworkAvailable() -> {
                     val eventList: ArrayList<EventModel> = ArrayList()
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -49,7 +43,7 @@ class EventDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return eventList
                 }
-                isOfflineModeEnabled -> // Return events from local DB
+                isOfflineModeEnabled() -> // Return events from local DB
                     return eventsDS.getAllEvents()
                 else -> {
                     Log.e(TAG, "Getting scannable events failed")
@@ -60,7 +54,7 @@ class EventDataHandler {
 
         fun getEventByID(eventId: String): EventModel? {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                context?.let { isNetworkAvailable() }!! -> {
                     var event: EventModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -68,7 +62,7 @@ class EventDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return event
                 }
-                isOfflineModeEnabled -> // Return events from local DB
+                isOfflineModeEnabled() -> // Return events from local DB
                     return eventsDS.getEvent(eventId)
                 else -> {
                     Log.e(TAG, "Getting scannable events failed")
@@ -79,7 +73,7 @@ class EventDataHandler {
 
         fun getEventByPosition(pos: Int): EventModel? {
             when {
-                context?.let { NetworkUtils.instance().isNetworkAvailable(it) }!! -> {
+                isNetworkAvailable() -> {
                     val eventList: ArrayList<EventModel> = ArrayList()
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -87,7 +81,7 @@ class EventDataHandler {
                     }.get() // get() is important to wait until doAsync is finished
                     return eventList[pos]
                 }
-                isOfflineModeEnabled ->  // Return events from local DB
+                isOfflineModeEnabled() ->  // Return events from local DB
                     return eventsDS.getAllEvents()?.get(pos)
                 else -> {
                     Log.e(TAG, "Getting scannable events failed")

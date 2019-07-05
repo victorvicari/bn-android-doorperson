@@ -10,6 +10,8 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.disableOfflineMode
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.content_profile.*
@@ -24,7 +26,7 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
         setSupportActionBar(profile_settings_toolbar)
 
-        AppUtils.checkLogged(getContext())
+        AppUtils.checkLogged()
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -44,12 +46,16 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(Intent(getContext(), LoginActivity::class.java))
         }
 
-        offline_mode_label.text = if (isOfflineModeEnabled) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
-        offline_mode_button_label.text = if (isOfflineModeEnabled) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
+        offline_mode_label.text = if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
+        offline_mode_button_label.text = if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
         offline_mode_button.setOnClickListener {
-            isOfflineModeEnabled = !isOfflineModeEnabled
-            offline_mode_label.text = if (isOfflineModeEnabled) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
-            offline_mode_button_label.text = if (isOfflineModeEnabled) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
+            if(isOfflineModeEnabled()) {
+                disableOfflineMode()
+            } else {
+                enableOfflineMode()
+            }
+            offline_mode_label.text = if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
+            offline_mode_button_label.text = if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
         }
     }
 

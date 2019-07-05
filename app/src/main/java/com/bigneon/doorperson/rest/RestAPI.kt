@@ -19,7 +19,7 @@ import com.bigneon.doorperson.rest.response.AuthTokenResponse
 import com.bigneon.doorperson.rest.response.EventsResponse
 import com.bigneon.doorperson.rest.response.TicketResponse
 import com.bigneon.doorperson.rest.response.TicketsResponse
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -108,7 +108,7 @@ class RestAPI private constructor() {
         }
 
         fun accessToken(setAccessToken: (accessToken: String?) -> Unit) {
-            if (NetworkUtils.instance().isNetworkAvailable(context)) {
+            if (isNetworkAvailable()) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") setAccessToken(null)
 
@@ -145,7 +145,7 @@ class RestAPI private constructor() {
 
         // Synchronous call
         fun accessToken(): String? {
-            if (NetworkUtils.instance().isNetworkAvailable(context)) {
+            if (isNetworkAvailable()) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") return null
 

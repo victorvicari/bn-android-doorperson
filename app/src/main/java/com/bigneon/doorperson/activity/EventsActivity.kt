@@ -15,7 +15,8 @@ import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
@@ -47,9 +48,8 @@ class EventsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
-        EventDataHandler.setContext(this)
 
-        AppUtils.checkLogged(getContext())
+        AppUtils.checkLogged()
 
         // Start synchronization service
         //startService(Intent(this, SyncService::class.java))
@@ -98,8 +98,7 @@ class EventsActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-//        SyncController.addRefreshEventListener(refreshEventListener)
+        addNetworkStateListener(this, networkStateReceiverListener)
         super.onStart()
     }
 
@@ -122,8 +121,7 @@ class EventsActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-//        SyncController.removeRefreshEventListener(refreshEventListener)
+        removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

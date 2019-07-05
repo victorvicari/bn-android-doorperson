@@ -17,6 +17,9 @@ import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.content_login.*
@@ -53,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         turn_on_wifi.setOnClickListener {
-            NetworkUtils.instance().setWiFiEnabled(this, true)
+            setWiFiEnabled(true)
         }
 
         email_address.addTextChangedListener(object : TextWatcher {
@@ -133,12 +136,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        addNetworkStateListener(this, networkStateReceiverListener)
         super.onStart()
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

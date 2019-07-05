@@ -12,7 +12,8 @@ import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
@@ -62,9 +63,8 @@ class ScanningEventActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
-        TicketDataHandler.setContext(this)
 
-        AppUtils.checkLogged(getContext())
+        AppUtils.checkLogged()
 
         eventId = intent.getStringExtra("eventId")
         TicketDataHandler.storeTickets(eventId)
@@ -148,16 +148,12 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-//        SyncController.addRefreshTicketListener(refreshTicketListener)
-//        SyncController.addLoadingTicketListener(loadingTicketListener)
+        addNetworkStateListener(this, networkStateReceiverListener)
         super.onStart()
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-//        SyncController.removeRefreshTicketListener(refreshTicketListener)
-//        SyncController.removeLoadingTicketListener(loadingTicketListener)
+        removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

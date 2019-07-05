@@ -13,13 +13,18 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
+import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.*
 import kotlinx.android.synthetic.main.content_ticket.view.*
@@ -111,7 +116,7 @@ class TicketActivity : AppCompatActivity() {
                                 )
                                 .setDuration(5000).show()
                         } else {
-                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
+                            if (!isOfflineModeEnabled() && !isNetworkAvailable()) {
                                 showDialog(getContext(), ticketId, redeemKey,
                                     redeemedTicket?.firstName!!, redeemedTicket.lastName!!)
                             } else {
@@ -145,13 +150,13 @@ class TicketActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
-                    isOfflineModeEnabled = true
+                    enableOfflineMode()
                     checkInTicket(ticketId, redeemKey, firstName, lastName)
                 }
             }
             .setNegativeButton("Turn on the WiFi") { _, _ ->
                 run {
-                    NetworkUtils.instance().setWiFiEnabled(this, true)
+                    setWiFiEnabled(true)
                     redeemTicket(ticketId, redeemKey, firstName, lastName)
                 }
             }
@@ -164,7 +169,7 @@ class TicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket)
 
-        AppUtils.checkLogged(getContext())
+        AppUtils.checkLogged()
 
         ticketsDS = TicketsDS()
 
@@ -255,8 +260,8 @@ class TicketActivity : AppCompatActivity() {
 
         complete_check_in.setOnClickListener {
             when {
-                NetworkUtils.instance().isNetworkAvailable(getContext()) -> redeemTicket(ticketId, redeemKey, firstName, lastName)
-                isOfflineModeEnabled -> checkInTicket(ticketId, redeemKey, firstName, lastName)
+                isNetworkAvailable() -> TicketDataHandler.redeemTicket(eventId!!, ticketId, redeemKey, firstName, lastName)
+                isOfflineModeEnabled() -> checkInTicket(ticketId, redeemKey, firstName, lastName)
                 else -> {
                     showDialog(getContext(), ticketId, redeemKey, firstName, lastName)
                     Log.e(TAG, "ERROR: Internet is not available and offline mode is disabled!")
@@ -267,12 +272,12 @@ class TicketActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+        addNetworkStateListener(this, networkStateReceiverListener)
         super.onStart()
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+        removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

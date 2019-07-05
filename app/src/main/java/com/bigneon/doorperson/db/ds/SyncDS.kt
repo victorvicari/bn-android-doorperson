@@ -13,6 +13,7 @@ import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_NAME
 import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_SYNC
 import com.bigneon.doorperson.rest.model.SyncModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.getCurrentTimestamp
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -65,7 +66,7 @@ class SyncDS {
                 // Update existing
                 val values = ContentValues()
 
-                values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
+                values.put(LAST_SYNC_TIME, getCurrentTimestamp())
 
                 SQLiteHelper.getDB().update(
                     TABLE_SYNC,
@@ -79,7 +80,7 @@ class SyncDS {
                 values.put(TABLE_NAME, syncTableName.toString())
                 values.put(EVENT_ID, eventId)
                 values.put(SYNC_DIRECTION, if (upload) "U" else "D")
-                values.put(LAST_SYNC_TIME, AppUtils.getCurrentTimestamp())
+                values.put(LAST_SYNC_TIME, getCurrentTimestamp())
                 SQLiteHelper.getDB().insert(TABLE_SYNC, null, values)
             }
         }

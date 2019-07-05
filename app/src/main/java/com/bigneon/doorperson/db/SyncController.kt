@@ -118,7 +118,7 @@ class SyncController {
 //        }
 
 //        fun synchronizeAllTables(fullRefresh: Boolean): Boolean {
-//            if (!NetworkUtils.instance().isNetworkAvailable(context))
+//            if (!isNetworkAvailable(context))
 //                return false
 //
 //            if (!syncInProgress) {

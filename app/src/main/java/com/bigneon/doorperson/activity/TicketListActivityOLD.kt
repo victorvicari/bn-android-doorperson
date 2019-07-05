@@ -76,7 +76,7 @@
 //        setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
 //        setSupportActionBar(ticket_list_toolbar)
 //
-//        AppUtils.checkLogged(getContext())
+//        AppUtils.checkLogged()
 //
 //        ticketsDS = TicketsDS()
 //
@@ -172,7 +172,7 @@
 //    }
 //
 //    override fun onStart() {
-//        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
+//        addNetworkStateListener(this, networkStateReceiverListener)
 //        SyncController.addRefreshTicketListener(refreshTicketListener)
 //        SyncController.addLoadingTicketListener(loadingTicketListener)
 //        super.onStart()
@@ -251,7 +251,7 @@
 //    }
 //
 //    override fun onStop() {
-//        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
+//        removeNetworkStateListener(this, networkStateReceiverListener)
 //        SyncController.removeRefreshTicketListener(refreshTicketListener)
 //        SyncController.removeLoadingTicketListener(loadingTicketListener)
 //        super.onStop()

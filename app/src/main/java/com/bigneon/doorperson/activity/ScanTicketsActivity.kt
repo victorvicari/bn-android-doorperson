@@ -24,8 +24,11 @@ import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.google.zxing.Result
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
@@ -55,7 +58,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         // Set the scanner view as the content view
         setContentView(R.layout.activity_scan_tickets)
 
-        AppUtils.checkLogged(getContext())
+        checkLogged()
 
         ticketsDS = TicketsDS()
 
@@ -198,7 +201,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
                             showPillUserInfo(true, ticketId)
                         } else {
-                            if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
+                            if (!isOfflineModeEnabled() && !isNetworkAvailable()) {
                                 showDialog(getContext(), ticketId, redeemKey)
                             } else {
                                 showPillUserInfo(false, ticketId)
@@ -233,13 +236,13 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             .setCancelable(false)
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
-                    isOfflineModeEnabled = true
+                    enableOfflineMode()
                     checkInTicket(ticket?.status!!, ticketId, redeemKey)
                 }
             }
             .setNegativeButton("Turn on the WiFi") { _, _ ->
                 run {
-                    NetworkUtils.instance().setWiFiEnabled(this, true)
+                    setWiFiEnabled(true)
                     redeemTicket(ticketId, redeemKey, ticket?.firstName!!, ticket.lastName!!)
                 }
             }
@@ -294,10 +297,10 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                 startActivity(intent)
             } else {
 //                var success = false
-                if (NetworkUtils.instance().isNetworkAvailable(getContext())) {
+                if (isNetworkAvailable()) {
                     /*success = */redeemTicket(ticketId, redeemKey, ticket.firstName!!, ticket.lastName!!)
                 } else {
-                    if (isOfflineModeEnabled) {
+                    if (isOfflineModeEnabled()) {
                         /*success = */checkInTicket(ticket.status!!, ticketId, redeemKey)
                     } else {
                         Log.e(TAG, "ERROR: Internet is not available and offline mode is disabled!")
