@@ -27,7 +27,7 @@
             android:theme="@style/AppTheme">
 
         <service
-                android:name=".service.SyncService"
+                android:name=".service.StoreTicketsService"
                 android:exported="false">
         </service>
 

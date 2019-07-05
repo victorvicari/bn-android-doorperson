@@ -91,6 +91,9 @@ class EventsActivity : AppCompatActivity() {
             events_layout.isRefreshing = false // TODO - Move after sync is done!
         }
 
+        AppUtils.ticketListItemPosition = 0
+        AppUtils.ticketListItemOffset = 0
+
         refreshList()
     }
 

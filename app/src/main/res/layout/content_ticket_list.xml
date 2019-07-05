@@ -53,7 +53,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone">
-
             <requestFocus/>
         </android.support.v7.widget.RecyclerView>
 
@@ -84,14 +83,6 @@
                         android:textSize="16sp"
                         android:text="@string/no_guests_found"/>
             </LinearLayout>
-
-            <ProgressBar
-                    android:id="@+id/loading_guests_progress_bar"
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"/>
         </RelativeLayout>
     </LinearLayout>
 </android.support.v4.widget.SwipeRefreshLayout>

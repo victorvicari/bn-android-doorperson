@@ -45,7 +45,7 @@ class TicketActivity : AppCompatActivity() {
         return this
     }
 
-    private fun checkInTicket(ticketId: String, redeemKey: String) {
+    private fun checkInTicket(ticketId: String, redeemKey: String, firstName: String, lastName: String) {
         val ticket = ticketsDS!!.setCheckedTicket(ticketId)
         if (ticket != null) {
             scanning_ticket_layout.checked_status?.visibility = View.VISIBLE
@@ -55,7 +55,7 @@ class TicketActivity : AppCompatActivity() {
             Snackbar
                 .make(
                     scanning_ticket_layout,
-                    "Checked in ${ticket.lastName + ", " + ticket.firstName}",
+                    "Checked in ${"$lastName, $firstName"}",
                     Snackbar.LENGTH_LONG
                 )
                 .setDuration(5000).show()
@@ -71,7 +71,7 @@ class TicketActivity : AppCompatActivity() {
         }
     }
 
-    private fun redeemTicket(ticketId: String, redeemKey: String) {
+    private fun redeemTicket(ticketId: String, redeemKey: String, firstName: String, lastName: String) {
         fun setAccessToken(accessToken: String?) {
             if (accessToken == null) {
                 Snackbar
@@ -112,7 +112,8 @@ class TicketActivity : AppCompatActivity() {
                                 .setDuration(5000).show()
                         } else {
                             if (!isOfflineModeEnabled && !NetworkUtils.instance().isNetworkAvailable(this)) {
-                                showDialog(getContext(), ticketId, redeemKey)
+                                showDialog(getContext(), ticketId, redeemKey,
+                                    redeemedTicket?.firstName!!, redeemedTicket.lastName!!)
                             } else {
                                 Log.e(TAG, "ERROR: redeemTicketForEvent")
                             }
@@ -120,14 +121,12 @@ class TicketActivity : AppCompatActivity() {
                     }
                 }
 
-                val ticket = ticketsDS!!.getTicket(ticketId)
-
                 RestAPI.redeemTicketForEvent(
                     accessToken,
                     eventId!!,
                     ticketId,
-                    ticket?.firstName!!,
-                    ticket.lastName!!,
+                    firstName,
+                    lastName,
                     redeemKey,
                     ::redeemTicketResult
                 )
@@ -136,7 +135,8 @@ class TicketActivity : AppCompatActivity() {
         RestAPI.accessToken(::setAccessToken)
     }
 
-    private fun showDialog(context: Context, ticketId: String, redeemKey: String) {
+    private fun showDialog(context: Context, ticketId: String, redeemKey: String, firstName: String, lastName: String
+    ) {
         // build alert dialog
         val dialogBuilder = AlertDialog.Builder(context)
 
@@ -146,13 +146,13 @@ class TicketActivity : AppCompatActivity() {
             .setPositiveButton("Turn on the offline mode") { _, _ ->
                 run {
                     isOfflineModeEnabled = true
-                    checkInTicket(ticketId, redeemKey)
+                    checkInTicket(ticketId, redeemKey, firstName, lastName)
                 }
             }
             .setNegativeButton("Turn on the WiFi") { _, _ ->
                 run {
                     NetworkUtils.instance().setWiFiEnabled(this, true)
-                    redeemTicket(ticketId, redeemKey)
+                    redeemTicket(ticketId, redeemKey, firstName, lastName)
                 }
             }
         val alert = dialogBuilder.create()
@@ -255,10 +255,10 @@ class TicketActivity : AppCompatActivity() {
 
         complete_check_in.setOnClickListener {
             when {
-                NetworkUtils.instance().isNetworkAvailable(getContext()) -> redeemTicket(ticketId, redeemKey)
-                isOfflineModeEnabled -> checkInTicket(ticketId, redeemKey)
+                NetworkUtils.instance().isNetworkAvailable(getContext()) -> redeemTicket(ticketId, redeemKey, firstName, lastName)
+                isOfflineModeEnabled -> checkInTicket(ticketId, redeemKey, firstName, lastName)
                 else -> {
-                    showDialog(getContext(), ticketId, redeemKey)
+                    showDialog(getContext(), ticketId, redeemKey, firstName, lastName)
                     Log.e(TAG, "ERROR: Internet is not available and offline mode is disabled!")
                 }
             }
