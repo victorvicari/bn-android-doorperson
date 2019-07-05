@@ -23,7 +23,26 @@ class TicketDataHandler {
     companion object {
         private val TAG = TicketDataHandler::class.java.simpleName
 
-        var ticketsDS: TicketsDS = TicketsDS()
+        private var ticketsDS: TicketsDS = TicketsDS()
+
+        fun getTicket(ticketId: String): TicketModel? {
+            when {
+                isNetworkAvailable() -> {
+                    var ticket: TicketModel? = null
+                    doAsync {
+                        val accessToken: String? = RestAPI.accessToken()
+                        RestAPI.getTicket(accessToken!!, ticketId)?.let { ticket = it }
+                    }.get() // get() is important to wait until doAsync is finished
+                    return ticket
+                }
+                isOfflineModeEnabled() -> // Return events from local DB
+                    return ticketsDS.getTicket(ticketId)
+                else -> {
+                    Log.e(TAG, "Getting ticket failed")
+                }
+            }
+            return null
+        }
 
         fun loadPageOfTickets(eventId: String, page: Int): List<TicketModel>? {
             when {
@@ -31,11 +50,13 @@ class TicketDataHandler {
                     var tickets: ArrayList<TicketModel>? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
-                        RestAPI.getTicketsForEvent(accessToken!!,
+                        RestAPI.getTicketsForEvent(
+                            accessToken!!,
                             eventId,
                             AppConstants.MIN_TIMESTAMP,
                             AppConstants.PAGE_LIMIT,
-                            page)?.let { tickets = it }
+                            page
+                        )?.let { tickets = it }
                     }.get() // get() is important to wait until doAsync is finished
                     return tickets
                 }
@@ -96,24 +117,54 @@ class TicketDataHandler {
             context?.startService(i)
         }
 
-        fun redeemTicket(eventId: String, ticketId: String, redeemKey: String, firstName: String, lastName: String) {
-            fun setAccessToken(accessToken: String?) {
-                if (accessToken != null) {
-                    fun redeemTicketResult(isDuplicateTicket: Boolean, redeemedTicket: TicketModel?) {
-
-                    }
-                    RestAPI.redeemTicketForEvent(
-                        accessToken,
-                        eventId,
-                        ticketId,
-                        firstName,
-                        lastName,
-                        redeemKey,
-                        ::redeemTicketResult
-                    )
+        fun completeCheckIn(
+            eventId: String,
+            ticketId: String,
+            redeemKey: String,
+            firstName: String,
+            lastName: String
+        ): TicketState? {
+            var ticketState: TicketState? = null
+            when {
+                isNetworkAvailable() -> {
+                    doAsync {
+                        val accessToken: String? = RestAPI.accessToken()
+                        val isDuplicateTicket = accessToken?.let {
+                            RestAPI.redeemTicketForEvent(
+                                it,
+                                eventId,
+                                ticketId,
+                                firstName,
+                                lastName,
+                                redeemKey
+                            )
+                        }
+                        ticketState = if (isDuplicateTicket == true) {
+                            Log.d(
+                                TAG,
+                                "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! "
+                            )
+                            TicketState.DUPLICATED
+                        } else {
+                            Log.d(TAG, "Ticket ID: $ticketId has been redeemed! ")
+                            TicketState.REDEEMED
+                        }
+                    }.get() // get() is important to wait until doAsync is finished
+                }
+                isOfflineModeEnabled() -> {
+                    ticketsDS.setCheckedTicket(ticketId)
+                    ticketState = TicketState.CHECKED
+                }
+                else -> {
+                    ticketState = TicketState.ERROR
+                    Log.e(TAG, "Error in connection! Redeem ticket failed")
                 }
             }
-            RestAPI.accessToken(::setAccessToken)
+            return ticketState
         }
+    }
+
+    enum class TicketState {
+        REDEEMED, CHECKED, DUPLICATED, ERROR
     }
 }

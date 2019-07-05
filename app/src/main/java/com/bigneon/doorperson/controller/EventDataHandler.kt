@@ -19,7 +19,7 @@ class EventDataHandler {
         private val TAG = EventDataHandler::class.java.simpleName
 
         //var eventList: ArrayList<EventModel> = ArrayList()
-        var eventsDS: EventsDS = EventsDS()
+        private var eventsDS: EventsDS = EventsDS()
 
         fun storeEvents(events: ArrayList<EventModel>?) {
             if (events != null) {

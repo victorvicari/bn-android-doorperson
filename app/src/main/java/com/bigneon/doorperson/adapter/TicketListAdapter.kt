@@ -53,11 +53,11 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
 //        notifyItemInserted(list.size - 1)
     }
 
-    fun addAll(postItems: List<TicketModel>) {
-        for (response in postItems) {
-            add(response)
-        }
-    }
+//    fun addAll(postItems: List<TicketModel>) {
+//        for (response in postItems) {
+//            add(response)
+//        }
+//    }
 
     private fun remove(postItems: TicketModel?) {
         val position = list!!.indexOf(postItems)
@@ -93,8 +93,8 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
     }
 
     companion object {
-        private val VIEW_TYPE_LOADING = 0
-        private val VIEW_TYPE_NORMAL = 1
+        private const val VIEW_TYPE_LOADING = 0
+        private const val VIEW_TYPE_NORMAL = 1
     }
 
 }

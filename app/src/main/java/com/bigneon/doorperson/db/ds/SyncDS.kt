@@ -12,7 +12,6 @@ import com.bigneon.doorperson.db.dml.TableSyncDML.SYNC_DIRECTION
 import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_NAME
 import com.bigneon.doorperson.db.dml.TableSyncDML.TABLE_SYNC
 import com.bigneon.doorperson.rest.model.SyncModel
-import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.getCurrentTimestamp
 
 /****************************************************

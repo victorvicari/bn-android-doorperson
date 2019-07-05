@@ -16,7 +16,6 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
-import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled

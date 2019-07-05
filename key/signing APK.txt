@@ -1,5 +1,5 @@
-Presign requirements:
-=====================
+Pre-sign requirements:
+======================
 - Keystore file path: bn-android-doorperson\key\bigneon-doorperson.keystore
 
 Signing APK:
@@ -27,7 +27,7 @@ Publishing APK on Google Play:
 ==============================
 - Go to Google Play Console
 https://play.google.com/apps/publish/?account=5143065808235667505#AppListPlace
-- Click on "Big Neon Dorperson" application
+- Click on "Big Neon Doorperson" application
 - On the left side click on "Application versions" link
 - Upload APK for Internal, Alpha, Beta testing or Publish
 - Publish

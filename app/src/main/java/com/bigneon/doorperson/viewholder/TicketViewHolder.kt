@@ -16,11 +16,11 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
     private var ticketIdTextView: TextView? = null
-    var redeemedStatusTextView: TextView? = null
-    var checkedStatusTextView: TextView? = null
+    private var redeemedStatusTextView: TextView? = null
+    private var checkedStatusTextView: TextView? = null
     private var checkedNoInternetImageView: ImageView? = null
     private var duplicateStatusTextView: TextView? = null
-    var purchasedStatusTextView: TextView? = null
+    private var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
 

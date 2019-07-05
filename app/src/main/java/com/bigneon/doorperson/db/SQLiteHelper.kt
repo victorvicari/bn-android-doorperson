@@ -21,7 +21,7 @@ class SQLiteHelper : SQLiteOpenHelper(
     AppConstants.DATABASE_VERSION
 ) {
     companion object {
-        val instance = SQLiteHelper()
+        private val instance = SQLiteHelper()
 
         fun getDB(): SQLiteDatabase {
             return instance.writableDatabase

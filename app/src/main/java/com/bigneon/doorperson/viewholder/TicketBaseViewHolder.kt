@@ -11,8 +11,7 @@ import android.view.View
  ****************************************************/
 abstract class TicketBaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    var currentPosition: Int = 0
-        private set
+    private var currentPosition: Int = 0
 
     protected abstract fun bind(position: Int)
 

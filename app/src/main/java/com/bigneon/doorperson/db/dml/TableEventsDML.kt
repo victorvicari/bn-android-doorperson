@@ -7,7 +7,7 @@ package com.bigneon.doorperson.db.dml
  ****************************************************/
 object TableEventsDML {
     const val TABLE_EVENTS = "events"
-    const val EVENT_ID = "event_id"
+    private const val EVENT_ID = "event_id"
     const val NAME = "name"
     const val PROMO_IMAGE_URL = "promo_image_url"
 

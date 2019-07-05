@@ -37,7 +37,7 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     private var currentPage = PAGE_START
     private var isLastPage = false
     private var isLoading = false
-    var itemCount = 0
+    private var itemCount = 0
     //    private var searchTextChanged: Boolean = false
     private var screenRotation: Boolean = false
     private var searchGuestText: String = ""
@@ -67,6 +67,7 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         eventId = intent.getStringExtra("eventId")
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
+
         itemTouchHelper.attachToRecyclerView(ticket_list_view)
 
         tickets_swipe_refresh_layout.setOnRefreshListener(this)
@@ -78,6 +79,7 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
         mAdapter = TicketListAdapter(ArrayList())
         ticket_list_view.adapter = mAdapter
+        recyclerItemTouchHelper.adapter = mAdapter
 
         adaptTicketList()
 
