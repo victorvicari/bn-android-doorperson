@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
-import com.bigneon.doorperson.BigNeonApplication
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 
 
@@ -45,17 +44,23 @@ class NetworkUtils {
             }
         }
 
-        fun isNetworkAvailable(): Boolean {
+        fun isNetworkAvailable(context: Context): Boolean {
             val connectivityManager =
-                BigNeonApplication.context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
             val activeNetworkInfo = connectivityManager!!.activeNetworkInfo
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
         }
 
         @Throws(Exception::class)
-        fun setWiFiEnabled(enabled: Boolean) {
-            val wifiManager = BigNeonApplication.context?.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            wifiManager.isWifiEnabled = enabled
+        fun setWiFiEnabled(context: Context) {
+            val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiManager.isWifiEnabled = true
+        }
+
+        @Throws(Exception::class)
+        fun setWiFiDisabled(context: Context) {
+            val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiManager.isWifiEnabled = false
         }
     }
 }

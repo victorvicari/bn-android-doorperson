@@ -3,6 +3,7 @@ package com.bigneon.doorperson.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -18,23 +19,71 @@ import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiDisabled
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.content_login.*
 
-
 class LoginActivity : AppCompatActivity() {
     private val TAG = LoginActivity::class.java.simpleName
     private var showPassword: Boolean = false
+    private var turnOnWifiClicked: Boolean = false
+    private var countDownTimerIsTicking: Boolean = false
+
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
+            val countDownTimer = object : CountDownTimer(10000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                }
+
+                override fun onFinish() {
+                    turn_on_wifi.progress = -1
+                    Handler().postDelayed({
+                        try {
+                            turnOnWifiClicked = false
+                            turn_on_wifi.progress = 0
+                            setWiFiDisabled(getContext())
+                        } catch (e: Exception) {
+                            Log.e(TAG, e.message)
+                        }
+                    }, 3000)
+                }
+            }
+
             override fun networkAvailable() {
-                turn_on_wifi.visibility = View.GONE
+                if (turnOnWifiClicked) {
+                    turn_on_wifi.progress = 100
+                    Handler().postDelayed({
+                        try {
+                            turnOnWifiClicked = false
+                            turn_on_wifi.visibility = View.INVISIBLE
+                            loginBtn.isEnabled = true
+                            if (countDownTimerIsTicking) {
+                                countDownTimer.cancel()
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, e.message)
+                        }
+                    }, 3000)
+                } else {
+                    turn_on_wifi.visibility = View.INVISIBLE
+                    loginBtn.isEnabled = true
+                }
             }
 
             override fun networkUnavailable() {
-                turn_on_wifi.visibility = View.VISIBLE
+                if (turnOnWifiClicked) {
+                    if (countDownTimerIsTicking) {
+                        countDownTimer.cancel()
+                    }
+                    countDownTimer.start()
+                    countDownTimerIsTicking = true
+                } else {
+                    turn_on_wifi.progress = 0
+                    turn_on_wifi.visibility = View.VISIBLE
+                    loginBtn.isEnabled = false
+                }
             }
         }
 
@@ -49,13 +98,17 @@ class LoginActivity : AppCompatActivity() {
 
         SharedPrefs.setContext(this)
         RestAPI.setContext(this)
-//        SyncController.setContext(this)
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        turn_on_wifi.isIndeterminateProgressMode = true
         turn_on_wifi.setOnClickListener {
-            setWiFiEnabled(true)
+            turnOnWifiClicked = true
+            if (turn_on_wifi.progress == 0) {
+                turn_on_wifi.progress = 30
+            }
+            setWiFiEnabled(getContext())
         }
 
         email_address.addTextChangedListener(object : TextWatcher {

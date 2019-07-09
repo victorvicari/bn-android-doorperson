@@ -15,19 +15,24 @@
             android:background="@color/colorWhite"
             android:orientation="vertical">
 
-        <TextView
+        <com.dd.CircularProgressButton
                 android:id="@+id/turn_on_wifi"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_marginStart="@dimen/fab_margin"
-                android:layout_marginEnd="@dimen/fab_margin"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="20dp"
                 android:background="@color/colorAccent"
-                android:hint="@string/turn_on_wifi"
-                android:gravity="center"
+                android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="30dp"
-                android:visibility="gone"/>
+                android:textAllCaps="false"
+                android:gravity="center"
+                app:cpb_cornerRadius="4dp"
+                app:cpb_textIdle="@string/turn_on_wifi"
+                app:cpb_textComplete="WiFi is now turned ON"
+                app:cpb_textError="Error while turning on WiFi"
+                android:visibility="invisible"/>
 
         <android.support.v7.widget.AppCompatTextView
                 android:layout_width="match_parent"

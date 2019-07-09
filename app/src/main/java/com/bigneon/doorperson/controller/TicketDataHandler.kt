@@ -1,5 +1,6 @@
 package com.bigneon.doorperson.controller
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.bigneon.doorperson.BigNeonApplication.Companion.context
@@ -25,9 +26,9 @@ class TicketDataHandler {
 
         private var ticketsDS: TicketsDS = TicketsDS()
 
-        fun getTicket(ticketId: String): TicketModel? {
+        fun getTicket(context: Context, ticketId: String): TicketModel? {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     var ticket: TicketModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -44,9 +45,9 @@ class TicketDataHandler {
             return null
         }
 
-        fun loadPageOfTickets(eventId: String, page: Int): List<TicketModel>? {
+        fun loadPageOfTickets(context: Context, eventId: String, page: Int): List<TicketModel>? {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     var tickets: ArrayList<TicketModel>? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -69,9 +70,9 @@ class TicketDataHandler {
             return null
         }
 
-        fun getRedeemedTicketNumberForEvent(eventId: String): Int {
+        fun getRedeemedTicketNumberForEvent(context: Context, eventId: String): Int {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -88,9 +89,9 @@ class TicketDataHandler {
             return 0
         }
 
-        fun getAllTicketNumberForEvent(eventId: String): Int {
+        fun getAllTicketNumberForEvent(context: Context, eventId: String): Int {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -118,6 +119,7 @@ class TicketDataHandler {
         }
 
         fun completeCheckIn(
+            context: Context,
             eventId: String,
             ticketId: String,
             redeemKey: String,
@@ -126,7 +128,7 @@ class TicketDataHandler {
         ): TicketState? {
             var ticketState: TicketState? = null
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
                         val isDuplicateTicket = accessToken?.let {

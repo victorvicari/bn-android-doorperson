@@ -133,12 +133,12 @@ class ScanningEventActivity : AppCompatActivity() {
 //    }
 
     private fun getEventSummary() {
-        scanning_event_name.text = EventDataHandler.getEventByID(eventId)?.name ?: ""
+        scanning_event_name.text = EventDataHandler.getEventByID(getContext(), eventId)?.name ?: ""
 
         number_of_redeemed.text = getString(
             R.string._1_d_of_2_d_redeemed,
-            TicketDataHandler.getRedeemedTicketNumberForEvent(eventId),
-            TicketDataHandler.getAllTicketNumberForEvent(eventId)
+            TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId),
+            TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId)
         )
 
         number_of_checked.text = getString(

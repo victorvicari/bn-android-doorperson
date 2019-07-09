@@ -15,7 +15,6 @@ import com.bigneon.doorperson.R
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.controller.TicketDataHandler.Companion.completeCheckIn
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
@@ -121,7 +120,8 @@ class RecyclerItemTouchHelper :
                         adapter!!.notifyItemChanged(pos)
 
                         fun completeCheckIn() {
-                            when (completeCheckIn(
+                            when (TicketDataHandler.completeCheckIn(
+                                viewHolder.itemView.context,
                                 ticketModel.eventId!!,
                                 ticketModel.ticketId!!,
                                 ticketModel.redeemKey!!,
@@ -155,7 +155,7 @@ class RecyclerItemTouchHelper :
                                         }
                                         .setNegativeButton("Turn on the WiFi") { _, _ ->
                                             run {
-                                                setWiFiEnabled(true)
+                                                setWiFiEnabled(viewHolder.itemView.context)
                                                 completeCheckIn()
                                             }
                                         }

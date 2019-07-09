@@ -105,7 +105,7 @@ class RestAPI private constructor() {
         }
 
         fun accessToken(setAccessToken: (accessToken: String?) -> Unit) {
-            if (isNetworkAvailable()) {
+            if (isNetworkAvailable(context)) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") setAccessToken(null)
 
@@ -142,7 +142,7 @@ class RestAPI private constructor() {
 
         // Synchronous call
         fun accessToken(): String? {
-            if (isNetworkAvailable()) {
+            if (isNetworkAvailable(context)) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
                 if (refreshToken == "") return null
 

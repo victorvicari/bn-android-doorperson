@@ -154,7 +154,7 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         if (currentPage != PAGE_START) mAdapter?.removeLoading()
 
         if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
-            val items = TicketDataHandler.loadPageOfTickets(eventId!!, 0)
+            val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, 0)
             recyclerItemTouchHelper.ticketList = items as java.util.ArrayList<TicketModel>?
         }
 
@@ -178,7 +178,7 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     }
 
     private fun loadNewPage(eventId: String, page: Int) {
-        val items = TicketDataHandler.loadPageOfTickets(eventId, page)
+        val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId, page)
         items?.let {
             recyclerItemTouchHelper.ticketList?.addAll(it)
             adaptTicketList()

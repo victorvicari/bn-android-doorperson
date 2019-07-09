@@ -132,7 +132,7 @@ class TicketActivity : AppCompatActivity() {
         }
 
         fun completeCheckIn() {
-            when (TicketDataHandler.completeCheckIn(eventId!!, ticketId, redeemKey, firstName, lastName)) {
+            when (TicketDataHandler.completeCheckIn(getContext(), eventId!!, ticketId, redeemKey, firstName, lastName)) {
                 TicketDataHandler.TicketState.REDEEMED -> {
                     scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
@@ -190,7 +190,7 @@ class TicketActivity : AppCompatActivity() {
                         }
                         .setNegativeButton("Turn on the WiFi") { _, _ ->
                             run {
-                                setWiFiEnabled(true)
+                                setWiFiEnabled(getContext())
                                 completeCheckIn()
                             }
                         }

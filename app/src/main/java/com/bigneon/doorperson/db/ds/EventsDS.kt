@@ -102,7 +102,7 @@ class EventsDS {
         var index = 0
         eventModel.id = cursor.getString(index++)
         eventModel.name = cursor.getString(index++)
-        eventModel.promoImageURL = cursor.getString(index++)
+        eventModel.promoImageURL = cursor.getString(index)
         return eventModel
     }
 }

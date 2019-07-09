@@ -1,7 +1,7 @@
 package com.bigneon.doorperson.controller
 
+import android.content.Context
 import android.util.Log
-import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.db.ds.EventsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventModel
@@ -14,7 +14,7 @@ import org.jetbrains.anko.doAsync
  * All right reserved!
  * Created by SRKI-ST on 28.06.2019..
  ****************************************************/
-class EventDataHandler {
+class EventDataHandler() {
     companion object {
         private val TAG = EventDataHandler::class.java.simpleName
 
@@ -33,9 +33,9 @@ class EventDataHandler {
             }
         }
 
-        fun loadAllEvents(): ArrayList<EventModel>? {
+        fun loadAllEvents(context: Context): ArrayList<EventModel>? {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     val eventList: ArrayList<EventModel> = ArrayList()
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -52,9 +52,9 @@ class EventDataHandler {
             return null
         }
 
-        fun getEventByID(eventId: String): EventModel? {
+        fun getEventByID(context: Context, eventId: String): EventModel? {
             when {
-                context?.let { isNetworkAvailable() }!! -> {
+                isNetworkAvailable(context) -> {
                     var event: EventModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -71,9 +71,9 @@ class EventDataHandler {
             return null
         }
 
-        fun getEventByPosition(pos: Int): EventModel? {
+        fun getEventByPosition(context: Context, pos: Int): EventModel? {
             when {
-                isNetworkAvailable() -> {
+                isNetworkAvailable(context) -> {
                     val eventList: ArrayList<EventModel> = ArrayList()
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()

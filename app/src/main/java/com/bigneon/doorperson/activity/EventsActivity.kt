@@ -58,7 +58,7 @@ class EventsActivity : AppCompatActivity() {
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
-                val eventId = EventDataHandler.getEventByPosition(position)?.id
+                val eventId = EventDataHandler.getEventByPosition(getContext(), position)?.id
 //                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
 //                if (eventForSync.isNullOrEmpty()) {
 //                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
@@ -103,7 +103,7 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun refreshList() {
-        val events = EventDataHandler.loadAllEvents()
+        val events = EventDataHandler.loadAllEvents(getContext())
         if (events != null) {
             eventsListView?.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)

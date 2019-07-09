@@ -24,7 +24,7 @@ import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
-import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.google.zxing.Result
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
@@ -163,7 +163,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val jsonObjectData = jsonObj.getJSONObject("data")
             val ticketId = jsonObjectData.getString("id")
 
-            val ticket = TicketDataHandler.getTicket(ticketId)
+            val ticket = TicketDataHandler.getTicket(getContext(), ticketId)
             if (ticket == null) {
                 Snackbar
                     .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
@@ -187,6 +187,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             } else {
                 fun completeCheckIn() {
                     when (TicketDataHandler.completeCheckIn(
+                        getContext(),
                         eventId!!,
                         ticketId,
                         ticket.redeemKey!!,
@@ -235,7 +236,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                 }
                                 .setNegativeButton("Turn on the WiFi") { _, _ ->
                                     run {
-                                        NetworkUtils.setWiFiEnabled(true)
+                                        setWiFiEnabled(getContext())
                                         completeCheckIn()
                                     }
                                 }
