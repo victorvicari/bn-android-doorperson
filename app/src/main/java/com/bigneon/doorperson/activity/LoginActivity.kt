@@ -168,7 +168,9 @@ class LoginActivity : AppCompatActivity() {
                                     loginBtn.startAnimation(loadAnimation(this, R.anim.shake))
                                     Handler().postDelayed({
                                         loginBtn.progress = 0
-                                        recreate() // refreshes the activity
+//                                        recreate() // refreshes the activity
+                                        finish()
+                                        startActivity(intent)
                                     }, 3000)
                                 } else {
                                     Crashlytics.setUserEmail(email)
