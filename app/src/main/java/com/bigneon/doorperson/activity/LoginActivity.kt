@@ -103,6 +103,9 @@ class LoginActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        login_email_address.setText(intent.getStringExtra("email"))
+        login_password.setText(intent.getStringExtra("password"))
+
         turn_on_wifi.isIndeterminateProgressMode = true
         turn_on_wifi.setOnClickListener {
             turnOnWifiClicked = true
@@ -112,7 +115,7 @@ class LoginActivity : AppCompatActivity() {
             setWiFiEnabled(getContext())
         }
 
-        email_address.addTextChangedListener(object : TextWatcher {
+        login_email_address.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
@@ -122,7 +125,7 @@ class LoginActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable) {}
         })
 
-        password.addTextChangedListener(object : TextWatcher {
+        login_password.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
@@ -139,18 +142,18 @@ class LoginActivity : AppCompatActivity() {
                 )
 
             showPassword = show_hide_password.text == getString(R.string.show)
-            password.transformationMethod =
+            login_password.transformationMethod =
                 if (showPassword) PasswordTransformationMethod.getInstance() else HideReturnsTransformationMethod.getInstance()
         }
 
         loginBtn.isIndeterminateProgressMode = true
         loginBtn.setOnClickListener {
             when {
-                email_address.text.toString().isEmpty() -> {
+                login_email_address.text.toString().isEmpty() -> {
                     email_address_message.visibility = View.VISIBLE
-                    email_address.startAnimation(loadAnimation(this, R.anim.shake))
+                    login_email_address.startAnimation(loadAnimation(this, R.anim.shake))
                 }
-                password.text.toString().isEmpty() || password.text?.length!! < 7 -> {
+                login_password.text.toString().isEmpty() || login_password.text?.length!! < 7 -> {
                     password_message.visibility = View.VISIBLE
                     password_with_show_hide.startAnimation(loadAnimation(this, R.anim.shake))
                 }
@@ -160,8 +163,8 @@ class LoginActivity : AppCompatActivity() {
                     }
                     Handler().postDelayed({
                         try {
-                            val email = email_address.text.toString()
-                            val password = password.text.toString()
+                            val email = login_email_address.text.toString()
+                            val password = login_password.text.toString()
                             fun setAccessToken(accessToken: String?) {
                                 if (accessToken == null) {
                                     loginBtn.progress = -1
@@ -170,6 +173,8 @@ class LoginActivity : AppCompatActivity() {
                                         loginBtn.progress = 0
 //                                        recreate() // refreshes the activity
                                         finish()
+                                        intent.putExtra("email", login_email_address.text.toString())
+                                        intent.putExtra("password", login_password.text.toString())
                                         startActivity(intent)
                                     }, 3000)
                                 } else {

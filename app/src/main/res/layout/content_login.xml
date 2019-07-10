@@ -44,7 +44,7 @@
                 android:textStyle="bold"/>
 
         <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/email_address"
+                android:id="@+id/login_email_address"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="@dimen/fab_margin"
@@ -76,7 +76,7 @@
                 android:orientation="horizontal">
 
             <android.support.v7.widget.AppCompatEditText
-                    android:id="@+id/password"
+                    android:id="@+id/login_password"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="match_parent"
