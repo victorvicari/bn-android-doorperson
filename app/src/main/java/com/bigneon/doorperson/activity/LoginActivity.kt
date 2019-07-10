@@ -43,6 +43,7 @@ class LoginActivity : AppCompatActivity() {
                         try {
                             turnOnWifiClicked = false
                             turn_on_wifi.progress = 0
+                            loginBtn.isEnabled = false
                             setWiFiDisabled(getContext())
                         } catch (e: Exception) {
                             Log.e(TAG, e.message)
@@ -167,6 +168,7 @@ class LoginActivity : AppCompatActivity() {
                                     loginBtn.startAnimation(loadAnimation(this, R.anim.shake))
                                     Handler().postDelayed({
                                         loginBtn.progress = 0
+                                        recreate() // refreshes the activity
                                     }, 3000)
                                 } else {
                                     Crashlytics.setUserEmail(email)

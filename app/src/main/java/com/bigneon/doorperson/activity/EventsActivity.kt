@@ -34,13 +34,6 @@ class EventsActivity : AppCompatActivity() {
             }
         }
 
-//    private var refreshEventListener: SyncController.RefreshEventListener =
-//        object : SyncController.RefreshEventListener {
-//            override fun refreshEventList() {
-//                refreshList()
-//            }
-//        }
-
     private fun getContext(): Context {
         return this
     }
@@ -51,18 +44,11 @@ class EventsActivity : AppCompatActivity() {
 
         AppUtils.checkLogged()
 
-        // Start synchronization service
-        //startService(Intent(this, SyncService::class.java))
-
         eventsListView = events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
                 val eventId = EventDataHandler.getEventByPosition(getContext(), position)?.id
-//                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
-//                if (eventForSync.isNullOrEmpty()) {
-//                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
-//                }
                 val intent = Intent(getContext(), ScanningEventActivity::class.java)
                 intent.putExtra("eventId", eventId)
                 startActivity(intent)
