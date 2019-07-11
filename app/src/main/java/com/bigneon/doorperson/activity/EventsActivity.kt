@@ -94,9 +94,6 @@ class EventsActivity : AppCompatActivity() {
 
         events_layout.setOnRefreshListener {
             refreshList()
-
-            // Hide swipe to refresh icon animation
-            events_layout.isRefreshing = false // TODO - Move after sync is done!
         }
 
         AppUtils.ticketListItemPosition = 0
@@ -125,6 +122,8 @@ class EventsActivity : AppCompatActivity() {
                     eventListItemOffset
                 )
             }
+            // Hide swipe to refresh icon animation if shown
+            events_layout.isRefreshing = false
         } else {
             object : ConnectionDialog() {
                 override fun positiveButtonAction(context: Context) {

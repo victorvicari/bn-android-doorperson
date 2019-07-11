@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -33,7 +32,7 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
  * All right reserved!
  * Created by SRKI-ST on 27.06.2019..
  ****************************************************/
-class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+class TicketListActivity : AppCompatActivity() {
     private var eventId: String? = null
     private var mAdapter: TicketListAdapter? = null
     private var mLayoutManager: LinearLayoutManager? = null
@@ -45,7 +44,10 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     //    private var searchTextChanged: Boolean = false
     private var screenRotation: Boolean = false
     private var searchGuestText: String = ""
-    private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
+
+    companion object {
+        val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
+    }
 
     private fun getContext(): Context {
         return this
@@ -73,17 +75,13 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         recyclerItemTouchHelper.parentLayout = tickets_layout
 
         itemTouchHelper.attachToRecyclerView(ticket_list_view)
-
-        tickets_swipe_refresh_layout.setOnRefreshListener(this)
-
         ticket_list_view.setHasFixedSize(true)
+
         // use a linear layout manager
         mLayoutManager = LinearLayoutManager(this)
         ticket_list_view.layoutManager = mLayoutManager
 
         mAdapter = TicketListAdapter(ArrayList())
-        ticket_list_view.adapter = mAdapter
-        recyclerItemTouchHelper.adapter = mAdapter
 
         adaptTicketList()
 
@@ -145,6 +143,10 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         }
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
+            itemCount = 0
+            currentPage = PAGE_START
+            isLastPage = false
+            mAdapter?.clear()
             adaptTicketList()
         }
     }
@@ -155,6 +157,9 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     }
 
     private fun adaptTicketList() {
+        ticket_list_view.adapter = mAdapter
+        recyclerItemTouchHelper.adapter = mAdapter
+
         if (currentPage != PAGE_START) mAdapter?.removeLoading()
 
         if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
@@ -191,8 +196,8 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                 )
             }
         }
-
         isLoading = false
+        tickets_swipe_refresh_layout.isRefreshing = false
     }
 
     private fun loadNewPage(eventId: String, page: Int) {
@@ -217,15 +222,6 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
             mAdapter?.addLoading()
         else
             isLastPage = true
-    }
-
-    override fun onRefresh() {
-        itemCount = 0
-        currentPage = PAGE_START
-        isLastPage = false
-        mAdapter?.clear()
-        adaptTicketList()
-        tickets_swipe_refresh_layout.isRefreshing = false
     }
 
     override fun onBackPressed() {

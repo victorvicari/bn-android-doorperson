@@ -6,13 +6,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bigneon.doorperson.rest.model.TicketModel
 
-
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 22.03.2019..
  ****************************************************/
-class TicketViewHolder internal constructor(itemView: View, list: MutableList<TicketModel>?, context: Context) : TicketBaseViewHolder(itemView) {
+class TicketViewHolder internal constructor(itemView: View, list: MutableList<TicketModel>?, context: Context) :
+    TicketBaseViewHolder(itemView) {
     var lastNameAndFirstNameTextView: TextView? = null
     private var priceAndTicketTypeTextView: TextView? = null
     private var ticketIdTextView: TextView? = null
@@ -23,11 +23,11 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
     private var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
+    private var ticketOrderNum: TextView? = null
 
     private var list: MutableList<TicketModel>? = null
 
     var checkedIn: Boolean = false
-    //var ticketId: String? = null
     private var priceInCents: Int? = null
     private var ticketType: String? = null
 
@@ -42,8 +42,11 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
         checkedNoInternetImageView = itemView.findViewById(com.bigneon.doorperson.R.id.checked_no_internet_item)
         duplicateStatusTextView = itemView.findViewById(com.bigneon.doorperson.R.id.duplicate_status_item)
         purchasedStatusTextView = itemView.findViewById(com.bigneon.doorperson.R.id.purchased_status_item)
-        ticketItemBackgroundRedeemedOrChecked = itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_redeemed_or_checked)
-        ticketItemBackgroundPurchased = itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_purchased)
+        ticketItemBackgroundRedeemedOrChecked =
+            itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_redeemed_or_checked)
+        ticketItemBackgroundPurchased =
+            itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_purchased)
+        ticketOrderNum = itemView.findViewById(com.bigneon.doorperson.R.id.ticket_order_num)
 
         this.list = list
         this.context = context
@@ -51,15 +54,20 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
 
     override fun bind(position: Int) {
         val ticket = list?.get(position)
+        ticketOrderNum?.text = "${position + 1}"
 
-        //ticketId = ticket?.ticketId
         priceInCents = ticket?.priceInCents
         ticketType = ticket?.ticketType
 
         lastNameAndFirstNameTextView?.text =
-            context!!.getString(com.bigneon.doorperson.R.string.last_name_first_name, ticket?.lastName, ticket?.firstName)
+            context!!.getString(
+                com.bigneon.doorperson.R.string.last_name_first_name,
+                ticket?.lastName,
+                ticket?.firstName
+            )
 
-        priceAndTicketTypeTextView?.text = context!!.getString(com.bigneon.doorperson.R.string.price_ticket_type, priceInCents?.div(100), ticketType)
+        priceAndTicketTypeTextView?.text =
+            context!!.getString(com.bigneon.doorperson.R.string.price_ticket_type, priceInCents?.div(100), ticketType)
 
         ticketIdTextView?.text = "#" + ticket?.ticketId?.takeLast(8)
 

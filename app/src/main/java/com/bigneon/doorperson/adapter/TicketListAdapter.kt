@@ -9,15 +9,14 @@ import com.bigneon.doorperson.viewholder.TicketBaseViewHolder
 import com.bigneon.doorperson.viewholder.TicketFooterViewHolder
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 
-
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 21.03.2019..
  ****************************************************/
 class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adapter<TicketBaseViewHolder>() {
-    private var isLoaderVisible = false
 
+    private var isLoaderVisible = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TicketBaseViewHolder? {
         val normalLayoutInflater = LayoutInflater.from(parent.context).inflate(R.layout.list_item_ticket, parent, false)
@@ -50,20 +49,12 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
 
     private fun add(ticket: TicketModel) {
         list!!.add(ticket)
-//        notifyItemInserted(list.size - 1)
     }
-
-//    fun addAll(postItems: List<TicketModel>) {
-//        for (response in postItems) {
-//            add(response)
-//        }
-//    }
 
     private fun remove(postItems: TicketModel?) {
         val position = list!!.indexOf(postItems)
         if (position > -1) {
             list!!.removeAt(position)
-//            notifyItemRemoved(position)
         }
     }
 
@@ -78,7 +69,6 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
         val item = getItem(position)
         if (item != null) {
             list!!.removeAt(position)
-//            notifyItemRemoved(position)
         }
     }
 
@@ -96,7 +86,6 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
         private const val VIEW_TYPE_LOADING = 0
         private const val VIEW_TYPE_NORMAL = 1
     }
-
 }
 
 

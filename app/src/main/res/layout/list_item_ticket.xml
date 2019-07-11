@@ -96,6 +96,7 @@
                             android:src="@drawable/no_internet"
                             android:contentDescription="@string/no_internet_icon"
                             android:visibility="gone"/>
+
                     <TextView
                             android:id="@+id/checked_status_item"
                             android:layout_width="wrap_content"
@@ -142,15 +143,36 @@
                         android:textSize="16sp"
                         android:textStyle="normal"/>
 
-                <TextView
-                        android:id="@+id/ticket_id"
+                <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:text="@string/ticket_id"
-                        android:gravity="center_vertical"
-                        android:textSize="16sp"
-                        android:textStyle="normal"/>
+                        android:layout_weight="1">
+
+                    <TextView
+                            android:id="@+id/ticket_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_toStartOf="@id/ticket_order_num"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/ticket_id"
+                            android:gravity="center_vertical|start"
+                            android:textSize="16sp"
+                            android:textStyle="normal"/>
+
+                    <TextView
+                            android:id="@+id/ticket_order_num"
+                            android:layout_width="50dp"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentEnd="true"
+                            android:gravity="center_vertical|start"
+                            android:text="0"
+                            android:textSize="16sp"
+                            android:textStyle="normal"
+                            android:paddingStart="5dp"
+                            android:paddingEnd="0dp"
+                            />
+                </RelativeLayout>
+
             </LinearLayout>
 
             <ImageView
