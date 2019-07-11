@@ -6,7 +6,6 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
@@ -16,6 +15,8 @@ import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
@@ -132,7 +133,14 @@ class TicketActivity : AppCompatActivity() {
         }
 
         fun completeCheckIn() {
-            when (TicketDataHandler.completeCheckIn(getContext(), eventId!!, ticketId, redeemKey, firstName, lastName)) {
+            when (TicketDataHandler.completeCheckIn(
+                getContext(),
+                eventId!!,
+                ticketId,
+                redeemKey,
+                firstName,
+                lastName
+            )) {
                 TicketDataHandler.TicketState.REDEEMED -> {
                     scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
@@ -176,27 +184,18 @@ class TicketActivity : AppCompatActivity() {
                         .setDuration(5000).show()
                 }
                 TicketDataHandler.TicketState.ERROR -> {
-                    // build alert dialog
-                    val dialogBuilder = AlertDialog.Builder(getContext())
+                    object : ConnectionDialog() {
+                        override fun positiveButtonAction(context: Context) {
+                            enableOfflineMode()
+                            completeCheckIn()
+                        }
 
-                    // set message of alert dialog
-                    dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
-                        .setCancelable(false)
-                        .setPositiveButton("Turn on the offline mode") { _, _ ->
-                            run {
-                                enableOfflineMode()
-                                completeCheckIn()
-                            }
+                        override fun negativeButtonAction(context: Context) {
+                            setWiFiEnabled(getContext())
+                            while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                            completeCheckIn()
                         }
-                        .setNegativeButton("Turn on the WiFi") { _, _ ->
-                            run {
-                                setWiFiEnabled(getContext())
-                                completeCheckIn()
-                            }
-                        }
-                    val alert = dialogBuilder.create()
-                    alert.setTitle("Error in connection!")
-                    alert.show()
+                    }.showDialog(getContext())
                 }
             }
             SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)

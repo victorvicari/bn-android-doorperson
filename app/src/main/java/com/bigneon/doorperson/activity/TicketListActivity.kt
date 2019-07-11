@@ -21,6 +21,10 @@ import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.listener.PaginationScrollListener
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
 
@@ -155,6 +159,20 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
         if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
             val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, 0)
+            if (items == null) {
+                object : ConnectionDialog() {
+                    override fun positiveButtonAction(context: Context) {
+                        enableOfflineMode()
+                        adaptTicketList()
+                    }
+
+                    override fun negativeButtonAction(context: Context) {
+                        setWiFiEnabled(context)
+                        while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                        adaptTicketList()
+                    }
+                }.showDialog(getContext())
+            }
             recyclerItemTouchHelper.ticketList = items as java.util.ArrayList<TicketModel>?
         }
 
@@ -179,14 +197,26 @@ class TicketListActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
     private fun loadNewPage(eventId: String, page: Int) {
         val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId, page)
-        items?.let {
-            recyclerItemTouchHelper.ticketList?.addAll(it)
-            adaptTicketList()
-            if (items.isNotEmpty())
-                mAdapter?.addLoading()
-            else
-                isLastPage = true
+        if (items == null) {
+            object : ConnectionDialog() {
+                override fun positiveButtonAction(context: Context) {
+                    enableOfflineMode()
+                    loadNewPage(eventId, page)
+                }
+
+                override fun negativeButtonAction(context: Context) {
+                    setWiFiEnabled(context)
+                    while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                    loadNewPage(eventId, page)
+                }
+            }.showDialog(getContext())
         }
+        recyclerItemTouchHelper.ticketList?.addAll(items!!)
+        adaptTicketList()
+        if (items!!.isNotEmpty())
+            mAdapter?.addLoading()
+        else
+            isLastPage = true
     }
 
     override fun onRefresh() {

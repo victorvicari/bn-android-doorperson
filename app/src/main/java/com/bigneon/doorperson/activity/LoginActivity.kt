@@ -171,7 +171,8 @@ class LoginActivity : AppCompatActivity() {
                                     loginBtn.startAnimation(loadAnimation(this, R.anim.shake))
                                     Handler().postDelayed({
                                         loginBtn.progress = 0
-//                                        recreate() // refreshes the activity
+
+                                        // refreshes the activity
                                         finish()
                                         intent.putExtra("email", login_email_address.text.toString())
                                         intent.putExtra("password", login_password.text.toString())

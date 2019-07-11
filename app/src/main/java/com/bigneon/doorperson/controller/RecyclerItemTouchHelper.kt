@@ -1,7 +1,7 @@
 package com.bigneon.doorperson.controller
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Canvas
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
@@ -17,6 +17,8 @@ import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.bigneon.doorperson.viewholder.TicketViewHolder
 import kotlinx.android.synthetic.main.list_item_ticket.view.*
@@ -141,27 +143,18 @@ class RecyclerItemTouchHelper :
                                         viewHolder.itemView.context!!.getString(R.string.duplicate).toLowerCase()
                                 }
                                 TicketDataHandler.TicketState.ERROR -> {
-                                    // build alert dialog
-                                    val dialogBuilder = AlertDialog.Builder(viewHolder.itemView.context)
+                                    object : ConnectionDialog() {
+                                        override fun positiveButtonAction(context: Context) {
+                                            enableOfflineMode()
+                                            completeCheckIn()
+                                        }
 
-                                    // set message of alert dialog
-                                    dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Turn on the offline mode") { _, _ ->
-                                            run {
-                                                enableOfflineMode()
-                                                completeCheckIn()
-                                            }
+                                        override fun negativeButtonAction(context: Context) {
+                                            setWiFiEnabled(context)
+                                            while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                                            completeCheckIn()
                                         }
-                                        .setNegativeButton("Turn on the WiFi") { _, _ ->
-                                            run {
-                                                setWiFiEnabled(viewHolder.itemView.context)
-                                                completeCheckIn()
-                                            }
-                                        }
-                                    val alert = dialogBuilder.create()
-                                    alert.setTitle("Error in connection!")
-                                    alert.show()
+                                    }.showDialog(viewHolder.itemView.context)
                                 }
                             }
                             SharedPrefs.setProperty(

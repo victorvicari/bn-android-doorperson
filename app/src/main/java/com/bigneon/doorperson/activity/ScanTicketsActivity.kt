@@ -9,7 +9,6 @@ import android.os.Handler
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat.checkSelfPermission
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -22,8 +21,10 @@ import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.google.zxing.Result
 import com.squareup.picasso.Picasso
@@ -163,92 +164,97 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
             val jsonObjectData = jsonObj.getJSONObject("data")
             val ticketId = jsonObjectData.getString("id")
 
-            val ticket = TicketDataHandler.getTicket(getContext(), ticketId)
-            if (ticket == null) {
-                Snackbar
-                    .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
-                    .setDuration(5000).show()
-                mScannerView?.resumeCameraPreview(this)
-                return
-            }
+            fun completeCheckIn() {
+                val ticket = TicketDataHandler.getTicket(getContext(), ticketId)
+                if (ticket == null) {
+                    object : ConnectionDialog() {
+                        override fun positiveButtonAction(context: Context) {
+                            enableOfflineMode()
+                            completeCheckIn()
+                        }
 
-            if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
-                val intent = Intent(getContext(), TicketActivity::class.java)
-                intent.putExtra("ticketId", ticket.ticketId)
-                intent.putExtra("eventId", ticket.eventId)
-                intent.putExtra("redeemKey", ticket.redeemKey)
-                intent.putExtra("searchGuestText", "")
-                intent.putExtra("firstName", ticket.firstName)
-                intent.putExtra("lastName", ticket.lastName)
-                intent.putExtra("priceInCents", ticket.priceInCents)
-                intent.putExtra("ticketType", ticket.ticketType)
-                intent.putExtra("status", ticket.status)
-                startActivity(intent)
-            } else {
-                fun completeCheckIn() {
-                    when (TicketDataHandler.completeCheckIn(
-                        getContext(),
-                        eventId!!,
-                        ticketId,
-                        ticket.redeemKey!!,
-                        ticket.firstName!!,
-                        ticket.lastName!!
-                    )) {
-                        TicketDataHandler.TicketState.REDEEMED -> {
-                            Snackbar
-                                .make(
-                                    scanning_ticket_layout,
-                                    "Redeemed ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
-                                    Snackbar.LENGTH_LONG
-                                )
-                                .setDuration(5000).show()
+                        override fun negativeButtonAction(context: Context) {
+                            setWiFiEnabled(context)
+                            while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                            completeCheckIn()
                         }
-                        TicketDataHandler.TicketState.CHECKED -> {
-                            Snackbar
-                                .make(
-                                    scanning_ticket_layout,
-                                    "Checked in ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
-                                    Snackbar.LENGTH_LONG
-                                )
-                                .setDuration(5000).show()
-                        }
-                        TicketDataHandler.TicketState.DUPLICATED -> {
-                            Snackbar
-                                .make(
-                                    scanning_ticket_layout,
-                                    "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
-                                    Snackbar.LENGTH_LONG
-                                )
-                                .setDuration(5000).show()
-                        }
-                        TicketDataHandler.TicketState.ERROR -> {
-                            // build alert dialog
-                            val dialogBuilder = AlertDialog.Builder(getContext())
-
-                            // set message of alert dialog
-                            dialogBuilder.setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
-                                .setCancelable(false)
-                                .setPositiveButton("Turn on the offline mode") { _, _ ->
-                                    run {
-                                        AppUtils.enableOfflineMode()
-                                        completeCheckIn()
-                                    }
-                                }
-                                .setNegativeButton("Turn on the WiFi") { _, _ ->
-                                    run {
-                                        setWiFiEnabled(getContext())
-                                        completeCheckIn()
-                                    }
-                                }
-                            val alert = dialogBuilder.create()
-                            alert.setTitle("Error in connection!")
-                            alert.show()
-                        }
+                    }.showDialog(getContext())
+                } else {
+                    if (ticket.ticketId == null) {
+                        Snackbar
+                            .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
+                            .setDuration(5000).show()
+                        mScannerView?.resumeCameraPreview(this)
+                        return
                     }
-                    SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)
+                    if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
+                        val intent = Intent(getContext(), TicketActivity::class.java)
+                        intent.putExtra("ticketId", ticket.ticketId)
+                        intent.putExtra("eventId", ticket.eventId)
+                        intent.putExtra("redeemKey", ticket.redeemKey)
+                        intent.putExtra("searchGuestText", "")
+                        intent.putExtra("firstName", ticket.firstName)
+                        intent.putExtra("lastName", ticket.lastName)
+                        intent.putExtra("priceInCents", ticket.priceInCents)
+                        intent.putExtra("ticketType", ticket.ticketType)
+                        intent.putExtra("status", ticket.status)
+                        startActivity(intent)
+                    } else {
+                        when (TicketDataHandler.completeCheckIn(
+                            getContext(),
+                            eventId!!,
+                            ticketId,
+                            ticket.redeemKey!!,
+                            ticket.firstName!!,
+                            ticket.lastName!!
+                        )) {
+                            TicketDataHandler.TicketState.REDEEMED -> {
+                                Snackbar
+                                    .make(
+                                        scanning_ticket_layout,
+                                        "Redeemed ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
+                                        Snackbar.LENGTH_LONG
+                                    )
+                                    .setDuration(5000).show()
+                            }
+                            TicketDataHandler.TicketState.CHECKED -> {
+                                Snackbar
+                                    .make(
+                                        scanning_ticket_layout,
+                                        "Checked in ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
+                                        Snackbar.LENGTH_LONG
+                                    )
+                                    .setDuration(5000).show()
+                            }
+                            TicketDataHandler.TicketState.DUPLICATED -> {
+                                Snackbar
+                                    .make(
+                                        scanning_ticket_layout,
+                                        "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
+                                        Snackbar.LENGTH_LONG
+                                    )
+                                    .setDuration(5000).show()
+                            }
+                            TicketDataHandler.TicketState.ERROR -> {
+                                object : ConnectionDialog() {
+                                    override fun positiveButtonAction(context: Context) {
+                                        enableOfflineMode()
+                                        completeCheckIn()
+                                    }
+
+                                    override fun negativeButtonAction(context: Context) {
+                                        setWiFiEnabled(getContext())
+                                        while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                                        completeCheckIn()
+                                    }
+                                }.showDialog(getContext())
+                            }
+                        }
+                        SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)
+                    }
                 }
-                completeCheckIn()
             }
+            completeCheckIn()
 
             Log.v(TAG, rawResult.text) // Prints scan results
             Log.v(TAG, rawResult.barcodeFormat.toString()) // Prints the scan format (qrcode, pdf417 etc.)

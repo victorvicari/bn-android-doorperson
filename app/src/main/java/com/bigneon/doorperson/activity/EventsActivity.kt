@@ -15,13 +15,17 @@ import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
+import com.bigneon.doorperson.util.ConnectionDialog
 import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
 class EventsActivity : AppCompatActivity() {
     private var eventsListView: RecyclerView? = null
+    private var eventDataHandler: EventDataHandler? = null
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -41,6 +45,7 @@ class EventsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_events)
+        eventDataHandler = EventDataHandler()
 
         AppUtils.checkLogged()
 
@@ -48,10 +53,27 @@ class EventsActivity : AppCompatActivity() {
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
-                val eventId = EventDataHandler.getEventByPosition(getContext(), position)?.id
-                val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                intent.putExtra("eventId", eventId)
-                startActivity(intent)
+                val event = eventDataHandler?.getEventByPosition(getContext(), position)
+
+                if (event != null) {
+                    val eventId = event.id
+                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                    intent.putExtra("eventId", eventId)
+                    startActivity(intent)
+                } else {
+                    object : ConnectionDialog() {
+                        override fun positiveButtonAction(context: Context) {
+                            AppUtils.enableOfflineMode()
+                            onItemClicked(position, view)
+                        }
+
+                        override fun negativeButtonAction(context: Context) {
+                            setWiFiEnabled(context)
+                            while (!isNetworkAvailable(context)) Thread.sleep(1000)
+                            onItemClicked(position, view)
+                        }
+                    }.showDialog(getContext())
+                }
             }
         })
 
@@ -89,13 +111,13 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun refreshList() {
-        val events = EventDataHandler.loadAllEvents(getContext())
+        val events = eventDataHandler?.loadAllEvents(getContext())
         if (events != null) {
             eventsListView?.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
             eventsListView?.adapter = EventListAdapter(events)
-            EventDataHandler.storeEvents(events)
+            eventDataHandler?.storeEvents(events)
 
             if (eventListItemPosition >= 0) {
                 (eventsListView?.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
@@ -103,6 +125,19 @@ class EventsActivity : AppCompatActivity() {
                     eventListItemOffset
                 )
             }
+        } else {
+            object : ConnectionDialog() {
+                override fun positiveButtonAction(context: Context) {
+                    AppUtils.enableOfflineMode()
+                    refreshList()
+                }
+
+                override fun negativeButtonAction(context: Context) {
+                    setWiFiEnabled(context)
+                    while (!isNetworkAvailable(context)) Thread.sleep(1000)
+                    refreshList()
+                }
+            }.showDialog(getContext())
         }
     }
 

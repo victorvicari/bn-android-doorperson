@@ -34,15 +34,15 @@ class TicketDataHandler {
                         val accessToken: String? = RestAPI.accessToken()
                         RestAPI.getTicket(accessToken!!, ticketId)?.let { ticket = it }
                     }.get() // get() is important to wait until doAsync is finished
-                    return ticket
+                    return ticket ?: TicketModel()
                 }
                 isOfflineModeEnabled() -> // Return events from local DB
-                    return ticketsDS.getTicket(ticketId)
+                    return ticketsDS.getTicket(ticketId) ?: TicketModel()
                 else -> {
                     Log.e(TAG, "Getting ticket failed")
+                    return null
                 }
             }
-            return null
         }
 
         fun loadPageOfTickets(context: Context, eventId: String, page: Int): List<TicketModel>? {
@@ -59,18 +59,18 @@ class TicketDataHandler {
                             page
                         )?.let { tickets = it }
                     }.get() // get() is important to wait until doAsync is finished
-                    return tickets
+                    return tickets ?: ArrayList()
                 }
                 isOfflineModeEnabled() -> // Return events from local DB
-                    return ticketsDS.getAllTicketsForEvent(eventId) // TODO - implement paging!!!
+                    return ticketsDS.getAllTicketsForEvent(eventId) ?: ArrayList() // TODO - implement paging!!!
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
+                    return null
                 }
             }
-            return null
         }
 
-        fun getRedeemedTicketNumberForEvent(context: Context, eventId: String): Int {
+        fun getRedeemedTicketNumberForEvent(context: Context, eventId: String): Int? {
             when {
                 isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
@@ -84,12 +84,12 @@ class TicketDataHandler {
                     return ticketsDS.getRedeemedTicketNumberForEvent(eventId)
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
+                    return null
                 }
             }
-            return 0
         }
 
-        fun getAllTicketNumberForEvent(context: Context, eventId: String): Int {
+        fun getAllTicketNumberForEvent(context: Context, eventId: String): Int? {
             when {
                 isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
@@ -103,9 +103,9 @@ class TicketDataHandler {
                     return ticketsDS.getAllTicketNumberForEvent(eventId)
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
+                    return null
                 }
             }
-            return 0
         }
 
         fun getCheckedTicketNumberForEvent(eventId: String): Int {

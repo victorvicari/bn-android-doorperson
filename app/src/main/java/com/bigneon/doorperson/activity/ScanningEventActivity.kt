@@ -12,14 +12,19 @@ import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils
 import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
 class ScanningEventActivity : AppCompatActivity() {
     private var eventId: String = ""
+    private var eventDataHandler: EventDataHandler? = null
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -40,10 +45,11 @@ class ScanningEventActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanning_event)
         setSupportActionBar(scanning_events_toolbar)
+        eventDataHandler = EventDataHandler()
 
         checkLogged()
 
-        eventId = intent.getStringExtra("eventId")
+        eventId = intent.getStringExtra("eventId") ?: ""
         storeTickets(eventId) // download sync (create/update tickets)
 
         //this line shows back button
@@ -75,16 +81,37 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     private fun getEventSummary() {
-        scanning_event_name.text = EventDataHandler.getEventByID(getContext(), eventId)?.name ?: ""
-        number_of_redeemed.text = getString(
-            R.string._1_d_of_2_d_redeemed,
-            TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId),
-            TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId)
-        )
-        number_of_checked.text = getString(
-            R.string._1_d_checked,
-            TicketDataHandler.getCheckedTicketNumberForEvent(eventId)
-        )
+        val event = eventDataHandler?.getEventByID(getContext(), eventId)
+        val redeemedTicketNumberForEvent = TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId)
+        val allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId)
+
+        if (event != null && redeemedTicketNumberForEvent != null && allTicketNumberForEvent != null) {
+            scanning_event_name.text = event.name ?: ""
+            number_of_redeemed.text = getString(
+                R.string._1_d_of_2_d_redeemed,
+                redeemedTicketNumberForEvent,
+                allTicketNumberForEvent
+            )
+            number_of_checked.text = getString(
+                R.string._1_d_checked,
+                TicketDataHandler.getCheckedTicketNumberForEvent(eventId)
+            )
+        } else {
+            object : ConnectionDialog() {
+                override fun positiveButtonAction(context: Context) {
+                    AppUtils.enableOfflineMode()
+                    getEventSummary()
+                }
+
+                override fun negativeButtonAction(context: Context) {
+                    setWiFiEnabled(context)
+                    while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                    getEventSummary()
+                }
+            }.showDialog(getContext())
+
+        }
+
     }
 
     override fun onStart() {
