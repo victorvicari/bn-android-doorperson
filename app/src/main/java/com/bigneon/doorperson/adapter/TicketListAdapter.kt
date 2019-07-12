@@ -47,27 +47,9 @@ class TicketListAdapter(var list: MutableList<TicketModel>?) : RecyclerView.Adap
         return list?.size ?: 0
     }
 
-    private fun add(ticket: TicketModel) {
-        list!!.add(ticket)
-    }
-
     private fun remove(postItems: TicketModel?) {
         val position = list!!.indexOf(postItems)
         if (position > -1) {
-            list!!.removeAt(position)
-        }
-    }
-
-    fun addLoading() {
-        isLoaderVisible = true
-        add(TicketModel())
-    }
-
-    fun removeLoading() {
-        isLoaderVisible = false
-        val position = list!!.size - 1
-        val item = getItem(position)
-        if (item != null) {
             list!!.removeAt(position)
         }
     }

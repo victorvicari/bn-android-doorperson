@@ -122,6 +122,9 @@ class EventsActivity : AppCompatActivity() {
                     eventListItemOffset
                 )
             }
+            TicketListActivity.recyclerItemTouchHelper.ticketList = null
+            TicketListActivity.currentPage = 0
+
             // Hide swipe to refresh icon animation if shown
             events_layout.isRefreshing = false
         } else {

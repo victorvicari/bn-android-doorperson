@@ -36,17 +36,17 @@ class TicketListActivity : AppCompatActivity() {
     private var eventId: String? = null
     private var mAdapter: TicketListAdapter? = null
     private var mLayoutManager: LinearLayoutManager? = null
-    private val PAGE_START = 0
-    private var currentPage = PAGE_START
-    private var isLastPage = false
-    private var isLoading = false
-    private var itemCount = 0
+
     //    private var searchTextChanged: Boolean = false
     private var screenRotation: Boolean = false
     private var searchGuestText: String = ""
+    private var isLastPage = false
+    private var isLoading = false
+    private var itemCount = 0
 
     companion object {
         val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
+        var currentPage = 0
     }
 
     private fun getContext(): Context {
@@ -124,7 +124,6 @@ class TicketListActivity : AppCompatActivity() {
 
                 override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
                     searchGuestText = search_guest.text.toString()
-//                    adaptListView(findViewById(com.bigneon.doorperson.R.id.ticket_list_view))
                 }
 
                 override fun afterTextChanged(s: Editable) {}
@@ -144,7 +143,7 @@ class TicketListActivity : AppCompatActivity() {
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
             itemCount = 0
-            currentPage = PAGE_START
+            currentPage = 0
             isLastPage = false
             mAdapter?.clear()
             adaptTicketList()
@@ -159,8 +158,6 @@ class TicketListActivity : AppCompatActivity() {
     private fun adaptTicketList() {
         ticket_list_view.adapter = mAdapter
         recyclerItemTouchHelper.adapter = mAdapter
-
-        if (currentPage != PAGE_START) mAdapter?.removeLoading()
 
         if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
             val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, 0)
@@ -183,18 +180,16 @@ class TicketListActivity : AppCompatActivity() {
 
         mAdapter?.list = recyclerItemTouchHelper.ticketList
 
-        if (mAdapter?.list != null) {
-            if (mAdapter?.list?.size!! > 0) {
-                no_guests_found_placeholder.visibility = View.GONE
-                ticket_list_view.visibility = View.VISIBLE
-            }
+        if (mAdapter?.list?.size!! > 0) {
+            no_guests_found_placeholder.visibility = View.GONE
+            ticket_list_view.visibility = View.VISIBLE
+        }
 
-            if (AppUtils.ticketListItemPosition >= 0) {
-                (ticket_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    AppUtils.ticketListItemPosition,
-                    AppUtils.ticketListItemOffset
-                )
-            }
+        if (AppUtils.ticketListItemPosition >= 0) {
+            (ticket_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                AppUtils.ticketListItemPosition,
+                AppUtils.ticketListItemOffset
+            )
         }
         isLoading = false
         tickets_swipe_refresh_layout.isRefreshing = false
@@ -218,9 +213,7 @@ class TicketListActivity : AppCompatActivity() {
         }
         recyclerItemTouchHelper.ticketList?.addAll(items!!)
         adaptTicketList()
-        if (items!!.isNotEmpty())
-            mAdapter?.addLoading()
-        else
+        if (items!!.isEmpty())
             isLastPage = true
     }
 

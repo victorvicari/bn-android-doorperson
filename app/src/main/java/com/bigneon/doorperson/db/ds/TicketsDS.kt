@@ -3,6 +3,7 @@ package com.bigneon.doorperson.db.ds
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.bigneon.doorperson.config.AppConstants.Companion.PAGE_LIMIT
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.dml.TableTicketsDML.EMAIL
 import com.bigneon.doorperson.db.dml.TableTicketsDML.EVENT_ID
@@ -288,9 +289,33 @@ class TicketsDS {
 //        return getTicket(ticketId)
 //    }
 
-    fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
-        val ticketModels = ArrayList<TicketModel>()
+//    fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
+//        val ticketModels = ArrayList<TicketModel>()
+//
+//        SQLiteHelper.getDB().query(
+//            TABLE_TICKETS,
+//            allColumns,
+//            "$EVENT_ID = '$eventId'",
+//            null,
+//            null,
+//            null,
+//            null
+//        )?.use {
+//            if (it.moveToFirst()) {
+//                while (!it.isAfterLast) {
+//                    val ticket = cursorToTicket(it)
+//                    ticketModels.add(ticket)
+//                    it.moveToNext()
+//                }
+//                it.close()
+//                return ticketModels
+//            }
+//        } ?: return null
+//        return null
+//    }
 
+    fun getTicketsForEvent(eventId: String, page: Int): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
         SQLiteHelper.getDB().query(
             TABLE_TICKETS,
             allColumns,
@@ -298,7 +323,8 @@ class TicketsDS {
             null,
             null,
             null,
-            null
+            null,
+            "${PAGE_LIMIT.times(page)}, $PAGE_LIMIT"
         )?.use {
             if (it.moveToFirst()) {
                 while (!it.isAfterLast) {

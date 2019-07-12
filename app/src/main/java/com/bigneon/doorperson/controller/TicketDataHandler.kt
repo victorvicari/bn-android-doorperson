@@ -14,7 +14,6 @@ import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import org.jetbrains.anko.doAsync
 
-
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
@@ -62,7 +61,7 @@ class TicketDataHandler {
                     return tickets ?: ArrayList()
                 }
                 isOfflineModeEnabled() -> // Return events from local DB
-                    return ticketsDS.getAllTicketsForEvent(eventId) ?: ArrayList() // TODO - implement paging!!!
+                    return ticketsDS.getTicketsForEvent(eventId, page) ?: ArrayList()
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
                     return null
