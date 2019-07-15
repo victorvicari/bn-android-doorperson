@@ -37,6 +37,8 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
 class TicketListActivity : AppCompatActivity() {
     private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
+    private var ticketId: String? = null
+    private var status: String? = null
     private var mAdapter: TicketListAdapter? = null
     private var mLayoutManager: LinearLayoutManager? = null
 
@@ -74,6 +76,9 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         eventId = intent.getStringExtra("eventId")
+        ticketId = intent.getStringExtra("ticketId")
+        status = intent.getStringExtra("status")
+
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
 
@@ -199,6 +204,13 @@ class TicketListActivity : AppCompatActivity() {
                 }.showDialog(getContext())
             }
             recyclerItemTouchHelper.ticketList = items as java.util.ArrayList<TicketModel>?
+        } else {
+            val ticket = recyclerItemTouchHelper.ticketList!!
+                .stream()
+                .filter{ t -> t.ticketId == ticketId }
+                .findAny()
+                .orElse(null)
+            ticket.status = status
         }
 
         mAdapter?.list = recyclerItemTouchHelper.ticketList

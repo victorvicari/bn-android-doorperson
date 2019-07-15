@@ -26,6 +26,8 @@ import kotlinx.android.synthetic.main.content_ticket.view.*
 
 class TicketActivity : AppCompatActivity() {
     private var eventId: String? = null
+    private var ticketId: String? = null
+    private var status: String? = null
     private var searchGuestText: String? = null
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -52,7 +54,7 @@ class TicketActivity : AppCompatActivity() {
 
         checkLogged()
 
-        val ticketId = intent.getStringExtra("ticketId")
+        ticketId = intent.getStringExtra("ticketId")
         eventId = intent.getStringExtra("eventId")
         val redeemKey = intent.getStringExtra("redeemKey")
         searchGuestText = intent.getStringExtra("searchGuestText")
@@ -60,7 +62,7 @@ class TicketActivity : AppCompatActivity() {
         val lastName = intent.getStringExtra("lastName")
         val priceInCents = intent.getIntExtra("priceInCents", 0)
         val ticketType = intent.getStringExtra("ticketType")
-        val status = intent.getStringExtra("status")
+        status = intent.getStringExtra("status")
 
         last_name_and_first_name?.text =
             getContext().getString(R.string.last_name_first_name, lastName, firstName)
@@ -121,6 +123,8 @@ class TicketActivity : AppCompatActivity() {
         ticket_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("ticketId", ticketId)
+            intent.putExtra("status", status)
             intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
@@ -128,6 +132,8 @@ class TicketActivity : AppCompatActivity() {
         back_to_list.setOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("ticketId", ticketId)
+            intent.putExtra("status", status)
             intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
@@ -136,12 +142,13 @@ class TicketActivity : AppCompatActivity() {
             when (TicketDataHandler.completeCheckIn(
                 getContext(),
                 eventId!!,
-                ticketId,
+                ticketId!!,
                 redeemKey,
                 firstName,
                 lastName
             )) {
                 TicketDataHandler.TicketState.REDEEMED -> {
+                    status = statusRedeemed
                     scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
@@ -156,6 +163,7 @@ class TicketActivity : AppCompatActivity() {
                         .setDuration(5000).show()
                 }
                 TicketDataHandler.TicketState.CHECKED -> {
+                    status = statusChecked
                     scanning_ticket_layout.checked_status?.visibility = View.VISIBLE
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
@@ -170,6 +178,7 @@ class TicketActivity : AppCompatActivity() {
                         .setDuration(5000).show()
                 }
                 TicketDataHandler.TicketState.DUPLICATED -> {
+                    status = statusDuplicate
                     scanning_ticket_layout.checked_status?.visibility = View.GONE
                     scanning_ticket_layout.purchased_status?.visibility = View.GONE
                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
@@ -219,6 +228,8 @@ class TicketActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val intent = Intent(getContext(), TicketListActivity::class.java)
         intent.putExtra("eventId", eventId)
+        intent.putExtra("ticketId", ticketId)
+        intent.putExtra("status", status)
         intent.putExtra("searchGuestText", searchGuestText)
         startActivity(intent)
         finish()
