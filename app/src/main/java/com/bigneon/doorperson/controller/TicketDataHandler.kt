@@ -44,7 +44,7 @@ class TicketDataHandler {
             }
         }
 
-        fun loadPageOfTickets(context: Context, eventId: String, page: Int): List<TicketModel>? {
+        fun loadPageOfTickets(context: Context, eventId: String, filter: String, page: Int): List<TicketModel>? {
             when {
                 isNetworkAvailable(context) -> {
                     var tickets: ArrayList<TicketModel>? = null
@@ -55,13 +55,14 @@ class TicketDataHandler {
                             eventId,
                             AppConstants.MIN_TIMESTAMP,
                             AppConstants.PAGE_LIMIT,
+                            filter,
                             page
                         )?.let { tickets = it }
                     }.get() // get() is important to wait until doAsync is finished
                     return tickets ?: ArrayList()
                 }
                 isOfflineModeEnabled() -> // Return events from local DB
-                    return ticketsDS.getTicketsForEvent(eventId, page) ?: ArrayList()
+                    return ticketsDS.getTicketsForEvent(eventId, filter, page) ?: ArrayList()
                 else -> {
                     Log.e(TAG, "Getting a number of all ticket for event failed")
                     return null

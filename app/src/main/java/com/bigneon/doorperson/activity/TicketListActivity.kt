@@ -5,12 +5,14 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.TicketListAdapter
@@ -33,6 +35,7 @@ import kotlinx.android.synthetic.main.content_ticket_list.*
  * Created by SRKI-ST on 27.06.2019..
  ****************************************************/
 class TicketListActivity : AppCompatActivity() {
+    private val TAG = TicketListActivity::class.java.simpleName
     private var eventId: String? = null
     private var mAdapter: TicketListAdapter? = null
     private var mLayoutManager: LinearLayoutManager? = null
@@ -118,17 +121,32 @@ class TicketListActivity : AppCompatActivity() {
             }
         })
 
-        search_guest.post {
-            search_guest.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        var countDownTimerIsTicking = false
+        val countDownTimer = object : CountDownTimer(1000, 100) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d(TAG, "Finish in: $millisUntilFinished ms")
+            }
 
-                override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
-                    searchGuestText = search_guest.text.toString()
-                }
-
-                override fun afterTextChanged(s: Editable) {}
-            })
+            override fun onFinish() {
+                searchGuestText = search_guest.text.toString()
+                countDownTimerIsTicking = false
+                refreshTicketList()
+            }
         }
+
+        search_guest.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
+                if (countDownTimerIsTicking) {
+                    countDownTimer.cancel()
+                }
+                countDownTimer.start()
+                countDownTimerIsTicking = true
+            }
+
+            override fun afterTextChanged(s: Editable) {}
+        })
 
         ticket_list_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
@@ -142,12 +160,16 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
-            itemCount = 0
-            currentPage = 0
-            isLastPage = false
-            mAdapter?.clear()
-            adaptTicketList()
+            refreshTicketList()
         }
+    }
+
+    private fun refreshTicketList() {
+        itemCount = 0
+        currentPage = 0
+        isLastPage = false
+        mAdapter?.clear()
+        adaptTicketList()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -160,7 +182,7 @@ class TicketListActivity : AppCompatActivity() {
         recyclerItemTouchHelper.adapter = mAdapter
 
         if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
-            val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, 0)
+            val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, searchGuestText, 0)
             if (items == null) {
                 object : ConnectionDialog() {
                     override fun positiveButtonAction(context: Context) {
@@ -196,7 +218,7 @@ class TicketListActivity : AppCompatActivity() {
     }
 
     private fun loadNewPage(eventId: String, page: Int) {
-        val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId, page)
+        val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId, searchGuestText, page)
         if (items == null) {
             object : ConnectionDialog() {
                 override fun positiveButtonAction(context: Context) {

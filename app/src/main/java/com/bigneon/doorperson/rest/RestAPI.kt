@@ -224,10 +224,11 @@ class RestAPI private constructor() {
             eventId: String,
             changesSince: String?,
             limit: Int?,
+            filter: String?,
             page: Int?
         ): ArrayList<TicketModel>? {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, null)
+                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, filter)
             return getTicketsForEventCall.execute().body()?.data
         }
 

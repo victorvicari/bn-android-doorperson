@@ -314,12 +314,31 @@ class TicketsDS {
 //        return null
 //    }
 
-    fun getTicketsForEvent(eventId: String, page: Int): ArrayList<TicketModel>? {
+    fun getTicketsForEvent(eventId: String, filter: String, page: Int): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
+        val sb = StringBuilder("$EVENT_ID = '$eventId' ")
+
+        val searchWords = filter.split(" ")
+        var andAdded = false
+        for (word in searchWords) {
+            if (word.isEmpty())
+                continue
+            if (andAdded) {
+                sb.append("OR ")
+            } else {
+                sb.append("AND (")
+                andAdded = true
+            }
+            sb.append("$TICKET_ID LIKE '%$word%' OR $FIRST_NAME LIKE '%$word%' OR $LAST_NAME LIKE '%$word%' OR $EMAIL LIKE '%$word%' OR $PHONE LIKE '%$word%' ")
+        }
+        if(andAdded) {
+            sb.append(")")
+        }
+
         SQLiteHelper.getDB().query(
             TABLE_TICKETS,
             allColumns,
-            "$EVENT_ID = '$eventId'",
+            sb.toString(),
             null,
             null,
             null,
