@@ -23,7 +23,6 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
     private var purchasedStatusTextView: TextView? = null
     private var ticketItemBackgroundRedeemedOrChecked: TextView? = null
     private var ticketItemBackgroundPurchased: TextView? = null
-    private var ticketOrderNum: TextView? = null
 
     private var list: MutableList<TicketModel>? = null
 
@@ -46,7 +45,6 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
             itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_redeemed_or_checked)
         ticketItemBackgroundPurchased =
             itemView.findViewById(com.bigneon.doorperson.R.id.ticket_item_background_purchased)
-        ticketOrderNum = itemView.findViewById(com.bigneon.doorperson.R.id.ticket_order_num)
 
         this.list = list
         this.context = context
@@ -54,7 +52,6 @@ class TicketViewHolder internal constructor(itemView: View, list: MutableList<Ti
 
     override fun bind(position: Int) {
         val ticket = list?.get(position)
-        ticketOrderNum?.text = "${position + 1}"
 
         priceInCents = ticket?.priceInCents
         ticketType = ticket?.ticketType
