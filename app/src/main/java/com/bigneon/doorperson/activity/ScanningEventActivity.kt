@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.content_scanning_event.*
 class ScanningEventActivity : AppCompatActivity() {
     private var eventId: String = ""
     private var eventDataHandler: EventDataHandler? = null
+    private var searchGuestText: String = ""
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -52,6 +53,8 @@ class ScanningEventActivity : AppCompatActivity() {
         eventId = intent.getStringExtra("eventId") ?: ""
         storeTickets(eventId) // download sync (create/update tickets)
 
+        searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
+
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -69,6 +72,7 @@ class ScanningEventActivity : AppCompatActivity() {
         scanning_events_button.setOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
 

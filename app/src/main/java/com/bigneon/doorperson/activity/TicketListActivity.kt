@@ -156,6 +156,7 @@ class TicketListActivity : AppCompatActivity() {
         ticket_list_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
 
@@ -242,6 +243,7 @@ class TicketListActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val intent = Intent(getContext(), ScanTicketsActivity::class.java)
         intent.putExtra("eventId", eventId)
+        intent.putExtra("searchGuestText", searchGuestText)
         startActivity(intent)
         finish()
     }

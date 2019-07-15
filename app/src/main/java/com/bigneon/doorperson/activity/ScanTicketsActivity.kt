@@ -29,7 +29,6 @@ import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import com.google.zxing.Result
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
-import kotlinx.android.synthetic.main.activity_ticket.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -45,6 +44,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
     private var checkInMode: String? = null
     private var ticketsDS: TicketsDS? = null
     private var readingTicket: Boolean = false
+    private var searchGuestText: String = ""
 
     private fun getContext(): Context {
         return this
@@ -64,6 +64,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         val lastCheckedTicketId = SharedPrefs.getProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId)
         if (!lastCheckedTicketId.isNullOrEmpty())
             showPillUserInfo(true, lastCheckedTicketId)
+
+        searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
 
         mScannerView = zxscan   // Programmatically initialize the scanner view
 
@@ -90,6 +92,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         check_in_mode_exit.setOnClickListener {
             val intent = Intent(getContext(), ScanningEventActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
 
@@ -104,6 +107,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         ticket_list_layout.setOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
     }
@@ -192,7 +196,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         intent.putExtra("ticketId", ticket.ticketId)
                         intent.putExtra("eventId", ticket.eventId)
                         intent.putExtra("redeemKey", ticket.redeemKey)
-                        intent.putExtra("searchGuestText", "")
+                        intent.putExtra("searchGuestText", searchGuestText)
                         intent.putExtra("firstName", ticket.firstName)
                         intent.putExtra("lastName", ticket.lastName)
                         intent.putExtra("priceInCents", ticket.priceInCents)
@@ -209,31 +213,37 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                             ticket.lastName!!
                         )) {
                             TicketDataHandler.TicketState.REDEEMED -> {
-                                Snackbar
-                                    .make(
-                                        scanning_ticket_layout,
-                                        "Redeemed ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
+                                runOnUiThread {
+                                    Snackbar
+                                        .make(
+                                            scan_tickets_layout,
+                                            "Redeemed ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
+                                }
                             }
                             TicketDataHandler.TicketState.CHECKED -> {
-                                Snackbar
-                                    .make(
-                                        scanning_ticket_layout,
-                                        "Checked in ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
+                                runOnUiThread {
+                                    Snackbar
+                                        .make(
+                                            scan_tickets_layout,
+                                            "Checked in ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
+                                }
                             }
                             TicketDataHandler.TicketState.DUPLICATED -> {
-                                Snackbar
-                                    .make(
-                                        scanning_ticket_layout,
-                                        "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    .setDuration(5000).show()
+                                runOnUiThread {
+                                    Snackbar
+                                        .make(
+                                            scan_tickets_layout,
+                                            "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
+                                }
                             }
                             TicketDataHandler.TicketState.ERROR -> {
                                 object : ConnectionDialog() {
