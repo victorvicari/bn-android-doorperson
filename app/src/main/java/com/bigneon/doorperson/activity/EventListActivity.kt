@@ -20,7 +20,7 @@ import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListene
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
-import kotlinx.android.synthetic.main.activity_events.*
+import kotlinx.android.synthetic.main.activity_event_list.*
 import kotlinx.android.synthetic.main.content_events.*
 
 class EventListActivity : AppCompatActivity() {
@@ -44,7 +44,7 @@ class EventListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.bigneon.doorperson.R.layout.activity_events)
+        setContentView(com.bigneon.doorperson.R.layout.activity_event_list)
         eventDataHandler = EventDataHandler()
 
         AppUtils.checkLogged()

@@ -1,7 +1,9 @@
 package com.bigneon.doorperson.activity
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -10,6 +12,7 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
+import com.bigneon.doorperson.controller.TicketDataHandler.Companion.redeemCheckedTickets
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
@@ -42,6 +45,13 @@ class ScanningEventActivity : AppCompatActivity() {
         return this
     }
 
+    private val redeemCheckedTicketsReceiver = object : BroadcastReceiver() {
+        @Synchronized
+        override fun onReceive(context: Context, intent: Intent) {
+            redeemCheckedTickets(eventId)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanning_event)
@@ -52,6 +62,14 @@ class ScanningEventActivity : AppCompatActivity() {
 
         eventId = intent.getStringExtra("eventId") ?: ""
         storeTickets(eventId) // download sync (create/update tickets)
+
+        val filter = IntentFilter()
+        // Run every 1 minute!
+        filter.addAction("android.intent.action.TIME_TICK")
+        registerReceiver(redeemCheckedTicketsReceiver, filter)
+
+        // Initial redeeming tickets
+        redeemCheckedTickets(eventId)
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
 
@@ -131,5 +149,10 @@ class ScanningEventActivity : AppCompatActivity() {
     override fun onBackPressed() {
         startActivity(Intent(getContext(), EventListActivity::class.java))
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(redeemCheckedTicketsReceiver)
     }
 }

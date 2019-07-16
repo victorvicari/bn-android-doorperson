@@ -208,9 +208,9 @@ class TicketListActivity : AppCompatActivity() {
             val ticket = recyclerItemTouchHelper.ticketList!!
                 .stream()
                 .filter{ t -> t.ticketId == ticketId }
-                .findAny()
-                .orElse(null)
-            ticket.status = status
+                .findAny().orElse(null)
+            if (ticket != null)
+                ticket.status = status ?: ""
         }
 
         mAdapter?.list = recyclerItemTouchHelper.ticketList

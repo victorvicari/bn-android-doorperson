@@ -9,6 +9,7 @@ import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.service.RedeemCheckedService
 import com.bigneon.doorperson.service.StoreTicketsService
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
@@ -116,6 +117,14 @@ class TicketDataHandler {
             val i = Intent(context, StoreTicketsService::class.java)
             i.putExtra("eventId", eventId)
             context?.startService(i)
+        }
+
+        fun redeemCheckedTickets(eventId: String) {
+            if (isNetworkAvailable(context!!)) {
+                val i = Intent(context, RedeemCheckedService::class.java)
+                i.putExtra("eventId", eventId)
+                context?.startService(i)
+            }
         }
 
         fun completeCheckIn(

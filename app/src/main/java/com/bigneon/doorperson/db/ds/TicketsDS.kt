@@ -277,42 +277,42 @@ class TicketsDS {
         return null
     }
 
-//    fun setRedeemedTicket(ticketId: String): TicketModel? {
-//        val values = ContentValues()
-//        values.put(STATUS, "REDEEMED")
-//        SQLiteHelper.getDB().update(
-//            TABLE_TICKETS,
-//            values,
-//            "$TICKET_ID = '$ticketId'",
-//            null
-//        )
-//        return getTicket(ticketId)
-//    }
+    fun setRedeemedTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(STATUS, "REDEEMED")
+        SQLiteHelper.getDB().update(
+            TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
+            null
+        )
+        return getTicket(ticketId)
+    }
 
-//    fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
-//        val ticketModels = ArrayList<TicketModel>()
-//
-//        SQLiteHelper.getDB().query(
-//            TABLE_TICKETS,
-//            allColumns,
-//            "$EVENT_ID = '$eventId'",
-//            null,
-//            null,
-//            null,
-//            null
-//        )?.use {
-//            if (it.moveToFirst()) {
-//                while (!it.isAfterLast) {
-//                    val ticket = cursorToTicket(it)
-//                    ticketModels.add(ticket)
-//                    it.moveToNext()
-//                }
-//                it.close()
-//                return ticketModels
-//            }
-//        } ?: return null
-//        return null
-//    }
+    fun getCheckedTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
+
+        SQLiteHelper.getDB().query(
+            TABLE_TICKETS,
+            allColumns,
+            "$EVENT_ID = '$eventId' AND $STATUS = 'CHECKED'",
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val ticket = cursorToTicket(it)
+                    ticketModels.add(ticket)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
+    }
 
     fun getTicketsForEvent(eventId: String, filter: String, page: Int): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
