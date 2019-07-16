@@ -38,7 +38,7 @@ class ProfileActivity : AppCompatActivity() {
         )
 
         profile_settings_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), EventsActivity::class.java))
+            startActivity(Intent(getContext(), EventListActivity::class.java))
         }
 
         logout_button.setOnClickListener {
@@ -60,7 +60,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(getContext(), EventsActivity::class.java))
+        startActivity(Intent(getContext(), EventListActivity::class.java))
         finish()
     }
 }

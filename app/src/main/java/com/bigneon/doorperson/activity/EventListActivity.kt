@@ -23,7 +23,7 @@ import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.android.synthetic.main.content_events.*
 
-class EventsActivity : AppCompatActivity() {
+class EventListActivity : AppCompatActivity() {
     private var eventsListView: RecyclerView? = null
     private var eventDataHandler: EventDataHandler? = null
 

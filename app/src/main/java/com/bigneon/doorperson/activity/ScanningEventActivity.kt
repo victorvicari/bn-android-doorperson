@@ -66,7 +66,7 @@ class ScanningEventActivity : AppCompatActivity() {
         )
 
         scanning_events_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), EventsActivity::class.java))
+            startActivity(Intent(getContext(), EventListActivity::class.java))
         }
 
         scanning_events_button.setOnClickListener {
@@ -129,7 +129,7 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(getContext(), EventsActivity::class.java))
+        startActivity(Intent(getContext(), EventListActivity::class.java))
         finish()
     }
 }

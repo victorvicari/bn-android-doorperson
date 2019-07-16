@@ -182,7 +182,7 @@ class LoginActivity : AppCompatActivity() {
                                     Crashlytics.setUserEmail(email)
                                     loginBtn.progress = 100
                                     Handler().postDelayed({
-                                        startActivity(Intent(getContext(), EventsActivity::class.java))
+                                        startActivity(Intent(getContext(), EventListActivity::class.java))
                                         finish()
                                     }, 1000)
                                 }

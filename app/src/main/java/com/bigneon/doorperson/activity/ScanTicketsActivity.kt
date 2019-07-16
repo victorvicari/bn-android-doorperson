@@ -123,7 +123,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                             .make(scan_tickets_layout, "Camera permission denied by user!", Snackbar.LENGTH_LONG)
                             .setDuration(5000).show()
                         Log.e(TAG, "Camera permission denied by user!")
-                        startActivity(Intent(getContext(), EventsActivity::class.java))
+                        startActivity(Intent(getContext(), EventListActivity::class.java))
                     }
                 }
             }

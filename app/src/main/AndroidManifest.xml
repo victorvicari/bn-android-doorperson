@@ -57,7 +57,7 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".activity.EventsActivity"
+                android:name=".activity.EventListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
