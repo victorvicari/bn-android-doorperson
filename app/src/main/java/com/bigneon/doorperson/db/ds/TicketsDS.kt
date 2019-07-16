@@ -3,8 +3,8 @@ package com.bigneon.doorperson.db.ds
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.bigneon.doorperson.config.AppConstants.Companion.PAGE_LIMIT
 import com.bigneon.doorperson.db.SQLiteHelper
-import com.bigneon.doorperson.db.dml.TableTicketsDML
 import com.bigneon.doorperson.db.dml.TableTicketsDML.EMAIL
 import com.bigneon.doorperson.db.dml.TableTicketsDML.EVENT_ID
 import com.bigneon.doorperson.db.dml.TableTicketsDML.FIRST_NAME
@@ -61,7 +61,7 @@ class TicketsDS {
         return 0
     }
 
-    fun ticketExists(ticketId: String): Boolean {
+    private fun ticketExists(ticketId: String): Boolean {
         SQLiteHelper.getDB().rawQuery(
             "select count(*) from $TABLE_TICKETS where $TICKET_ID = '$ticketId'",
             null
@@ -131,9 +131,9 @@ class TicketsDS {
         db.insert(TABLE_TICKETS, null, values)
     }
 
-    fun updateTicket(ticketModel: TicketModel) {
-        updateTicket(SQLiteHelper.getDB(), ticketModel)
-    }
+//    fun updateTicket(ticketModel: TicketModel) {
+//        updateTicket(SQLiteHelper.getDB(), ticketModel)
+//    }
 
     private fun updateTicket(db: SQLiteDatabase, ticketModel: TicketModel) {
         updateTicket(
@@ -188,23 +188,23 @@ class TicketsDS {
         values.put(REDEEMED_AT, redeemedAt)
 
         db.update(
-            TableTicketsDML.TABLE_TICKETS,
+            TABLE_TICKETS,
             values,
             "$TICKET_ID = '$ticketId'",
             null
         )
     }
 
-    fun createTicketList(tickets: ArrayList<TicketModel>) {
-        val db = SQLiteHelper.getDB()
-        db.beginTransaction()
-        tickets.forEach {
-            createTicket(db, it)
-        }
-        db.setTransactionSuccessful()
-        db.endTransaction()
-        SQLiteHelper.closeDB(db)
-    }
+//    fun createTicketList(tickets: ArrayList<TicketModel>) {
+//        val db = SQLiteHelper.getDB()
+//        db.beginTransaction()
+//        tickets.forEach {
+//            createTicket(db, it)
+//        }
+//        db.setTransactionSuccessful()
+//        db.endTransaction()
+//        SQLiteHelper.closeDB(db)
+//    }
 
     fun createOrUpdateTicketList(tickets: ArrayList<TicketModel>) {
         val db = SQLiteHelper.getDB()
@@ -221,42 +221,42 @@ class TicketsDS {
         SQLiteHelper.closeDB(db)
     }
 
-    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
-        val ticketModels = ArrayList<TicketModel>()
+//    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
+//        val ticketModels = ArrayList<TicketModel>()
+//
+//        SQLiteHelper.getDB().query(
+//            TABLE_TICKETS,
+//            allColumns,
+//            "$STATUS = 'CHECKED'",
+//            null,
+//            null,
+//            null,
+//            null
+//        )?.use {
+//            if (it.moveToFirst()) {
+//                while (!it.isAfterLast) {
+//                    val ticket = cursorToTicket(it)
+//                    ticketModels.add(ticket)
+//                    it.moveToNext()
+//                }
+//                it.close()
+//                return ticketModels
+//            }
+//        } ?: return null
+//        return null
+//    }
 
-        SQLiteHelper.getDB().query(
-            TABLE_TICKETS,
-            allColumns,
-            "$STATUS = 'CHECKED'",
-            null,
-            null,
-            null,
-            null
-        )?.use {
-            if (it.moveToFirst()) {
-                while (!it.isAfterLast) {
-                    val ticket = cursorToTicket(it)
-                    ticketModels.add(ticket)
-                    it.moveToNext()
-                }
-                it.close()
-                return ticketModels
-            }
-        } ?: return null
-        return null
-    }
-
-    fun setDuplicateTicket(ticketId: String): TicketModel? {
-        val values = ContentValues()
-        values.put(STATUS, "DUPLICATE")
-        SQLiteHelper.getDB().update(
-            TABLE_TICKETS,
-            values,
-            "$TICKET_ID = '$ticketId'",
-            null
-        )
-        return getTicket(ticketId)
-    }
+//    fun setDuplicateTicket(ticketId: String): TicketModel? {
+//        val values = ContentValues()
+//        values.put(STATUS, "DUPLICATE")
+//        SQLiteHelper.getDB().update(
+//            TABLE_TICKETS,
+//            values,
+//            "$TICKET_ID = '$ticketId'",
+//            null
+//        )
+//        return getTicket(ticketId)
+//    }
 
     fun getTicket(ticketId: String): TicketModel? {
         SQLiteHelper.getDB().query(
@@ -289,17 +289,61 @@ class TicketsDS {
         return getTicket(ticketId)
     }
 
-    fun getAllTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
+    fun getCheckedTicketsForEvent(eventId: String): ArrayList<TicketModel>? {
         val ticketModels = ArrayList<TicketModel>()
 
         SQLiteHelper.getDB().query(
             TABLE_TICKETS,
             allColumns,
-            "$EVENT_ID = '$eventId'",
+            "$EVENT_ID = '$eventId' AND $STATUS = 'CHECKED'",
             null,
             null,
             null,
             null
+        )?.use {
+            if (it.moveToFirst()) {
+                while (!it.isAfterLast) {
+                    val ticket = cursorToTicket(it)
+                    ticketModels.add(ticket)
+                    it.moveToNext()
+                }
+                it.close()
+                return ticketModels
+            }
+        } ?: return null
+        return null
+    }
+
+    fun getTicketsForEvent(eventId: String, filter: String, page: Int): ArrayList<TicketModel>? {
+        val ticketModels = ArrayList<TicketModel>()
+        val sb = StringBuilder("$EVENT_ID = '$eventId' ")
+
+        val searchWords = filter.split(" ")
+        var andAdded = false
+        for (word in searchWords) {
+            if (word.isEmpty())
+                continue
+            if (andAdded) {
+                sb.append("OR ")
+            } else {
+                sb.append("AND (")
+                andAdded = true
+            }
+            sb.append("$TICKET_ID LIKE '%$word%' OR $FIRST_NAME LIKE '%$word%' OR $LAST_NAME LIKE '%$word%' OR $EMAIL LIKE '%$word%' OR $PHONE LIKE '%$word%' ")
+        }
+        if(andAdded) {
+            sb.append(")")
+        }
+
+        SQLiteHelper.getDB().query(
+            TABLE_TICKETS,
+            allColumns,
+            sb.toString(),
+            null,
+            null,
+            null,
+            null,
+            "${PAGE_LIMIT.times(page)}, $PAGE_LIMIT"
         )?.use {
             if (it.moveToFirst()) {
                 while (!it.isAfterLast) {

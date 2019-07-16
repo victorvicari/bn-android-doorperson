@@ -1,6 +1,5 @@
 package com.dd;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -8,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -526,13 +524,8 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
      * Set the View's background. Masks the API changes made in Jelly Bean.
      */
     @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
     public void setBackgroundCompat(Drawable drawable) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            setBackground(drawable);
-        } else {
-            setBackgroundDrawable(drawable);
-        }
+        setBackground(drawable);
     }
 
     public void setProgress(int progress) {

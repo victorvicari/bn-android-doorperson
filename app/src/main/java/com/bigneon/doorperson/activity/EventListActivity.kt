@@ -10,24 +10,22 @@ import android.view.View
 import com.bigneon.doorperson.adapter.EventListAdapter
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.addOnItemClickListener
-import com.bigneon.doorperson.config.AppConstants
-import com.bigneon.doorperson.config.SharedPrefs
-import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.ds.EventsDS
+import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.rest.model.EventModel
-import com.bigneon.doorperson.service.SyncService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.doorperson.util.AppUtils.Companion.eventListItemPosition
-import com.bigneon.doorperson.util.NetworkUtils
-import kotlinx.android.synthetic.main.activity_events.*
+import com.bigneon.doorperson.util.ConnectionDialog
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
+import kotlinx.android.synthetic.main.activity_event_list.*
 import kotlinx.android.synthetic.main.content_events.*
 
-class EventsActivity : AppCompatActivity() {
-    private var eventsDS: EventsDS? = null
+class EventListActivity : AppCompatActivity() {
     private var eventsListView: RecyclerView? = null
-    private var eventList: ArrayList<EventModel>? = null
+    private var eventDataHandler: EventDataHandler? = null
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -40,41 +38,42 @@ class EventsActivity : AppCompatActivity() {
             }
         }
 
-    private var refreshEventListener: SyncController.RefreshEventListener =
-        object : SyncController.RefreshEventListener {
-            override fun refreshEventList() {
-                refreshList()
-            }
-        }
-
     private fun getContext(): Context {
         return this
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(com.bigneon.doorperson.R.layout.activity_event_list)
+        eventDataHandler = EventDataHandler()
 
-        setContentView(com.bigneon.doorperson.R.layout.activity_events)
-
-        AppUtils.checkLogged(getContext())
-
-        eventsDS = EventsDS()
-
-        // Start synchronization service
-        startService(Intent(this, SyncService::class.java))
+        AppUtils.checkLogged()
 
         eventsListView = events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
 
         eventsListView!!.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(position: Int, view: View) {
-                val eventId = eventList?.get(position)?.id
-                val eventForSync = SharedPrefs.getProperty(AppConstants.EVENT_FOR_SYNC + eventId)
-                val intent = Intent(getContext(), ScanningEventActivity::class.java)
-                if (eventForSync.isNullOrEmpty()) {
-                    SharedPrefs.setProperty(AppConstants.EVENT_FOR_SYNC + eventId, eventId)
+                val event = eventDataHandler?.getEventByPosition(getContext(), position)
+
+                if (event != null) {
+                    val eventId = event.id
+                    val intent = Intent(getContext(), ScanningEventActivity::class.java)
+                    intent.putExtra("eventId", eventId)
+                    startActivity(intent)
+                } else {
+                    object : ConnectionDialog() {
+                        override fun positiveButtonAction(context: Context) {
+                            AppUtils.enableOfflineMode()
+                            onItemClicked(position, view)
+                        }
+
+                        override fun negativeButtonAction(context: Context) {
+                            setWiFiEnabled(context)
+                            while (!isNetworkAvailable(context)) Thread.sleep(1000)
+                            onItemClicked(position, view)
+                        }
+                    }.showDialog(getContext())
                 }
-                intent.putExtra("eventId", eventId)
-                startActivity(intent)
             }
         })
 
@@ -94,42 +93,58 @@ class EventsActivity : AppCompatActivity() {
         }
 
         events_layout.setOnRefreshListener {
-            // Sync local DB with remote server
-            SyncController.synchronizeAllTables(true)
-
-            // Hide swipe to refresh icon animation
-            events_layout.isRefreshing = false // TODO - Move after sync is done!
+            refreshList()
         }
+
+        AppUtils.ticketListItemPosition = 0
+        AppUtils.ticketListItemOffset = 0
 
         refreshList()
     }
 
     override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.addRefreshEventListener(refreshEventListener)
+        addNetworkStateListener(this, networkStateReceiverListener)
         super.onStart()
     }
 
     private fun refreshList() {
-        eventList = eventsDS!!.getAllEvents()
-        if (eventList != null) {
-            eventsListView!!.layoutManager =
+        val events = eventDataHandler?.loadAllEvents(getContext())
+        if (events != null) {
+            eventsListView?.layoutManager =
                 LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
 
-            eventsListView!!.adapter = EventListAdapter(eventList!!)
+            eventsListView?.adapter = EventListAdapter(events)
+            eventDataHandler?.storeEvents(events)
 
             if (eventListItemPosition >= 0) {
-                (eventsListView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                (eventsListView?.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     eventListItemPosition,
                     eventListItemOffset
                 )
             }
+            TicketListActivity.recyclerItemTouchHelper.ticketList = null
+            TicketListActivity.currentPage = 0
+
+            // Hide swipe to refresh icon animation if shown
+            events_layout.isRefreshing = false
+        } else {
+            object : ConnectionDialog() {
+                override fun positiveButtonAction(context: Context) {
+                    AppUtils.enableOfflineMode()
+                    refreshList()
+                }
+
+                override fun negativeButtonAction(context: Context) {
+                    setWiFiEnabled(context)
+                    while (!isNetworkAvailable(context)) Thread.sleep(1000)
+                    refreshList()
+                }
+            }.showDialog(getContext())
         }
     }
 
     override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.removeRefreshEventListener(refreshEventListener)
+        removeNetworkStateListener(this, networkStateReceiverListener)
         super.onStop()
     }
 

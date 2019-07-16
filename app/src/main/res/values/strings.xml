@@ -12,8 +12,6 @@
     <string name="manage_events">Manage events</string>
     <string name="scanning_event">Scanning Event</string>
     <string name="scan_tickets">Scan Tickets</string>
-    <string name="load_tickets">Downloading Tickets</string>
-    <string name="_1_d_of_2_d_loaded">%1$d of %2$d loaded</string>
     <string name="_1_d_of_2_d_redeemed">%1$d of %2$d redeemed</string>
     <string name="_1_d_checked">%1$d checked</string>
     <string name="scan_tickets_icon">Scan tickets icon</string>

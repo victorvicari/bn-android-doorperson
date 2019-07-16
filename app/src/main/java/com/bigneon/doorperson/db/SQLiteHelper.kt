@@ -21,7 +21,7 @@ class SQLiteHelper : SQLiteOpenHelper(
     AppConstants.DATABASE_VERSION
 ) {
     companion object {
-        val instance = SQLiteHelper()
+        private val instance = SQLiteHelper()
 
         fun getDB(): SQLiteDatabase {
             return instance.writableDatabase
@@ -39,8 +39,8 @@ class SQLiteHelper : SQLiteOpenHelper(
 
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_D)
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_U)
-        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_D)
-        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_U)
+//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_D)
+//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_U)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

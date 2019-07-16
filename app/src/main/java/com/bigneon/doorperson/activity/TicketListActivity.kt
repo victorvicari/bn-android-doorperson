@@ -5,66 +5,53 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import com.bigneon.doorperson.adapter.OnItemClickListener
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
-import com.bigneon.doorperson.db.SyncController
-import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.controller.TicketDataHandler
+import com.bigneon.doorperson.listener.PaginationScrollListener
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
-import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemOffset
-import com.bigneon.doorperson.util.AppUtils.Companion.ticketListItemPosition
+import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
+import com.bigneon.doorperson.util.ConnectionDialog
 import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
-import kotlinx.android.synthetic.main.content_ticket_list.view.*
 
+/****************************************************
+ * Copyright (c) 2016 - 2019.
+ * All right reserved!
+ * Created by SRKI-ST on 27.06.2019..
+ ****************************************************/
 class TicketListActivity : AppCompatActivity() {
-    private val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
-    private var ticketsDS: TicketsDS? = null
-    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
-        object : NetworkStateReceiver.NetworkStateReceiverListener {
-            override fun networkAvailable() {
-                no_internet_toolbar_icon.visibility = View.GONE
-            }
+    private val TAG = TicketListActivity::class.java.simpleName
+    private var eventId: String? = null
+    private var ticketId: String? = null
+    private var status: String? = null
+    private var mAdapter: TicketListAdapter? = null
+    private var mLayoutManager: LinearLayoutManager? = null
 
-            override fun networkUnavailable() {
-                no_internet_toolbar_icon.visibility = View.VISIBLE
-            }
-        }
-    private var refreshTicketListener: SyncController.RefreshTicketListener =
-        object : SyncController.RefreshTicketListener {
-            override fun refreshTicketList(eventId: String) {
-                if (TicketListActivity.eventId == eventId)
-                    refreshList(eventId)
-            }
-        }
-    private var loadingTicketListener: SyncController.LoadingTicketListener =
-        object : SyncController.LoadingTicketListener {
-            override fun finish() {
-                tickets_swipe_refresh_layout.isEnabled = true
-                // Hide swipe to refresh icon animation
-                tickets_swipe_refresh_layout.isRefreshing = false
-            }
-        }
+    //    private var searchTextChanged: Boolean = false
+    private var screenRotation: Boolean = false
+    private var searchGuestText: String = ""
+    private var isLastPage = false
+    private var isLoading = false
+    private var itemCount = 0
 
     companion object {
-        private var eventId: String? = null
-        private var searchTextChanged: Boolean = false
-        private var screenRotation: Boolean = false
-        private var searchGuestText: String = ""
-        var ticketList: ArrayList<TicketModel>? = null
-        val finallyFilteredTicketList = ArrayList<TicketModel>()
+        val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
+        var currentPage = 0
     }
 
     private fun getContext(): Context {
@@ -75,10 +62,6 @@ class TicketListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.bigneon.doorperson.R.layout.activity_ticket_list)
         setSupportActionBar(ticket_list_toolbar)
-
-        AppUtils.checkLogged(getContext())
-
-        ticketsDS = TicketsDS()
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -93,20 +76,41 @@ class TicketListActivity : AppCompatActivity() {
         }
 
         eventId = intent.getStringExtra("eventId")
+        ticketId = intent.getStringExtra("ticketId")
+        status = intent.getStringExtra("status")
 
         val itemTouchHelper = ItemTouchHelper(recyclerItemTouchHelper)
         recyclerItemTouchHelper.parentLayout = tickets_layout
-        itemTouchHelper.attachToRecyclerView(ticket_list_view)
 
-        tickets_swipe_refresh_layout.isEnabled = ticketsDS!!.getAllTicketNumberForEvent(eventId!!) != 0
+        itemTouchHelper.attachToRecyclerView(ticket_list_view)
+        ticket_list_view.setHasFixedSize(true)
+
+        // use a linear layout manager
+        mLayoutManager = LinearLayoutManager(this)
+        ticket_list_view.layoutManager = mLayoutManager
+
+        mAdapter = TicketListAdapter(ArrayList())
+
+        adaptTicketList()
+
+        ticket_list_view.addOnScrollListener(object : PaginationScrollListener(mLayoutManager!!) {
+            override fun loadMoreItems() {
+                isLoading = true
+                loadNewPage(eventId!!, ++currentPage)
+            }
+
+            override fun isLastPage(): Boolean {
+                return isLastPage
+            }
+
+            override fun isLoading(): Boolean {
+                return isLoading
+            }
+        })
 
         ticket_list_view.addOnItemClickListener(object : OnItemClickListener {
             override fun onItemClicked(adapterPosition: Int, view: View) {
-                val filteredList =
-                    if (TicketListActivity.finallyFilteredTicketList.size > 0)
-                        finallyFilteredTicketList else ticketList
-
-                val ticket = filteredList?.get(adapterPosition)
+                val ticket = mAdapter!!.list?.get(adapterPosition)
 
                 val intent = Intent(getContext(), TicketActivity::class.java)
                 intent.putExtra("ticketId", ticket?.ticketId)
@@ -122,31 +126,32 @@ class TicketListActivity : AppCompatActivity() {
             }
         })
 
-        ticket_list_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                ticketListItemPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-
-                ticketListItemOffset =
-                    if (recyclerView.layoutManager?.findViewByPosition(ticketListItemPosition) != null) recyclerView.layoutManager?.findViewByPosition(
-                        ticketListItemPosition
-                    )!!.top else 0
+        var countDownTimerIsTicking = false
+        val countDownTimer = object : CountDownTimer(1000, 100) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d(TAG, "Finish in: $millisUntilFinished ms")
             }
-        })
 
-        search_guest.post {
-            search_guest.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-                override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
-                    searchGuestText = search_guest.text.toString()
-                    adaptListView(findViewById(com.bigneon.doorperson.R.id.ticket_list_view))
-                }
-
-                override fun afterTextChanged(s: Editable) {}
-            })
+            override fun onFinish() {
+                searchGuestText = search_guest.text.toString()
+                countDownTimerIsTicking = false
+                refreshTicketList()
+            }
         }
+
+        search_guest.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
+                if (countDownTimerIsTicking) {
+                    countDownTimer.cancel()
+                }
+                countDownTimer.start()
+                countDownTimerIsTicking = true
+            }
+
+            override fun afterTextChanged(s: Editable) {}
+        })
 
         ticket_list_toolbar.navigationIcon!!.setColorFilter(
             ContextCompat.getColor(getContext(), com.bigneon.doorperson.R.color.colorAccent),
@@ -156,26 +161,21 @@ class TicketListActivity : AppCompatActivity() {
         ticket_list_toolbar.setNavigationOnClickListener {
             val intent = Intent(getContext(), ScanTicketsActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
 
         tickets_swipe_refresh_layout.setOnRefreshListener {
-            if (tickets_swipe_refresh_layout.isEnabled) {
-                tickets_swipe_refresh_layout.isEnabled = false
-
-                // Sync local DB with remote server
-                SyncController.updateEvent(eventId!!)
-            }
+            refreshTicketList()
         }
-
-        refreshList(eventId)
     }
 
-    override fun onStart() {
-        NetworkUtils.instance().addNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.addRefreshTicketListener(refreshTicketListener)
-        SyncController.addLoadingTicketListener(loadingTicketListener)
-        super.onStart()
+    private fun refreshTicketList() {
+        itemCount = 0
+        currentPage = 0
+        isLastPage = false
+        mAdapter?.clear()
+        adaptTicketList()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -183,83 +183,79 @@ class TicketListActivity : AppCompatActivity() {
         screenRotation = true
     }
 
-    private fun adaptListView(ticketListView: RecyclerView) {
-        val searchWords = searchGuestText.split(" ")
-        if (searchGuestText != "") {
-            searchTextChanged = true
-        }
-        finallyFilteredTicketList.clear()
+    private fun adaptTicketList() {
+        ticket_list_view.adapter = mAdapter
+        recyclerItemTouchHelper.adapter = mAdapter
 
-        if (ticketList == null)
-            return
+        if (recyclerItemTouchHelper.ticketList == null || recyclerItemTouchHelper.ticketList!!.size == 0) {
+            val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId!!, searchGuestText, 0)
+            if (items == null) {
+                object : ConnectionDialog() {
+                    override fun positiveButtonAction(context: Context) {
+                        enableOfflineMode()
+                        adaptTicketList()
+                    }
 
-        for (word in searchWords) {
-            if (word == "")
-                continue
-
-            val filteredTicketList = ticketList?.filter {
-                (it.firstName?.toLowerCase()!!.contains(word.toLowerCase()) || it.lastName?.toLowerCase()!!.contains(
-                    word.toLowerCase()
-                ) || it.ticketId?.toLowerCase()!!.contains(word.toLowerCase()))
-            } as ArrayList<TicketModel>
-            filteredTicketList.forEach { if (it !in finallyFilteredTicketList) finallyFilteredTicketList.add(it) }
-            finallyFilteredTicketList.sortedWith(compareBy { it.ticketId })
-        }
-
-        if (screenRotation || searchTextChanged) {
-            ticketListView.adapter =
-                TicketListAdapter(finallyFilteredTicketList)
-            recyclerItemTouchHelper.ticketList = finallyFilteredTicketList
-            recyclerItemTouchHelper.adapter = ticketListView.adapter as TicketListAdapter
-
-            screenRotation = false
-            searchTextChanged = false
+                    override fun negativeButtonAction(context: Context) {
+                        setWiFiEnabled(context)
+                        while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                        adaptTicketList()
+                    }
+                }.showDialog(getContext())
+            }
+            recyclerItemTouchHelper.ticketList = items as java.util.ArrayList<TicketModel>?
         } else {
-            ticketListView.adapter =
-                TicketListAdapter(ticketList!!)
-            recyclerItemTouchHelper.ticketList = ticketList
-            recyclerItemTouchHelper.adapter = ticketListView.adapter as TicketListAdapter
+            val ticket = recyclerItemTouchHelper.ticketList!!
+                .stream()
+                .filter{ t -> t.ticketId == ticketId }
+                .findAny().orElse(null)
+            if (ticket != null)
+                ticket.status = status ?: ""
         }
 
-        if (ticketListView.adapter?.itemCount!! > 0) {
-            ticket_list_view.visibility = View.VISIBLE
+        mAdapter?.list = recyclerItemTouchHelper.ticketList
+
+        if (mAdapter?.list?.size!! > 0) {
             no_guests_found_placeholder.visibility = View.GONE
-        } else {
-            ticket_list_view.visibility = View.GONE
-            no_guests_found_placeholder.visibility = View.VISIBLE
+            ticket_list_view.visibility = View.VISIBLE
         }
-    }
 
-    private fun refreshList(eventId: String?) {
-        if (TicketListActivity.eventId != eventId)
-            return
-
-        ticket_list_view.layoutManager =
-            LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)
-
-        tickets_layout.loading_guests_progress_bar.visibility = View.GONE
-
-        ticketList = ticketsDS!!.getAllTicketsForEvent(TicketListActivity.eventId!!)
-        adaptListView(ticket_list_view)
-
-        if (ticketListItemPosition >= 0) {
+        if (AppUtils.ticketListItemPosition >= 0) {
             (ticket_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                ticketListItemPosition,
-                ticketListItemOffset
+                AppUtils.ticketListItemPosition,
+                AppUtils.ticketListItemOffset
             )
         }
+        isLoading = false
+        tickets_swipe_refresh_layout.isRefreshing = false
     }
 
-    override fun onStop() {
-        NetworkUtils.instance().removeNetworkStateListener(this, networkStateReceiverListener)
-        SyncController.removeRefreshTicketListener(refreshTicketListener)
-        SyncController.removeLoadingTicketListener(loadingTicketListener)
-        super.onStop()
+    private fun loadNewPage(eventId: String, page: Int) {
+        val items = TicketDataHandler.loadPageOfTickets(getContext(), eventId, searchGuestText, page)
+        if (items == null) {
+            object : ConnectionDialog() {
+                override fun positiveButtonAction(context: Context) {
+                    enableOfflineMode()
+                    loadNewPage(eventId, page)
+                }
+
+                override fun negativeButtonAction(context: Context) {
+                    setWiFiEnabled(context)
+                    while (!NetworkUtils.isNetworkAvailable(context)) Thread.sleep(1000)
+                    loadNewPage(eventId, page)
+                }
+            }.showDialog(getContext())
+        }
+        recyclerItemTouchHelper.ticketList?.addAll(items!!)
+        adaptTicketList()
+        if (items!!.isEmpty())
+            isLastPage = true
     }
 
     override fun onBackPressed() {
         val intent = Intent(getContext(), ScanTicketsActivity::class.java)
         intent.putExtra("eventId", eventId)
+        intent.putExtra("searchGuestText", searchGuestText)
         startActivity(intent)
         finish()
     }

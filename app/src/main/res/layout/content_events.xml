@@ -7,8 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_events"
-        tools:context=".activity.EventsActivity">
+        tools:showIn="@layout/activity_event_list"
+        tools:context=".activity.EventListActivity">
 
     <android.support.v7.widget.RecyclerView
             android:id="@+id/events_list_view"

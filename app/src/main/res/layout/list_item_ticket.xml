@@ -96,6 +96,7 @@
                             android:src="@drawable/no_internet"
                             android:contentDescription="@string/no_internet_icon"
                             android:visibility="gone"/>
+
                     <TextView
                             android:id="@+id/checked_status_item"
                             android:layout_width="wrap_content"
@@ -148,9 +149,10 @@
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:text="@string/ticket_id"
-                        android:gravity="center_vertical"
+                        android:gravity="center_vertical|start"
                         android:textSize="16sp"
                         android:textStyle="normal"/>
+
             </LinearLayout>
 
             <ImageView

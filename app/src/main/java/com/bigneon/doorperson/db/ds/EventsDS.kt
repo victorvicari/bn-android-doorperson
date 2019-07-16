@@ -6,7 +6,6 @@ import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.dml.TableEventsDML.NAME
 import com.bigneon.doorperson.db.dml.TableEventsDML.PROMO_IMAGE_URL
 import com.bigneon.doorperson.db.dml.TableEventsDML.TABLE_EVENTS
-import com.bigneon.doorperson.db.dml.TableEventsDML.TOTAL_NUM_OF_TICKETS
 import com.bigneon.doorperson.db.dml.TableTicketsDML.EVENT_ID
 import com.bigneon.doorperson.rest.model.EventModel
 
@@ -19,8 +18,7 @@ class EventsDS {
     private val allColumns = arrayOf(
         EVENT_ID,
         NAME,
-        PROMO_IMAGE_URL,
-        TOTAL_NUM_OF_TICKETS
+        PROMO_IMAGE_URL
     )
 
     fun getEvent(eventId: String): EventModel? {
@@ -73,15 +71,12 @@ class EventsDS {
     fun createEvent(
         eventId: String,
         name: String,
-        promoImageURL: String,
-        total: Int
-
+        promoImageURL: String
     ) {
         val values = ContentValues()
         values.put(EVENT_ID, eventId)
         values.put(NAME, name)
         values.put(PROMO_IMAGE_URL, promoImageURL)
-        values.put(TOTAL_NUM_OF_TICKETS, total)
 
         val db = SQLiteHelper.getDB()
         db.insert(TABLE_EVENTS, null, values)
@@ -91,13 +86,11 @@ class EventsDS {
     fun updateEvent(
         eventId: String,
         name: String,
-        promoImageURL: String,
-        total: Int
+        promoImageURL: String
     ) {
         val values = ContentValues()
         values.put(NAME, name)
         values.put(PROMO_IMAGE_URL, promoImageURL)
-        values.put(TOTAL_NUM_OF_TICKETS, total)
 
         val db = SQLiteHelper.getDB()
         db.update(TABLE_EVENTS, values, "$EVENT_ID = '$eventId'", null)
@@ -109,8 +102,7 @@ class EventsDS {
         var index = 0
         eventModel.id = cursor.getString(index++)
         eventModel.name = cursor.getString(index++)
-        eventModel.promoImageURL = cursor.getString(index++)
-        eventModel.totalNumOfTickets = cursor.getInt(index)
+        eventModel.promoImageURL = cursor.getString(index)
         return eventModel
     }
 }

@@ -25,9 +25,12 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-
         <service
-                android:name=".service.SyncService"
+                android:name=".service.RedeemCheckedService"
+                android:exported="false">
+        </service>
+        <service
+                android:name=".service.StoreTicketsService"
                 android:exported="false">
         </service>
 
@@ -57,7 +60,7 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".activity.EventsActivity"
+                android:name=".activity.EventListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
