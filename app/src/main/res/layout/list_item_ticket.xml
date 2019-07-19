@@ -59,21 +59,39 @@
                     android:paddingEnd="0dp"
                     android:layout_toStartOf="@+id/event_right_arrow">
 
+            <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                <TextView
+                        android:id="@+id/last_name_and_first_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/last_name_first_name"
+                        android:gravity="center_vertical"
+                        android:textSize="20sp"
+                        android:singleLine="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/ticket_status"
+                        android:textStyle="bold"/>
                 <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:id="@+id/ticket_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:paddingTop="5dp"
                         android:orientation="horizontal">
 
-                    <TextView
-                            android:id="@+id/last_name_and_first_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="@string/last_name_first_name"
-                            android:maxLength="14"
-                            android:gravity="center_vertical"
-                            android:textSize="20sp"
-                            android:textStyle="bold"/>
+                    <ImageView
+                            android:id="@+id/checked_no_internet_item"
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:src="@drawable/no_internet"
+                            android:paddingTop="5dp"
+                            android:contentDescription="@string/no_internet_icon"
+                            android:visibility="gone"/>
 
                     <TextView
                             android:id="@+id/redeemed_status_item"
@@ -86,16 +104,6 @@
                             android:layout_marginStart="10dp"
                             android:padding="5dp"
                             android:visibility="visible"/>
-
-                    <ImageView
-                            android:id="@+id/checked_no_internet_item"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="10dp"
-                            android:paddingTop="5dp"
-                            android:src="@drawable/no_internet"
-                            android:contentDescription="@string/no_internet_icon"
-                            android:visibility="gone"/>
 
                     <TextView
                             android:id="@+id/checked_status_item"
@@ -132,6 +140,9 @@
                             android:padding="5dp"
                             android:visibility="gone"/>
                 </LinearLayout>
+            </RelativeLayout>
+
+
 
                 <TextView
                         android:id="@+id/price_and_ticket_type"
