@@ -101,14 +101,6 @@ class RecyclerItemTouchHelper :
         if (viewHolder is TicketViewHolder) {
             // TODO - Move this dialog on background item click instead of on swiped!
             if (!viewHolder.checkedIn) {
-                Snackbar
-                    .make(
-                        viewHolder.itemView,
-                        "Checked in ${viewHolder.lastNameAndFirstNameTextView?.text.toString()}",
-                        Snackbar.LENGTH_LONG
-                    )
-                    .setDuration(5000).show()
-
                 run {
                     Log.d(
                         TAG,
@@ -131,14 +123,35 @@ class RecyclerItemTouchHelper :
                                 ticketModel.lastName!!
                             )) {
                                 TicketDataHandler.TicketState.REDEEMED -> {
+                                    Snackbar
+                                        .make(
+                                            viewHolder.itemView,
+                                            "Redeemed ${"${ticketModel.lastName!!}, ${ticketModel.firstName!!}"}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
                                     ticketModel.status =
                                         viewHolder.itemView.context!!.getString(R.string.redeemed).toLowerCase()
                                 }
                                 TicketDataHandler.TicketState.CHECKED -> {
+                                    Snackbar
+                                        .make(
+                                            viewHolder.itemView,
+                                            "Checked in ${"${ticketModel.lastName!!}, ${ticketModel.firstName!!}"}",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
                                     ticketModel.status =
                                         viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                 }
                                 TicketDataHandler.TicketState.DUPLICATED -> {
+                                    Snackbar
+                                        .make(
+                                            viewHolder.itemView,
+                                            "Warning: DUPLICATE TICKET! - Ticket ID: ${ticketModel.ticketId} has already been redeemed! ",
+                                            Snackbar.LENGTH_LONG
+                                        )
+                                        .setDuration(5000).show()
                                     ticketModel.status =
                                         viewHolder.itemView.context!!.getString(R.string.duplicate).toLowerCase()
                                 }
