@@ -39,6 +39,8 @@ import kotlin.math.abs
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     private val TAG = ScanTicketsActivity::class.java.simpleName
     private var eventId: String? = null
+    private var scannedTicketId: String? = null
+    private var status: String? = null
     private var mScannerView: ZXingScannerView? = null
     private var cameraPermissionGranted: Boolean = false
     private var checkInMode: String? = null
@@ -107,6 +109,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
         ticket_list_layout.setOnClickListener {
             val intent = Intent(getContext(), TicketListActivity::class.java)
             intent.putExtra("eventId", eventId)
+            intent.putExtra("ticketId", scannedTicketId)
+            intent.putExtra("status", status)
             intent.putExtra("searchGuestText", searchGuestText)
             startActivity(intent)
         }
@@ -204,14 +208,18 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         intent.putExtra("status", ticket.status)
                         startActivity(intent)
                     } else {
-                        when (TicketDataHandler.completeCheckIn(
+                        val ticketState = TicketDataHandler.completeCheckIn(
                             getContext(),
                             eventId!!,
                             ticketId,
                             ticket.redeemKey!!,
                             ticket.firstName!!,
                             ticket.lastName!!
-                        )) {
+                        )
+                        status = ticketState?.name
+                        scannedTicketId = ticketId
+
+                        when (ticketState) {
                             TicketDataHandler.TicketState.REDEEMED -> {
                                 runOnUiThread {
                                     Snackbar
