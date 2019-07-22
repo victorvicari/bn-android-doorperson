@@ -289,10 +289,19 @@ class RestAPI private constructor() {
                             redeemTicketResult?.invoke(false)
                         } else {
                             if (response.code() == 409) {
-                                val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
-                                intent.putExtra("ticketId", ticketId)
-                                intent.putExtra("lastAndFirstName", "$lastName, $firstName")
-                                context.startActivity(intent)
+                                val getTicketCall = client().getTicket(accessToken, ticketId)
+                                val getTicketCallResponse = getTicketCall.execute()
+                                if (getTicketCallResponse.body() != null) {
+                                    val ticketStatus = getTicketCallResponse.body()!!.ticket?.status?.toLowerCase()
+                                    val statusRedeemed =
+                                        context.getString(com.bigneon.doorperson.R.string.redeemed).toLowerCase()
+                                    if (ticketStatus == statusRedeemed) {
+                                        val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
+                                        intent.putExtra("ticketId", ticketId)
+                                        intent.putExtra("lastAndFirstName", "$lastName, $firstName")
+                                        context.startActivity(intent)
+                                    }
+                                }
                                 redeemTicketResult?.invoke(true)
                             } else {
                                 redeemTicketResult?.invoke(false)
@@ -332,10 +341,19 @@ class RestAPI private constructor() {
                     false
                 } else
                     return if (response.code() == 409) {
-                        val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
-                        intent.putExtra("ticketId", ticketId)
-                        intent.putExtra("lastAndFirstName", "$lastName, $firstName")
-                        context.startActivity(intent)
+                        val getTicketCall = client().getTicket(accessToken, ticketId)
+                        val getTicketCallResponse = getTicketCall.execute()
+                        if (getTicketCallResponse.body() != null) {
+                            val ticketStatus = getTicketCallResponse.body()!!.ticket?.status?.toLowerCase()
+                            val statusRedeemed =
+                                context.getString(com.bigneon.doorperson.R.string.redeemed).toLowerCase()
+                            if (ticketStatus == statusRedeemed) {
+                                val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
+                                intent.putExtra("ticketId", ticketId)
+                                intent.putExtra("lastAndFirstName", "$lastName, $firstName")
+                                context.startActivity(intent)
+                            }
+                        }
                         Log.e(TAG, "Redeem ticket for event $eventId failed")
                         true
                     } else {
@@ -429,7 +447,8 @@ class RestAPI private constructor() {
         // Synchronous call
         fun getTicket(
             accessToken: String,
-            ticketId: String): TicketModel? {
+            ticketId: String
+        ): TicketModel? {
             try {
                 val getTicketCall = client().getTicket(accessToken, ticketId)
                 val response = getTicketCall.execute()
