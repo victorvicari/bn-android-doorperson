@@ -155,6 +155,7 @@ class TicketDataHandler {
                                 TAG,
                                 "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! "
                             )
+                            ticketsDS.setDuplicateTicket(ticketId)
                             TicketState.DUPLICATED
                         } else {
                             Log.d(TAG, "Ticket ID: $ticketId has been redeemed! ")

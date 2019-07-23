@@ -1,9 +1,7 @@
 package com.bigneon.doorperson.activity
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -26,13 +24,14 @@ import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
 class ScanningEventActivity : AppCompatActivity() {
-    private var eventId: String = ""
+    private var eventId: String? = null
     private var eventDataHandler: EventDataHandler? = null
     private var searchGuestText: String = ""
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
+                redeemCheckedTickets(eventId!!)
                 no_internet_toolbar_icon.visibility = View.GONE
             }
 
@@ -45,13 +44,6 @@ class ScanningEventActivity : AppCompatActivity() {
         return this
     }
 
-    private val redeemCheckedTicketsReceiver = object : BroadcastReceiver() {
-        @Synchronized
-        override fun onReceive(context: Context, intent: Intent) {
-            redeemCheckedTickets(eventId)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanning_event)
@@ -61,15 +53,7 @@ class ScanningEventActivity : AppCompatActivity() {
         checkLogged()
 
         eventId = intent.getStringExtra("eventId") ?: ""
-        storeTickets(eventId) // download sync (create/update tickets)
-
-        val filter = IntentFilter()
-        // Run every 1 minute!
-        filter.addAction("android.intent.action.TIME_TICK")
-        registerReceiver(redeemCheckedTicketsReceiver, filter)
-
-        // Initial redeeming tickets
-        redeemCheckedTickets(eventId)
+        storeTickets(eventId!!) // download sync (create/update tickets)
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
 
@@ -103,9 +87,9 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     private fun getEventSummary() {
-        val event = eventDataHandler?.getEventByID(getContext(), eventId)
-        val redeemedTicketNumberForEvent = TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId)
-        val allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId)
+        val event = eventDataHandler?.getEventByID(getContext(), eventId!!)
+        val redeemedTicketNumberForEvent = TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId!!)
+        val allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId!!)
 
         if (event != null && redeemedTicketNumberForEvent != null && allTicketNumberForEvent != null) {
             scanning_event_name.text = event.name ?: ""
@@ -116,7 +100,7 @@ class ScanningEventActivity : AppCompatActivity() {
             )
             number_of_checked.text = getString(
                 R.string._1_d_checked,
-                TicketDataHandler.getCheckedTicketNumberForEvent(eventId)
+                TicketDataHandler.getCheckedTicketNumberForEvent(eventId!!)
             )
         } else {
             object : ConnectionDialog() {
@@ -149,10 +133,5 @@ class ScanningEventActivity : AppCompatActivity() {
     override fun onBackPressed() {
         startActivity(Intent(getContext(), EventListActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(redeemCheckedTicketsReceiver)
     }
 }
