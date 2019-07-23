@@ -40,6 +40,8 @@ class RedeemCheckedService : IntentService("RedeemCheckedService") {
                             ticket.firstName ?: "",
                             ticket.lastName ?: "",
                             ticket.redeemKey!!,
+                            ticket.redeemedBy!!,
+                            ticket.redeemedAt!!,
                             ::redeemTicketResult
                         )
                     }

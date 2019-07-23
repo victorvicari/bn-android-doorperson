@@ -42,7 +42,7 @@
     <string name="offline_mode_enabled">Offline mode is enabled</string>
     <string name="offline_mode_disabled">Offline mode is disabled</string>
     <string name="warning">WARNING!</string>
-    <string name="duplicate_ticket_msg">Duplicate ticket detected!!!\nTicket has already been redeemed!\n\nTicket: %1$s\nUser: %2$s</string>
+    <string name="duplicate_ticket_msg">Duplicate ticket detected!!!\nTicket has already been redeemed!\n\nTicket: %1$s\nUser: %2$s\nRedeemed by: %3$s\nRedeemed at: %4$s</string>
     <string name="go_back">GO BACK</string>
     <string name="ticket_id">Ticket ID</string>
     <string name="reading_ticket">Reading ticket</string>

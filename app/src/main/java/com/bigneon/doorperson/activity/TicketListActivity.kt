@@ -116,6 +116,8 @@ class TicketListActivity : AppCompatActivity() {
                 intent.putExtra("ticketId", ticket?.ticketId)
                 intent.putExtra("eventId", eventId)
                 intent.putExtra("redeemKey", ticket?.redeemKey)
+                intent.putExtra("redeemedBy", ticket?.redeemedBy)
+                intent.putExtra("redeemedAt", ticket?.redeemedAt)
                 intent.putExtra("searchGuestText", searchGuestText)
                 intent.putExtra("firstName", ticket?.firstName)
                 intent.putExtra("lastName", ticket?.lastName)

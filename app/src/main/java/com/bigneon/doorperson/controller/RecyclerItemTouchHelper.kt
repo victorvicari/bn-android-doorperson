@@ -2,6 +2,7 @@ package com.bigneon.doorperson.controller
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
@@ -11,11 +12,14 @@ import android.support.v7.widget.helper.ItemTouchHelper.RIGHT
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.LinearLayout
+import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.activity.DuplicateTicketCheckinActivity
 import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.ConnectionDialog
 import com.bigneon.doorperson.util.NetworkUtils
@@ -114,14 +118,7 @@ class RecyclerItemTouchHelper :
                         adapter!!.notifyItemChanged(pos)
 
                         fun completeCheckIn() {
-                            when (TicketDataHandler.completeCheckIn(
-                                viewHolder.itemView.context,
-                                ticketModel.eventId!!,
-                                ticketModel.ticketId!!,
-                                ticketModel.redeemKey!!,
-                                ticketModel.firstName!!,
-                                ticketModel.lastName!!
-                            )) {
+                            when (TicketDataHandler.completeCheckIn(viewHolder.itemView.context, ticketModel)) {
                                 TicketDataHandler.TicketState.REDEEMED -> {
                                     Snackbar
                                         .make(
@@ -145,10 +142,17 @@ class RecyclerItemTouchHelper :
                                         viewHolder.itemView.context!!.getString(R.string.checked).toLowerCase()
                                 }
                                 TicketDataHandler.TicketState.DUPLICATED -> {
+                                    val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
+                                    intent.putExtra("ticketId", ticketModel.ticketId)
+                                    intent.putExtra("lastAndFirstName", "${ticketModel.lastName!!}, ${ticketModel.firstName!!}")
+                                    intent.putExtra("redeemedBy", ticketModel.redeemedBy)
+                                    intent.putExtra("redeemedAt", ticketModel.redeemedAt)
+                                    context?.startActivity(intent)
+
                                     Snackbar
                                         .make(
                                             viewHolder.itemView,
-                                            "Warning: DUPLICATE TICKET! - Ticket ID: ${ticketModel.ticketId} has already been redeemed! ",
+                                            "Warning: Ticket redeemed by ${ticketModel.redeemedBy} ${AppUtils.getTimeAgo(ticketModel.redeemedAt!!)}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
