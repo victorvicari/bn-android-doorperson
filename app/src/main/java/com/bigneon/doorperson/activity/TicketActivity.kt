@@ -13,6 +13,8 @@ import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.rest.model.TicketModel
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.ConnectionDialog
@@ -57,6 +59,8 @@ class TicketActivity : AppCompatActivity() {
         ticketId = intent.getStringExtra("ticketId")
         eventId = intent.getStringExtra("eventId")
         val redeemKey = intent.getStringExtra("redeemKey")
+        val redeemedBy = intent.getStringExtra("redeemedBy")
+        val redeemedAt = intent.getStringExtra("redeemedAt")
         searchGuestText = intent.getStringExtra("searchGuestText")
         val firstName = intent.getStringExtra("firstName")
         val lastName = intent.getStringExtra("lastName")
@@ -139,14 +143,13 @@ class TicketActivity : AppCompatActivity() {
         }
 
         fun completeCheckIn() {
-            when (TicketDataHandler.completeCheckIn(
-                getContext(),
-                eventId!!,
-                ticketId!!,
-                redeemKey,
-                firstName,
-                lastName
-            )) {
+            val ticket = TicketModel()
+            ticket.eventId = eventId!!
+            ticket.ticketId = ticketId!!
+            ticket.redeemKey = redeemKey!!
+            ticket.firstName = firstName!!
+            ticket.lastName = lastName!!
+            when (TicketDataHandler.completeCheckIn(getContext(), ticket)) {
                 TicketDataHandler.TicketState.REDEEMED -> {
                     status = statusRedeemed
                     scanning_ticket_layout.redeemed_status?.visibility = View.VISIBLE
@@ -184,10 +187,17 @@ class TicketActivity : AppCompatActivity() {
                     scanning_ticket_layout.complete_check_in?.visibility = View.GONE
                     scanning_ticket_layout.duplicate_status?.visibility = View.VISIBLE
 
+                    val intent = Intent(getContext(), DuplicateTicketCheckinActivity::class.java)
+                    intent.putExtra("ticketId", ticketId)
+                    intent.putExtra("lastAndFirstName", "${ticket.lastName!!}, ${ticket.firstName!!}")
+                    intent.putExtra("redeemedBy", ticket.redeemedBy)
+                    intent.putExtra("redeemedAt", ticket.redeemedAt)
+                    startActivity(intent)
+
                     Snackbar
                         .make(
                             scanning_ticket_layout,
-                            "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
+                            "Warning: Ticket redeemed by $redeemedBy ${AppUtils.getTimeAgo(redeemedAt!!)}",
                             Snackbar.LENGTH_LONG
                         )
                         .setDuration(5000).show()

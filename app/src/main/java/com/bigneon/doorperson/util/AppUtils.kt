@@ -8,6 +8,7 @@ import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -40,6 +41,41 @@ class AppUtils {
             dateFormat.timeZone = TimeZone.getTimeZone("CET")
             val date = Date()
             return dateFormat.format(date)
+        }
+
+        fun getTimeAgo(redeemedAt: String): String {
+            val formatLocal = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            val formatUTC = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            formatUTC.timeZone = TimeZone.getTimeZone("UTC")
+
+            val redeemedDate = formatLocal.parse(redeemedAt)
+            val nowDate = formatLocal.parse(formatUTC.format(Date()))
+            val diffInMilliseconds = abs(nowDate.time - redeemedDate.time)
+
+            val seconds = diffInMilliseconds / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+
+            var showBegun = false
+            val redeemedAtBuilder = StringBuilder()
+            if (days > 0) {
+                redeemedAtBuilder.append("$days d ")
+                showBegun = true
+            }
+            if (hours % 24 > 0 || showBegun) {
+                redeemedAtBuilder.append("${hours % 24}h ")
+                showBegun = true
+            }
+            if (minutes % 60 > 0 || showBegun) {
+                redeemedAtBuilder.append("${minutes % 60}m ")
+                showBegun = true
+            }
+            if (seconds % 60 > 0 || showBegun) {
+                redeemedAtBuilder.append("${seconds % 60}s ")
+            }
+            redeemedAtBuilder.append("ago")
+            return redeemedAtBuilder.toString()
         }
 
         fun checkLogged() {

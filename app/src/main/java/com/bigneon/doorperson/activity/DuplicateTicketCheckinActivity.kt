@@ -13,8 +13,16 @@ class DuplicateTicketCheckinActivity : AppCompatActivity() {
 
         val ticketId = intent.getStringExtra("ticketId") ?: "UNKNOWN"
         val lastAndFirstName = intent.getStringExtra("lastAndFirstName") ?: ""
+        val redeemedBy = intent.getStringExtra("redeemedBy") ?: ""
+        val redeemedAt = intent.getStringExtra("redeemedAt") ?: ""
 
-        duplicate_ticket_msg.text = getString(R.string.duplicate_ticket_msg, "#" + ticketId.takeLast(8), lastAndFirstName)
+        duplicate_ticket_msg.text = getString(
+            R.string.duplicate_ticket_msg,
+            "#" + ticketId.takeLast(8),
+            lastAndFirstName,
+            redeemedBy,
+            redeemedAt
+        )
         duplicate_ticket_go_back.setOnClickListener {
             finish()
         }

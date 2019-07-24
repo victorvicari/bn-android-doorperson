@@ -17,10 +17,10 @@ import android.view.View
 import android.widget.TextView.BufferType
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
-import com.bigneon.doorperson.config.AppConstants.Companion.DATE_FORMAT
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.ConnectionDialog
@@ -31,9 +31,6 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_scan_tickets.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.math.abs
 
 
 class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
@@ -200,6 +197,8 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         intent.putExtra("ticketId", ticket.ticketId)
                         intent.putExtra("eventId", ticket.eventId)
                         intent.putExtra("redeemKey", ticket.redeemKey)
+                        intent.putExtra("redeemedBy", ticket.redeemedBy)
+                        intent.putExtra("redeemedAt", ticket.redeemedAt)
                         intent.putExtra("searchGuestText", searchGuestText)
                         intent.putExtra("firstName", ticket.firstName)
                         intent.putExtra("lastName", ticket.lastName)
@@ -208,14 +207,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         intent.putExtra("status", ticket.status)
                         startActivity(intent)
                     } else {
-                        val ticketState = TicketDataHandler.completeCheckIn(
-                            getContext(),
-                            eventId!!,
-                            ticketId,
-                            ticket.redeemKey!!,
-                            ticket.firstName!!,
-                            ticket.lastName!!
-                        )
+                        val ticketState = TicketDataHandler.completeCheckIn(getContext(), ticket)
                         status = ticketState?.name
                         scannedTicketId = ticketId
 
@@ -244,10 +236,17 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                             }
                             TicketDataHandler.TicketState.DUPLICATED -> {
                                 runOnUiThread {
+                                    val intent = Intent(getContext(), DuplicateTicketCheckinActivity::class.java)
+                                    intent.putExtra("ticketId", ticketId)
+                                    intent.putExtra("lastAndFirstName", "${ticket.lastName!!}, ${ticket.firstName!!}")
+                                    intent.putExtra("redeemedBy", ticket.redeemedBy)
+                                    intent.putExtra("redeemedAt", ticket.redeemedAt)
+                                    startActivity(intent)
+
                                     Snackbar
                                         .make(
                                             scan_tickets_layout,
-                                            "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! ",
+                                            "Warning: Ticket redeemed by ${ticket.redeemedBy} ${AppUtils.getTimeAgo(ticket.redeemedAt!!)}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
@@ -302,38 +301,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
 
         var redeemedAt = ""
         if (ticket?.redeemedAt != null) {
-            val formatLocal = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
-            val formatUTC = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
-            formatUTC.timeZone = TimeZone.getTimeZone("UTC")
-
-            val redeemedDate = formatLocal.parse(ticket.redeemedAt)
-            val nowDate = formatLocal.parse(formatUTC.format(Date()))
-            val diffInMilliseconds = abs(nowDate.time - redeemedDate.time)
-
-            val seconds = diffInMilliseconds / 1000
-            val minutes = seconds / 60
-            val hours = minutes / 60
-            val days = hours / 24
-
-            var showBegun = false
-            val redeemedAtBuilder = StringBuilder()
-            if (days > 0) {
-                redeemedAtBuilder.append("$days d ")
-                showBegun = true
-            }
-            if (hours % 24 > 0 || showBegun) {
-                redeemedAtBuilder.append("${hours % 24}h ")
-                showBegun = true
-            }
-            if (minutes % 60 > 0 || showBegun) {
-                redeemedAtBuilder.append("${minutes % 60}m ")
-                showBegun = true
-            }
-            if (seconds % 60 > 0 || showBegun) {
-                redeemedAtBuilder.append("${seconds % 60}s ")
-            }
-            redeemedAtBuilder.append("ago")
-            redeemedAt = redeemedAtBuilder.toString()
+            redeemedAt = AppUtils.getTimeAgo(ticket.redeemedAt!!)
         }
         pill_scanned_time.text = redeemedAt
 
