@@ -24,14 +24,14 @@ import kotlinx.android.synthetic.main.activity_scanning_event.*
 import kotlinx.android.synthetic.main.content_scanning_event.*
 
 class ScanningEventActivity : AppCompatActivity() {
-    private var eventId: String? = null
+    private var eventId = ""
     private var eventDataHandler: EventDataHandler? = null
     private var searchGuestText: String = ""
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
-                redeemCheckedTickets(eventId!!)
+                redeemCheckedTickets(eventId)
                 no_internet_toolbar_icon.visibility = View.GONE
             }
 
@@ -52,8 +52,8 @@ class ScanningEventActivity : AppCompatActivity() {
 
         checkLogged()
 
-        eventId = intent.getStringExtra("eventId") ?: ""
-        storeTickets(eventId!!) // download sync (create/update tickets)
+        eventId = intent.getStringExtra("eventId")
+        storeTickets(eventId) // download sync (create/update tickets)
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
 
@@ -87,9 +87,10 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     private fun getEventSummary() {
-        val event = eventDataHandler?.getEventByID(getContext(), eventId!!)
-        val redeemedTicketNumberForEvent = TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId!!)
-        val allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId!!)
+        val event = eventDataHandler?.getEventByID(getContext(), eventId)
+        val redeemedTicketNumberForEvent = TicketDataHandler.getRedeemedTicketNumberForEvent(getContext(), eventId)
+        val allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId)
+        val checkedTicketNumberForEvent = TicketDataHandler.getCheckedTicketNumberForEvent(eventId)
 
         if (event != null && redeemedTicketNumberForEvent != null && allTicketNumberForEvent != null) {
             scanning_event_name.text = event.name ?: ""
@@ -100,7 +101,7 @@ class ScanningEventActivity : AppCompatActivity() {
             )
             number_of_checked.text = getString(
                 R.string._1_d_checked,
-                TicketDataHandler.getCheckedTicketNumberForEvent(eventId!!)
+                checkedTicketNumberForEvent
             )
         } else {
             object : ConnectionDialog() {

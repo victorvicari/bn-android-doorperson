@@ -15,7 +15,6 @@ import com.bigneon.doorperson.rest.model.TicketModel
  ****************************************************/
 class StoreTicketsService : IntentService("StoreTicketsService") {
     override fun onHandleIntent(intent: Intent?) {
-        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LOWEST)
         val eventId = intent?.getStringExtra("eventId") ?: return
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken != null) {

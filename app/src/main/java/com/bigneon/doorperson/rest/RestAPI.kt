@@ -2,9 +2,7 @@ package com.bigneon.doorperson.rest
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import com.bigneon.doorperson.activity.DuplicateTicketCheckinActivity
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.AppConstants.Companion.BASE_URL
 import com.bigneon.doorperson.config.SharedPrefs
@@ -166,25 +164,6 @@ class RestAPI private constructor() {
             }
         }
 
-//        fun getScannableEvents(accessToken: String, setEvents: (ArrayList<EventModel>?) -> Unit) {
-//            val getScannableEventsCall = client().getScannableEvents(accessToken)
-//            val getScannableEventsCallback = object : Callback<EventsResponse> {
-//                override fun onResponse(call: Call<EventsResponse>, response: Response<EventsResponse>) {
-//                    if (response.body() != null) {
-//                        setEvents(response.body()!!.data)
-//                    } else {
-//                        Log.e(TAG, "Getting scannable events failed")
-//                    }
-//                }
-//
-//                override fun onFailure(call: Call<EventsResponse>, t: Throwable) {
-//                    Log.e(TAG, "Getting scannable events failed")
-//                }
-//            }
-//
-//            getScannableEventsCall.enqueue(getScannableEventsCallback)
-//        }
-
         // Synchronous call
         fun getScannableEvents(accessToken: String): ArrayList<EventModel>? {
             val getScannableEventsCall = client().getScannableEvents(accessToken)
@@ -232,51 +211,11 @@ class RestAPI private constructor() {
             return getTicketsForEventCall.execute().body()?.data
         }
 
-//        fun getTotalNumberOfTicketsForEvent(
-//            accessToken: String,
-//            eventId: String,
-//            setTotalNumberOfTickets: (Int?) -> Unit
-//        ) {
-//            val getTicketsForEventCall =
-//                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0, null)
-//            val getTicketsForEventCallback = object : Callback<TicketsResponse> {
-//                override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
-//                    if (response.body() != null) {
-//                        setTotalNumberOfTickets(response.body()?.paging?.total)
-//                    } else {
-//                        Log.e(TAG, "Getting total number of tickets for event $eventId failed")
-//                    }
-//                }
-//
-//                override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
-//                    setTotalNumberOfTickets(-1)
-//                    Log.e(TAG, "Getting total number of tickets for event $eventId failed")
-//                }
-//            }
-//
-//            getTicketsForEventCall.enqueue(getTicketsForEventCallback)
-//        }
-
-        // Synchronous call
-//        fun getTotalNumberOfTicketsForEvent(
-//            accessToken: String,
-//            eventId: String
-//        ): Int? {
-//            val getTicketsForEventCall =
-//                client().getTicketsForEvent(accessToken, eventId, MIN_TIMESTAMP, 1, 0, null)
-//
-//            return getTicketsForEventCall.execute().body()?.paging?.total
-//        }
-
         fun redeemTicketForEvent(
             accessToken: String,
             eventId: String,
             ticketId: String,
-            firstName: String,
-            lastName: String,
             redeemKey: String,
-            redeemedBy: String,
-            redeemedAt: String,
             redeemTicketResult: ((isDuplicateTicket: Boolean) -> Unit)?
         ) {
             try {
@@ -314,12 +253,8 @@ class RestAPI private constructor() {
             accessToken: String,
             eventId: String,
             ticketId: String,
-            firstName: String?,
-            lastName: String?,
-            redeemKey: String,
-            redeemedBy: String,
-            redeemedAt: String
-            ): TicketModel? {
+            redeemKey: String
+        ): TicketModel? {
             try {
                 val redeemRequest = RedeemRequest()
                 redeemRequest.redeemKey = redeemKey
@@ -344,29 +279,6 @@ class RestAPI private constructor() {
             return null
         }
 
-//        fun getEvent(
-//            accessToken: String,
-//            eventId: String,
-//            getEvent: (EventModel?) -> Unit
-//        ) {
-//            val getEventCall = client().getEvent(accessToken, eventId)
-//
-//            val getEventCallback = object : Callback<EventModel> {
-//                override fun onResponse(call: Call<EventModel>, response: Response<EventModel>) {
-//                    if (response.body() != null) {
-//                        getEvent(response.body())
-//                    } else {
-//                        getEvent(null)
-//                    }
-//                }
-//
-//                override fun onFailure(call: Call<EventModel>, t: Throwable) {
-//                    getEvent(null)
-//                }
-//            }
-//            getEventCall.enqueue(getEventCallback)
-//        }
-
         // Synchronous call
         fun getEvent(
             accessToken: String,
@@ -384,43 +296,6 @@ class RestAPI private constructor() {
             val getEventDashboardCall = client().getEventDashboard(accessToken, eventId)
             return getEventDashboardCall.execute().body()?.event
         }
-
-//        fun getTicket(
-//            accessToken: String,
-//            ticketId: String,
-//            getTicketResult: (isRedeemed: Boolean, ticket: TicketModel?) -> Unit
-//        ) {
-//            try {
-//                val getTicketCall = client().getTicket(accessToken, ticketId)
-//                val getTicketCallback = object : Callback<TicketResponse> {
-//                    override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
-//                        if (response.body() != null) {
-//                            val ticket = response.body()!!.ticket!!
-//                            ticket.userId = response.body()!!.user?.userId ?: ""
-//                            ticket.firstName = response.body()!!.user?.firstName ?: ""
-//                            ticket.lastName = response.body()!!.user?.lastName ?: ""
-//                            ticket.email = response.body()!!.user?.email ?: ""
-//                            ticket.phone = response.body()!!.user?.phone ?: ""
-//                            ticket.profilePicURL = response.body()!!.user?.profilePicURL ?: ""
-//                            ticket.eventId = response.body()!!.event?.id ?: ""
-//                            getTicketResult(true, ticket)
-//                            Log.e(TAG, "Redeem ticket $ticketId succeeded")
-//                        } else {
-//                            getTicketResult(false, null)
-//                            Log.e(TAG, "Redeem ticket $ticketId failed")
-//                        }
-//                    }
-//
-//                    override fun onFailure(call: Call<TicketResponse>, t: Throwable) {
-//                        getTicketResult(false, null)
-//                        Log.e(TAG, "Redeem ticket $ticketId failed")
-//                    }
-//                }
-//                getTicketCall.enqueue(getTicketCallback)
-//            } catch (e: Exception) {
-//                Log.e(TAG, e.message)
-//            }
-//        }
 
         // Synchronous call
         fun getTicket(

@@ -2,7 +2,6 @@ package com.bigneon.doorperson.service
 
 import android.app.IntentService
 import android.content.Intent
-import android.util.Log
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 
@@ -25,10 +24,7 @@ class RedeemCheckedService : IntentService("RedeemCheckedService") {
                     for (ticket in checkedTickets) {
                         fun redeemTicketResult(isDuplicateTicket: Boolean) {
                             if (isDuplicateTicket) {
-                                Log.d(
-                                    TAG,
-                                    "Warning: DUPLICATE TICKET! - Ticket ID: ${ticket.ticketId} has already been redeemed! "
-                                )
+                                ticketsDS.setDuplicateTicket(ticket.ticketId!!)
                             } else {
                                 ticketsDS.setRedeemedTicket(ticket.ticketId!!)
                             }
@@ -37,11 +33,7 @@ class RedeemCheckedService : IntentService("RedeemCheckedService") {
                             accessToken,
                             eventId,
                             ticket.ticketId!!,
-                            ticket.firstName ?: "",
-                            ticket.lastName ?: "",
                             ticket.redeemKey!!,
-                            ticket.redeemedBy!!,
-                            ticket.redeemedAt!!,
                             ::redeemTicketResult
                         )
                     }

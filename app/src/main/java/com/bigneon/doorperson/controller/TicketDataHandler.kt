@@ -139,11 +139,7 @@ class TicketDataHandler {
                                 it,
                                 ticketModel.eventId!!,
                                 ticketModel.ticketId!!,
-                                ticketModel.firstName,
-                                ticketModel.lastName,
-                                ticketModel.redeemKey!!,
-                                ticketModel.redeemedBy ?: "",
-                                ticketModel.redeemedAt ?: ""
+                                ticketModel.redeemKey!!
                             )
                         }
                         ticketState = if (localTicketModel == null) {
