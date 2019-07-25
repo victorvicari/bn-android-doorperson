@@ -11,6 +11,7 @@ import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.service.RedeemCheckedService
 import com.bigneon.doorperson.service.StoreTicketsService
+import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import org.jetbrains.anko.doAsync
@@ -127,44 +128,57 @@ class TicketDataHandler {
             }
         }
 
-        fun completeCheckIn(
-            context: Context,
-            eventId: String,
-            ticketId: String,
-            redeemKey: String,
-            firstName: String,
-            lastName: String
-        ): TicketState? {
+        fun completeCheckIn(context: Context, ticketModel: TicketModel): TicketState? {
             var ticketState: TicketState? = null
             when {
                 isNetworkAvailable(context) -> {
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
-                        val isDuplicateTicket = accessToken?.let {
+                        val localTicketModel = accessToken?.let {
                             RestAPI.redeemTicketForEvent(
                                 it,
-                                eventId,
-                                ticketId,
-                                firstName,
-                                lastName,
-                                redeemKey
+                                ticketModel.eventId!!,
+                                ticketModel.ticketId!!,
+                                ticketModel.firstName,
+                                ticketModel.lastName,
+                                ticketModel.redeemKey!!,
+                                ticketModel.redeemedBy ?: "",
+                                ticketModel.redeemedAt ?: ""
                             )
                         }
-                        ticketState = if (isDuplicateTicket == true) {
+                        ticketState = if (localTicketModel == null) {
+                            var tickets: ArrayList<TicketModel>? = null
+                            doAsync {
+                                RestAPI.getTicketsForEvent(
+                                    accessToken!!,
+                                    ticketModel.eventId!!,
+                                    AppConstants.MIN_TIMESTAMP,
+                                    AppConstants.PAGE_LIMIT,
+                                    ticketModel.ticketId!!,
+                                    null
+                                )?.let { tickets = it }
+                            }.get() // get() is important to wait until doAsync is finished
+                            val ticket = tickets?.get(0)
                             Log.d(
                                 TAG,
-                                "Warning: DUPLICATE TICKET! - Ticket ID: $ticketId has already been redeemed! "
+                                "Warning: Ticket redeemed by ${ticket?.redeemedBy} ${AppUtils.getTimeAgo(
+                                    ticket?.redeemedAt!!
+                                )}"
                             )
-                            ticketsDS.setDuplicateTicket(ticketId)
+                            ticketsDS.setDuplicateTicket(ticketModel.ticketId!!)
+
+                            ticketModel.redeemedBy = ticket.redeemedBy
+                            ticketModel.redeemedAt = ticket.redeemedAt
+
                             TicketState.DUPLICATED
                         } else {
-                            Log.d(TAG, "Ticket ID: $ticketId has been redeemed! ")
+                            Log.d(TAG, "Ticket ID: ${ticketModel.ticketId} has been redeemed! ")
                             TicketState.REDEEMED
                         }
                     }.get() // get() is important to wait until doAsync is finished
                 }
                 isOfflineModeEnabled() -> {
-                    ticketsDS.setCheckedTicket(ticketId)
+                    ticketsDS.setCheckedTicket(ticketModel.ticketId!!)
                     ticketState = TicketState.CHECKED
                 }
                 else -> {

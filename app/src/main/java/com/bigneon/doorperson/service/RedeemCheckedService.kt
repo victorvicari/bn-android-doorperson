@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
-import org.jetbrains.anko.doAsync
 
 /**
  * An [IntentService] subclass for handling asynchronous task requests in
@@ -24,27 +23,27 @@ class RedeemCheckedService : IntentService("RedeemCheckedService") {
                 val checkedTickets = ticketsDS.getCheckedTicketsForEvent(eventId)
                 if (checkedTickets != null) {
                     for (ticket in checkedTickets) {
-                        doAsync {
-                            val isDuplicateTicket = accessToken.let {
-                                RestAPI.redeemTicketForEvent(
-                                    it,
-                                    eventId,
-                                    ticket.ticketId!!,
-                                    ticket.firstName ?: "",
-                                    ticket.lastName ?: "",
-                                    ticket.redeemKey!!
-                                )
-                            }
-                            if (isDuplicateTicket!!) {
+                        fun redeemTicketResult(isDuplicateTicket: Boolean) {
+                            if (isDuplicateTicket) {
                                 Log.d(
                                     TAG,
                                     "Warning: DUPLICATE TICKET! - Ticket ID: ${ticket.ticketId} has already been redeemed! "
                                 )
-                                ticketsDS.setDuplicateTicket(ticket.ticketId!!)
                             } else {
                                 ticketsDS.setRedeemedTicket(ticket.ticketId!!)
                             }
-                        }.get()
+                        }
+                        RestAPI.redeemTicketForEvent(
+                            accessToken,
+                            eventId,
+                            ticket.ticketId!!,
+                            ticket.firstName ?: "",
+                            ticket.lastName ?: "",
+                            ticket.redeemKey!!,
+                            ticket.redeemedBy!!,
+                            ticket.redeemedAt!!,
+                            ::redeemTicketResult
+                        )
                     }
                 }
             }
