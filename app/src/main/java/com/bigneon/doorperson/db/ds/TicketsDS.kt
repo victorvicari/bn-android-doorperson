@@ -246,17 +246,17 @@ class TicketsDS {
 //        return null
 //    }
 
-//    fun setDuplicateTicket(ticketId: String): TicketModel? {
-//        val values = ContentValues()
-//        values.put(STATUS, "DUPLICATE")
-//        SQLiteHelper.getDB().update(
-//            TABLE_TICKETS,
-//            values,
-//            "$TICKET_ID = '$ticketId'",
-//            null
-//        )
-//        return getTicket(ticketId)
-//    }
+    fun setDuplicateTicket(ticketId: String): TicketModel? {
+        val values = ContentValues()
+        values.put(STATUS, "DUPLICATE")
+        SQLiteHelper.getDB().update(
+            TABLE_TICKETS,
+            values,
+            "$TICKET_ID = '$ticketId'",
+            null
+        )
+        return getTicket(ticketId)
+    }
 
     fun getTicket(ticketId: String): TicketModel? {
         SQLiteHelper.getDB().query(

@@ -188,8 +188,38 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     if (ticket.ticketId == null) {
                         Snackbar
                             .make(scan_tickets_layout, "QR Code isn't valid!", Snackbar.LENGTH_LONG)
-                            .setDuration(5000).show()
+                            .setDuration(3000).show()
                         mScannerView?.resumeCameraPreview(this)
+
+                        zxscan_error.visibility = View.VISIBLE
+                        handler.postDelayed({
+                            zxscan_error.visibility = View.GONE
+                        }, 3000)
+
+                        return
+                    }
+                    if (ticket.ticketId == SharedPrefs.getProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId)) {
+                        Snackbar
+                            .make(scan_tickets_layout, "You just scanned the ticket again!", Snackbar.LENGTH_LONG)
+                            .setDuration(3000).show()
+
+                        zxscan_error.visibility = View.VISIBLE
+                        handler.postDelayed({
+                            zxscan_error.visibility = View.GONE
+                        }, 3000)
+
+                        return
+                    }
+                    if (ticket.eventId != eventId) {
+                        Snackbar
+                            .make(scan_tickets_layout, "The ticket isn't belong to the current event!", Snackbar.LENGTH_LONG)
+                            .setDuration(3000).show()
+
+                        zxscan_error.visibility = View.VISIBLE
+                        handler.postDelayed({
+                            zxscan_error.visibility = View.GONE
+                        }, 3000)
+
                         return
                     }
                     if (checkInMode == AppConstants.CHECK_IN_MODE_MANUAL) {
@@ -220,7 +250,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             "Redeemed ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
                                             Snackbar.LENGTH_LONG
                                         )
-                                        .setDuration(5000).show()
+                                        .setDuration(3000).show()
+                                    zxscan_ok.visibility = View.VISIBLE
+                                    handler.postDelayed({
+                                        zxscan_ok.visibility = View.GONE
+                                    }, 3000)
                                 }
                             }
                             TicketDataHandler.TicketState.CHECKED -> {
@@ -231,7 +265,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             "Checked in ${"${ticket.lastName!!}, ${ticket.firstName!!}"}",
                                             Snackbar.LENGTH_LONG
                                         )
-                                        .setDuration(5000).show()
+                                        .setDuration(3000).show()
+                                    zxscan_ok.visibility = View.VISIBLE
+                                    handler.postDelayed({
+                                        zxscan_ok.visibility = View.GONE
+                                    }, 3000)
                                 }
                             }
                             TicketDataHandler.TicketState.DUPLICATED -> {
@@ -250,6 +288,10 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
+                                    zxscan_error.visibility = View.VISIBLE
+                                    handler.postDelayed({
+                                        zxscan_error.visibility = View.GONE
+                                    }, 3000)
                                 }
                             }
                             TicketDataHandler.TicketState.ERROR -> {
@@ -267,6 +309,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                 }.showDialog(getContext())
                             }
                         }
+
                         SharedPrefs.setProperty(AppConstants.LAST_CHECKED_TICKET_ID + eventId, ticketId)
                     }
                 }

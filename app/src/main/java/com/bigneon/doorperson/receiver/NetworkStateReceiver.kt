@@ -28,7 +28,6 @@ class NetworkStateReceiver : BroadcastReceiver() {
         else
             false
 
-
         for (listener in this.listeners)
             if (connected)
                 listener.networkAvailable()
