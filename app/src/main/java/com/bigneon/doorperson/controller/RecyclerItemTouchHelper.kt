@@ -144,7 +144,10 @@ class RecyclerItemTouchHelper :
                                 TicketDataHandler.TicketState.DUPLICATED -> {
                                     val intent = Intent(context, DuplicateTicketCheckinActivity::class.java)
                                     intent.putExtra("ticketId", ticketModel.ticketId)
-                                    intent.putExtra("lastAndFirstName", "${ticketModel.lastName!!}, ${ticketModel.firstName!!}")
+                                    intent.putExtra(
+                                        "lastAndFirstName",
+                                        "${ticketModel.lastName!!}, ${ticketModel.firstName!!}"
+                                    )
                                     intent.putExtra("redeemedBy", ticketModel.redeemedBy)
                                     intent.putExtra("redeemedAt", ticketModel.redeemedAt)
                                     context?.startActivity(intent)
@@ -152,7 +155,9 @@ class RecyclerItemTouchHelper :
                                     Snackbar
                                         .make(
                                             viewHolder.itemView,
-                                            "Warning: Ticket redeemed by ${ticketModel.redeemedBy} ${AppUtils.getTimeAgo(ticketModel.redeemedAt!!)}",
+                                            "Warning: Ticket redeemed by ${ticketModel.redeemedBy} ${AppUtils.getTimeAgo(
+                                                ticketModel.redeemedAt!!
+                                            )}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()

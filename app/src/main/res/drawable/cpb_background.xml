@@ -6,6 +6,9 @@
             android:width="@dimen/cpb_stroke_width"
             android:color="@android:color/holo_red_light"/>
     <corners android:radius="10dp"/>
-    <gradient android:angle="0" android:startColor="@android:color/holo_blue_dark" android:endColor="@color/colorAccent" />
+    <gradient
+            android:angle="0"
+            android:startColor="@android:color/holo_blue_dark"
+            android:endColor="@color/colorAccent"/>
 </shape>
 

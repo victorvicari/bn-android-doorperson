@@ -21,7 +21,8 @@ class NetworkUtils {
         private var networkStateReceiver = NetworkStateReceiver()
         private var registeredListeners: ArrayList<NetworkStateReceiver.NetworkStateReceiverListener> = ArrayList()
 
-        fun addNetworkStateListener(context: Context,
+        fun addNetworkStateListener(
+            context: Context,
             networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
         ) {
             if (!registeredListeners.contains(networkStateReceiverListener)) {
@@ -34,8 +35,9 @@ class NetworkUtils {
             }
         }
 
-        fun removeNetworkStateListener(context: Context,
-                                       networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
+        fun removeNetworkStateListener(
+            context: Context,
+            networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener
         ) {
             if (registeredListeners.contains(networkStateReceiverListener)) {
                 context.unregisterReceiver(networkStateReceiver)

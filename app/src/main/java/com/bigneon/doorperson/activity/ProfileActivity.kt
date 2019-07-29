@@ -46,16 +46,20 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(Intent(getContext(), LoginActivity::class.java))
         }
 
-        offline_mode_label.text = if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
-        offline_mode_button_label.text = if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
+        offline_mode_label.text =
+            if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
+        offline_mode_button_label.text =
+            if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
         offline_mode_button.setOnClickListener {
-            if(isOfflineModeEnabled()) {
+            if (isOfflineModeEnabled()) {
                 disableOfflineMode()
             } else {
                 enableOfflineMode()
             }
-            offline_mode_label.text = if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
-            offline_mode_button_label.text = if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
+            offline_mode_label.text =
+                if (isOfflineModeEnabled()) getString(R.string.offline_mode_enabled) else getString(R.string.offline_mode_disabled)
+            offline_mode_button_label.text =
+                if (isOfflineModeEnabled()) getString(R.string.disable_offline_mode) else getString(R.string.enable_offline_mode)
         }
     }
 

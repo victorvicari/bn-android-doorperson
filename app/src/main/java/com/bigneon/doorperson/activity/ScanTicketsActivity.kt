@@ -212,7 +212,11 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                     }
                     if (ticket.eventId != eventId) {
                         Snackbar
-                            .make(scan_tickets_layout, "The ticket isn't belong to the current event!", Snackbar.LENGTH_LONG)
+                            .make(
+                                scan_tickets_layout,
+                                "The ticket isn't belong to the current event!",
+                                Snackbar.LENGTH_LONG
+                            )
                             .setDuration(3000).show()
 
                         zxscan_error.visibility = View.VISIBLE
@@ -284,7 +288,9 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                                     Snackbar
                                         .make(
                                             scan_tickets_layout,
-                                            "Warning: Ticket redeemed by ${ticket.redeemedBy} ${AppUtils.getTimeAgo(ticket.redeemedAt!!)}",
+                                            "Warning: Ticket redeemed by ${ticket.redeemedBy} ${AppUtils.getTimeAgo(
+                                                ticket.redeemedAt!!
+                                            )}",
                                             Snackbar.LENGTH_LONG
                                         )
                                         .setDuration(5000).show()
