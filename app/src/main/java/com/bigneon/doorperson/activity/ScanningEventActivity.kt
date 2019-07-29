@@ -10,7 +10,8 @@ import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
-import com.bigneon.doorperson.controller.TicketDataHandler.Companion.redeemCheckedTickets
+import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshTicketsListener
+import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
@@ -31,12 +32,23 @@ class ScanningEventActivity : AppCompatActivity() {
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
-                redeemCheckedTickets(eventId)
+//                redeemCheckedTickets()
                 no_internet_toolbar_icon.visibility = View.GONE
             }
 
             override fun networkUnavailable() {
                 no_internet_toolbar_icon.visibility = View.VISIBLE
+            }
+        }
+
+    private var refreshTicketsListener: TicketDataHandler.RefreshTickets =
+        object : TicketDataHandler.RefreshTickets {
+            override fun updateTicket(ticketId: String, status: String) {
+
+            }
+
+            override fun refreshTicketList() {
+                getEventSummary()
             }
         }
 
@@ -123,11 +135,13 @@ class ScanningEventActivity : AppCompatActivity() {
 
     override fun onStart() {
         addNetworkStateListener(this, networkStateReceiverListener)
+        addRefreshTicketsListener(refreshTicketsListener)
         super.onStart()
     }
 
     override fun onStop() {
         removeNetworkStateListener(this, networkStateReceiverListener)
+        removeRefreshTicketsListener(refreshTicketsListener)
         super.onStop()
     }
 

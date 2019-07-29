@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import com.bigneon.doorperson.BigNeonApplication
+import com.bigneon.doorperson.service.RedeemCheckedService
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -15,6 +17,7 @@ class NetworkStateReceiver : BroadcastReceiver() {
 
     companion object {
         private var connected: Boolean = false
+        private var lastConnectionState: Boolean = false
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -27,6 +30,12 @@ class NetworkStateReceiver : BroadcastReceiver() {
                     manager.activeNetworkInfo.type == ConnectivityManager.TYPE_MOBILE
         else
             false
+
+        if (connected && !lastConnectionState) {
+            context.startService(Intent(BigNeonApplication.context, RedeemCheckedService::class.java))
+        }
+        lastConnectionState = connected
+
 
         for (listener in this.listeners)
             if (connected)

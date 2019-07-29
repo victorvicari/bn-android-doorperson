@@ -34,7 +34,7 @@ class TicketActivity : AppCompatActivity() {
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
-                TicketDataHandler.redeemCheckedTickets(eventId!!)
+//                TicketDataHandler.redeemCheckedTickets()
                 no_internet_toolbar_icon.visibility = View.GONE
             }
 

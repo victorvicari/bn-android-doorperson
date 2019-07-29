@@ -38,7 +38,8 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                     RestAPI.getTicketsForEvent(
                         accessToken,
                         eventId,
-                        syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false),
+//                        syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false),
+                        AppConstants.MIN_TIMESTAMP, // TODO - Remove this line and uncomment upper one once notification is implemented
                         AppConstants.SYNC_PAGE_LIMIT,
                         page,
                         ::setTickets

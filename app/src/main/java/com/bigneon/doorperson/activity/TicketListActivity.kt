@@ -19,12 +19,17 @@ import com.bigneon.doorperson.adapter.TicketListAdapter
 import com.bigneon.doorperson.adapter.addOnItemClickListener
 import com.bigneon.doorperson.controller.RecyclerItemTouchHelper
 import com.bigneon.doorperson.controller.TicketDataHandler
+import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshTicketsListener
+import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.listener.PaginationScrollListener
+import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.rest.model.TicketModel
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.doorperson.util.ConnectionDialog
 import com.bigneon.doorperson.util.NetworkUtils
+import com.bigneon.doorperson.util.NetworkUtils.Companion.addNetworkStateListener
+import com.bigneon.doorperson.util.NetworkUtils.Companion.removeNetworkStateListener
 import com.bigneon.doorperson.util.NetworkUtils.Companion.setWiFiEnabled
 import kotlinx.android.synthetic.main.activity_ticket_list.*
 import kotlinx.android.synthetic.main.content_ticket_list.*
@@ -48,6 +53,32 @@ class TicketListActivity : AppCompatActivity() {
     private var isLastPage = false
     private var isLoading = false
     private var itemCount = 0
+
+    private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
+        object : NetworkStateReceiver.NetworkStateReceiverListener {
+            override fun networkAvailable() {
+            }
+
+            override fun networkUnavailable() {
+            }
+        }
+
+    private var refreshTicketsListener: TicketDataHandler.RefreshTickets =
+        object : TicketDataHandler.RefreshTickets {
+            override fun updateTicket(ticketId: String, status: String) {
+                val ticket = recyclerItemTouchHelper.ticketList!!
+                    .stream()
+                    .filter { t -> t.ticketId == ticketId }
+                    .findAny().orElse(null)
+                if (ticket != null) {
+                    ticket.status = status
+                }
+            }
+
+            override fun refreshTicketList() {
+                adaptTicketList()
+            }
+        }
 
     companion object {
         val recyclerItemTouchHelper: RecyclerItemTouchHelper = RecyclerItemTouchHelper()
@@ -95,6 +126,7 @@ class TicketListActivity : AppCompatActivity() {
 
         ticket_list_view.addOnScrollListener(object : PaginationScrollListener(mLayoutManager!!) {
             override fun loadMoreItems() {
+                // Starting loading process
                 isLoading = true
                 loadNewPage(eventId!!, ++currentPage)
             }
@@ -209,7 +241,7 @@ class TicketListActivity : AppCompatActivity() {
         } else {
             val ticket = recyclerItemTouchHelper.ticketList!!
                 .stream()
-                .filter{ t -> t.ticketId == ticketId }
+                .filter { t -> t.ticketId == ticketId }
                 .findAny().orElse(null)
             if (ticket != null)
                 ticket.status = status ?: ""
@@ -217,18 +249,24 @@ class TicketListActivity : AppCompatActivity() {
 
         mAdapter?.list = recyclerItemTouchHelper.ticketList
 
+        // Removing placeholder it there is any tickets on the list
         if (mAdapter?.list?.size!! > 0) {
             no_guests_found_placeholder.visibility = View.GONE
             ticket_list_view.visibility = View.VISIBLE
         }
 
+        // Setting up previous scroll position
         if (AppUtils.ticketListItemPosition >= 0) {
             (ticket_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                 AppUtils.ticketListItemPosition,
                 AppUtils.ticketListItemOffset
             )
         }
+
+        // Finishing loading process
         isLoading = false
+
+        // Removing swipe to refresh progress bar
         tickets_swipe_refresh_layout.isRefreshing = false
     }
 
@@ -252,6 +290,18 @@ class TicketListActivity : AppCompatActivity() {
         adaptTicketList()
         if (items!!.isEmpty())
             isLastPage = true
+    }
+
+    override fun onStart() {
+        addNetworkStateListener(this, networkStateReceiverListener)
+        addRefreshTicketsListener(refreshTicketsListener)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        removeNetworkStateListener(this, networkStateReceiverListener)
+        removeRefreshTicketsListener(refreshTicketsListener)
+        super.onStop()
     }
 
     override fun onBackPressed() {
