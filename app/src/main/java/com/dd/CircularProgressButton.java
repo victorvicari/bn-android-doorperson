@@ -523,7 +523,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
     /**
      * Set the View's background. Masks the API changes made in Jelly Bean.
      */
-    @SuppressWarnings("deprecation")
     public void setBackgroundCompat(Drawable drawable) {
         setBackground(drawable);
     }

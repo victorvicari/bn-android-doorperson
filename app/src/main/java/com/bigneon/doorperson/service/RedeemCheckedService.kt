@@ -18,8 +18,8 @@ import com.bigneon.doorperson.rest.model.TicketModel
  * helper methods.
  */
 class RedeemCheckedService : IntentService("RedeemCheckedService") {
-    var eventsDS = EventsDS()
-    var ticketsDS = TicketsDS()
+    private var eventsDS = EventsDS()
+    private var ticketsDS = TicketsDS()
     override fun onHandleIntent(intent: Intent?) {
         val allEvents = eventsDS.getAllEvents() ?: return
         for (event in allEvents) {

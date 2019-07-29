@@ -32,6 +32,7 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                             loadPageOfTickets(page + 1)
                         } else {
                             syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false)
+                            // TODO - Implement finish loading notification
                         }
                     }
 

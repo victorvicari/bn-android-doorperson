@@ -97,7 +97,7 @@ class TicketListActivity : AppCompatActivity() {
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        if (intent.extras.containsKey("searchGuestText")) {
+        if (intent.extras!!.containsKey("searchGuestText")) {
             searchGuestText = intent.getStringExtra("searchGuestText")
             search_guest.setText(searchGuestText)
             intent.removeExtra("searchGuestText")
