@@ -1,18 +1,22 @@
 package com.bigneon.doorperson.activity
 
+//import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
+import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
@@ -28,11 +32,11 @@ class ScanningEventActivity : AppCompatActivity() {
     private var eventId = ""
     private var eventDataHandler: EventDataHandler? = null
     private var searchGuestText: String = ""
+    private lateinit var loadingTicketsResultReceiver: LoadingTicketsResultReceiver
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
             override fun networkAvailable() {
-//                redeemCheckedTickets()
                 no_internet_toolbar_icon.visibility = View.GONE
             }
 
@@ -65,7 +69,19 @@ class ScanningEventActivity : AppCompatActivity() {
         checkLogged()
 
         eventId = intent.getStringExtra("eventId")
-        storeTickets(eventId) // download sync (create/update tickets)
+
+        var isLoadingInProgress = "FALSE"
+        if (SharedPrefs.getProperty("isLoadingInProgress$eventId") == "TRUE") {
+            isLoadingInProgress = "TRUE"
+        }
+        if (isLoadingInProgress == "FALSE") {
+            loadingTicketsResultReceiver = LoadingTicketsResultReceiver(
+                Handler(),
+                TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId) ?: 0,
+                loading_progress_bar, loading_text
+            )
+            storeTickets(eventId, loadingTicketsResultReceiver) // download sync (create/update tickets)
+        }
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
 

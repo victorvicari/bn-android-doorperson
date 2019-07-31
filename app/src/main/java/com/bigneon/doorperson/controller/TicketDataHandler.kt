@@ -6,6 +6,7 @@ import android.util.Log
 import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.db.ds.TicketsDS
+import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -117,17 +118,12 @@ class TicketDataHandler {
             return ticketsDS.getCheckedTicketNumberForEvent(eventId)
         }
 
-        fun storeTickets(eventId: String) {
-            val i = Intent(context, StoreTicketsService::class.java)
-            i.putExtra("eventId", eventId)
-            context?.startService(i)
+        fun storeTickets(eventId: String, loadingTicketsResultReceiver: LoadingTicketsResultReceiver) {
+            val intent = Intent(context, StoreTicketsService::class.java)
+            intent.putExtra("eventId", eventId)
+            intent.putExtra("receiver", loadingTicketsResultReceiver)
+            context?.startService(intent)
         }
-
-//        fun redeemCheckedTickets() {
-//            if (isNetworkAvailable(context!!)) {
-//                context?.startService(Intent(context, RedeemCheckedService::class.java))
-//            }
-//        }
 
         fun completeCheckIn(context: Context, ticketModel: TicketModel): TicketState? {
             var ticketState: TicketState? = null
