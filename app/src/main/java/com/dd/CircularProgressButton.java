@@ -49,15 +49,59 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
     private float mCornerRadius;
     private boolean mIndeterminateProgressMode;
     private boolean mConfigurationChanged;
-
-    private enum State {
-        PROGRESS, IDLE, COMPLETE, ERROR
-    }
-
     private int mMaxProgress;
     private int mProgress;
-
     private boolean mMorphingInProgress;
+    private OnAnimationEndListener mErrorStateListener = new OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd() {
+            if (mIconError != 0) {
+                setText(null);
+                setIcon(mIconError);
+            } else {
+                setText(mErrorText);
+            }
+            mMorphingInProgress = false;
+            mState = State.ERROR;
+
+            mStateManager.checkState(CircularProgressButton.this);
+        }
+    };
+    private OnAnimationEndListener mIdleStateListener = new OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd() {
+            removeIcon();
+            setText(mIdleText);
+            mMorphingInProgress = false;
+            mState = State.IDLE;
+
+            mStateManager.checkState(CircularProgressButton.this);
+        }
+    };
+    private OnAnimationEndListener mCompleteStateListener = new OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd() {
+            if (mIconComplete != 0) {
+                setText(null);
+                setIcon(mIconComplete);
+            } else {
+                setText(mCompleteText);
+            }
+            mMorphingInProgress = false;
+            mState = State.COMPLETE;
+
+            mStateManager.checkState(CircularProgressButton.this);
+        }
+    };
+    private OnAnimationEndListener mProgressStateListener = new OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd() {
+            mMorphingInProgress = false;
+            mState = State.PROGRESS;
+
+            mStateManager.checkState(CircularProgressButton.this);
+        }
+    };
 
     public CircularProgressButton(Context context) {
         super(context);
@@ -341,16 +385,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
         animation.start();
     }
 
-    private OnAnimationEndListener mProgressStateListener = new OnAnimationEndListener() {
-        @Override
-        public void onAnimationEnd() {
-            mMorphingInProgress = false;
-            mState = State.PROGRESS;
-
-            mStateManager.checkState(CircularProgressButton.this);
-        }
-    };
-
     private void morphProgressToComplete() {
         MorphingAnimation animation = createProgressMorphing(getHeight(), mCornerRadius, getHeight(), getWidth());
 
@@ -380,22 +414,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
         animation.start();
 
     }
-
-    private OnAnimationEndListener mCompleteStateListener = new OnAnimationEndListener() {
-        @Override
-        public void onAnimationEnd() {
-            if (mIconComplete != 0) {
-                setText(null);
-                setIcon(mIconComplete);
-            } else {
-                setText(mCompleteText);
-            }
-            mMorphingInProgress = false;
-            mState = State.COMPLETE;
-
-            mStateManager.checkState(CircularProgressButton.this);
-        }
-    };
 
     private void morphCompleteToIdle() {
         MorphingAnimation animation = createMorphing();
@@ -427,18 +445,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
 
     }
 
-    private OnAnimationEndListener mIdleStateListener = new OnAnimationEndListener() {
-        @Override
-        public void onAnimationEnd() {
-            removeIcon();
-            setText(mIdleText);
-            mMorphingInProgress = false;
-            mState = State.IDLE;
-
-            mStateManager.checkState(CircularProgressButton.this);
-        }
-    };
-
     private void morphIdleToError() {
         MorphingAnimation animation = createMorphing();
 
@@ -466,22 +472,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
 
         animation.start();
     }
-
-    private OnAnimationEndListener mErrorStateListener = new OnAnimationEndListener() {
-        @Override
-        public void onAnimationEnd() {
-            if (mIconError != 0) {
-                setText(null);
-                setIcon(mIconError);
-            } else {
-                setText(mErrorText);
-            }
-            mMorphingInProgress = false;
-            mState = State.ERROR;
-
-            mStateManager.checkState(CircularProgressButton.this);
-        }
-    };
 
     private void morphProgressToIdle() {
         MorphingAnimation animation = createProgressMorphing(getHeight(), mCornerRadius, getHeight(), getWidth());
@@ -523,9 +513,12 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
     /**
      * Set the View's background. Masks the API changes made in Jelly Bean.
      */
-    @SuppressWarnings("deprecation")
     public void setBackgroundCompat(Drawable drawable) {
         setBackground(drawable);
+    }
+
+    public int getProgress() {
+        return mProgress;
     }
 
     public void setProgress(int progress) {
@@ -566,10 +559,6 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
         }
     }
 
-    public int getProgress() {
-        return mProgress;
-    }
-
     public void setBackgroundColor(int color) {
         background.getGradientDrawable().setColor(color);
     }
@@ -582,20 +571,20 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
         return mIdleText;
     }
 
-    public String getCompleteText() {
-        return mCompleteText;
-    }
-
-    public String getErrorText() {
-        return mErrorText;
-    }
-
     public void setIdleText(String text) {
         mIdleText = text;
     }
 
+    public String getCompleteText() {
+        return mCompleteText;
+    }
+
     public void setCompleteText(String text) {
         mCompleteText = text;
+    }
+
+    public String getErrorText() {
+        return mErrorText;
     }
 
     public void setErrorText(String text) {
@@ -635,9 +624,24 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
         }
     }
 
+    private enum State {
+        PROGRESS, IDLE, COMPLETE, ERROR
+    }
 
     static class SavedState extends BaseSavedState {
 
+        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
         private boolean mIndeterminateProgressMode;
         private boolean mConfigurationChanged;
         private int mProgress;
@@ -660,18 +664,5 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
             out.writeInt(mIndeterminateProgressMode ? 1 : 0);
             out.writeInt(mConfigurationChanged ? 1 : 0);
         }
-
-        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
-
-            @Override
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
     }
 }

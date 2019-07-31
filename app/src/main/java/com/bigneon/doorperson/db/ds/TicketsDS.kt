@@ -331,7 +331,7 @@ class TicketsDS {
             }
             sb.append("$TICKET_ID LIKE '%$word%' OR $FIRST_NAME LIKE '%$word%' OR $LAST_NAME LIKE '%$word%' OR $EMAIL LIKE '%$word%' OR $PHONE LIKE '%$word%' ")
         }
-        if(andAdded) {
+        if (andAdded) {
             sb.append(")")
         }
 

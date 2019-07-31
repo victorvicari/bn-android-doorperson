@@ -80,8 +80,8 @@ class AppUtils {
 
         fun checkLogged() {
             val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN)
-             if (refreshToken.isNullOrEmpty()) {
-                 context?.startActivity(Intent(context, LoginActivity::class.java))
+            if (refreshToken.isNullOrEmpty()) {
+                context?.startActivity(Intent(context, LoginActivity::class.java))
             }
         }
     }

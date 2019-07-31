@@ -10,7 +10,7 @@
             android:id="@+id/login_appbar"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay" />
+            android:theme="@style/AppTheme.AppBarOverlay"/>
 
     <include layout="@layout/content_login"/>
 

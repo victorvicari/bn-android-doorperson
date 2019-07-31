@@ -211,42 +211,42 @@ class RestAPI private constructor() {
             return getTicketsForEventCall.execute().body()?.data
         }
 
-        fun redeemTicketForEvent(
-            accessToken: String,
-            eventId: String,
-            ticketId: String,
-            redeemKey: String,
-            redeemTicketResult: ((isDuplicateTicket: Boolean) -> Unit)?
-        ) {
-            try {
-                val redeemRequest = RedeemRequest()
-                redeemRequest.redeemKey = redeemKey
-                val redeemTicketForEventCall = client()
-                    .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
-                val callbackRedeemTicketForEvent = object : Callback<TicketModel> {
-                    override fun onResponse(call: Call<TicketModel>, response: Response<TicketModel>) {
-                        if (response.body() != null) {
-                            Log.e(TAG, "Redeem ticket for event $eventId succeeded")
-                            redeemTicketResult?.invoke(false)
-                        } else {
-                            if (response.code() == 409) {
-                                redeemTicketResult?.invoke(true)
-                            } else {
-                                redeemTicketResult?.invoke(false)
-                            }
-                        }
-                    }
-
-                    override fun onFailure(call: Call<TicketModel>, t: Throwable) {
-                        Log.e(TAG, "Redeem ticket for event $eventId failed")
-                        redeemTicketResult?.invoke(false)
-                    }
-                }
-                redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
-            } catch (e: Exception) {
-                Log.e(TAG, e.message)
-            }
-        }
+//        fun redeemTicketForEvent(
+//            accessToken: String,
+//            eventId: String,
+//            ticketId: String,
+//            redeemKey: String,
+//            redeemTicketResult: ((isDuplicateTicket: Boolean) -> Unit)?
+//        ) {
+//            try {
+//                val redeemRequest = RedeemRequest()
+//                redeemRequest.redeemKey = redeemKey
+//                val redeemTicketForEventCall = client()
+//                    .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
+//                val callbackRedeemTicketForEvent = object : Callback<TicketModel> {
+//                    override fun onResponse(call: Call<TicketModel>, response: Response<TicketModel>) {
+//                        if (response.body() != null) {
+//                            Log.e(TAG, "Redeem ticket for event $eventId succeeded")
+//                            redeemTicketResult?.invoke(false)
+//                        } else {
+//                            if (response.code() == 409) {
+//                                redeemTicketResult?.invoke(true)
+//                            } else {
+//                                redeemTicketResult?.invoke(false)
+//                            }
+//                        }
+//                    }
+//
+//                    override fun onFailure(call: Call<TicketModel>, t: Throwable) {
+//                        Log.e(TAG, "Redeem ticket for event $eventId failed")
+//                        redeemTicketResult?.invoke(false)
+//                    }
+//                }
+//                redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
+//            } catch (e: Exception) {
+//                Log.e(TAG, e.message)
+//            }
+//        }
 
         // Synchronous call
         fun redeemTicketForEvent(

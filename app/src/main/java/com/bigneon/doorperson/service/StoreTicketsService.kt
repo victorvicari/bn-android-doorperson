@@ -32,13 +32,15 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                             loadPageOfTickets(page + 1)
                         } else {
                             syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false)
+                            // TODO - Implement finish loading notification
                         }
                     }
 
                     RestAPI.getTicketsForEvent(
                         accessToken,
                         eventId,
-                        syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false),
+//                        syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false),
+                        AppConstants.MIN_TIMESTAMP, // TODO - Remove this line and uncomment upper one once notification is implemented
                         AppConstants.SYNC_PAGE_LIMIT,
                         page,
                         ::setTickets

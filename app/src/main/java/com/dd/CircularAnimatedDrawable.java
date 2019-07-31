@@ -3,12 +3,7 @@ package com.dd;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.graphics.*;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.util.Property;
@@ -18,11 +13,11 @@ import android.view.animation.LinearInterpolator;
 
 class CircularAnimatedDrawable extends Drawable implements Animatable {
 
+    public static final int MIN_SWEEP_ANGLE = 30;
     private static final Interpolator ANGLE_INTERPOLATOR = new LinearInterpolator();
     private static final Interpolator SWEEP_INTERPOLATOR = new DecelerateInterpolator();
     private static final int ANGLE_ANIMATOR_DURATION = 2000;
     private static final int SWEEP_ANIMATOR_DURATION = 600;
-    public static final int MIN_SWEEP_ANGLE = 30;
     private final RectF fBounds = new RectF();
 
     private ObjectAnimator mObjectAnimatorSweep;
@@ -34,6 +29,30 @@ class CircularAnimatedDrawable extends Drawable implements Animatable {
     private float mCurrentSweepAngle;
     private float mBorderWidth;
     private boolean mRunning;
+    private Property<CircularAnimatedDrawable, Float> mAngleProperty =
+            new Property<CircularAnimatedDrawable, Float>(Float.class, "angle") {
+                @Override
+                public Float get(CircularAnimatedDrawable object) {
+                    return object.getCurrentGlobalAngle();
+                }
+
+                @Override
+                public void set(CircularAnimatedDrawable object, Float value) {
+                    object.setCurrentGlobalAngle(value);
+                }
+            };
+    private Property<CircularAnimatedDrawable, Float> mSweepProperty
+            = new Property<CircularAnimatedDrawable, Float>(Float.class, "arc") {
+        @Override
+        public Float get(CircularAnimatedDrawable object) {
+            return object.getCurrentSweepAngle();
+        }
+
+        @Override
+        public void set(CircularAnimatedDrawable object, Float value) {
+            object.setCurrentSweepAngle(value);
+        }
+    };
 
     public CircularAnimatedDrawable(int color, float borderWidth) {
         mBorderWidth = borderWidth;
@@ -90,32 +109,6 @@ class CircularAnimatedDrawable extends Drawable implements Animatable {
         fBounds.top = bounds.top + mBorderWidth / 2f + .5f;
         fBounds.bottom = bounds.bottom - mBorderWidth / 2f - .5f;
     }
-
-    private Property<CircularAnimatedDrawable, Float> mAngleProperty  =
-            new Property<CircularAnimatedDrawable, Float>(Float.class, "angle") {
-        @Override
-        public Float get(CircularAnimatedDrawable object) {
-            return object.getCurrentGlobalAngle();
-        }
-
-        @Override
-        public void set(CircularAnimatedDrawable object, Float value) {
-            object.setCurrentGlobalAngle(value);
-        }
-    };
-
-    private Property<CircularAnimatedDrawable, Float> mSweepProperty
-            = new Property<CircularAnimatedDrawable, Float>(Float.class, "arc") {
-        @Override
-        public Float get(CircularAnimatedDrawable object) {
-            return object.getCurrentSweepAngle();
-        }
-
-        @Override
-        public void set(CircularAnimatedDrawable object, Float value) {
-            object.setCurrentSweepAngle(value);
-        }
-    };
 
     private void setupAnimations() {
         mObjectAnimatorAngle = ObjectAnimator.ofFloat(this, mAngleProperty, 360f);
@@ -179,22 +172,22 @@ class CircularAnimatedDrawable extends Drawable implements Animatable {
         return mRunning;
     }
 
+    public float getCurrentGlobalAngle() {
+        return mCurrentGlobalAngle;
+    }
+
     public void setCurrentGlobalAngle(float currentGlobalAngle) {
         mCurrentGlobalAngle = currentGlobalAngle;
         invalidateSelf();
     }
 
-    public float getCurrentGlobalAngle() {
-        return mCurrentGlobalAngle;
+    public float getCurrentSweepAngle() {
+        return mCurrentSweepAngle;
     }
 
     public void setCurrentSweepAngle(float currentSweepAngle) {
         mCurrentSweepAngle = currentSweepAngle;
         invalidateSelf();
-    }
-
-    public float getCurrentSweepAngle() {
-        return mCurrentSweepAngle;
     }
 
 }

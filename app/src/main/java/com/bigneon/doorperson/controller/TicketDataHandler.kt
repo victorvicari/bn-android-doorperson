@@ -9,7 +9,6 @@ import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
-import com.bigneon.doorperson.service.RedeemCheckedService
 import com.bigneon.doorperson.service.StoreTicketsService
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.isOfflineModeEnabled
@@ -22,8 +21,12 @@ import org.jetbrains.anko.doAsync
  * Created by SRKI-ST on 28.06.2019..
  ****************************************************/
 class TicketDataHandler {
+
+
     companion object {
         private val TAG = TicketDataHandler::class.java.simpleName
+
+        private var listeners: MutableList<RefreshTickets> = ArrayList()
 
         private var ticketsDS: TicketsDS = TicketsDS()
 
@@ -120,13 +123,11 @@ class TicketDataHandler {
             context?.startService(i)
         }
 
-        fun redeemCheckedTickets(eventId: String) {
-            if (isNetworkAvailable(context!!)) {
-                val i = Intent(context, RedeemCheckedService::class.java)
-                i.putExtra("eventId", eventId)
-                context?.startService(i)
-            }
-        }
+//        fun redeemCheckedTickets() {
+//            if (isNetworkAvailable(context!!)) {
+//                context?.startService(Intent(context, RedeemCheckedService::class.java))
+//            }
+//        }
 
         fun completeCheckIn(context: Context, ticketModel: TicketModel): TicketState? {
             var ticketState: TicketState? = null
@@ -175,6 +176,7 @@ class TicketDataHandler {
                 }
                 isOfflineModeEnabled() -> {
                     ticketsDS.setCheckedTicket(ticketModel.ticketId!!)
+
                     ticketState = TicketState.CHECKED
                 }
                 else -> {
@@ -184,9 +186,35 @@ class TicketDataHandler {
             }
             return ticketState
         }
+
+        fun updateTicket(ticketId: String, status: String) {
+            for (listener in listeners) {
+                listener.updateTicket(ticketId, status)
+            }
+        }
+
+        fun refreshTicketList() {
+            for (listener in listeners) {
+                listener.refreshTicketList()
+            }
+        }
+
+        fun addRefreshTicketsListener(listener: RefreshTickets) {
+            listeners.add(listener)
+        }
+
+        fun removeRefreshTicketsListener(listener: RefreshTickets) {
+            listeners.remove(listener)
+        }
     }
 
     enum class TicketState {
         REDEEMED, CHECKED, DUPLICATED, ERROR
+    }
+
+    interface RefreshTickets {
+        fun updateTicket(ticketId: String, status: String)
+
+        fun refreshTicketList()
     }
 }

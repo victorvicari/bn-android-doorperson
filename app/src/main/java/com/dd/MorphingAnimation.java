@@ -1,10 +1,6 @@
 package com.dd;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
+import android.animation.*;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.TextView;
 
