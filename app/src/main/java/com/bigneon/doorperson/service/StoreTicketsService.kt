@@ -3,14 +3,15 @@ package com.bigneon.doorperson.service
 import android.app.IntentService
 import android.content.Intent
 import android.os.Bundle
-import android.os.ResultReceiver
+import android.support.v4.content.LocalBroadcastManager
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.db.ds.SyncDS
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
+
+
 
 /****************************************************
  * Copyright (c) 2016 - 2019.
@@ -25,7 +26,9 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
 
     override fun onHandleIntent(intent: Intent?) {
         val eventId = intent?.getStringExtra("eventId") ?: return
-        val receiver: ResultReceiver = intent.getParcelableExtra<LoadingTicketsResultReceiver>("receiver")
+//        val receiver: ResultReceiver = LoadingTicketsResultReceiver(
+//            Handler(), TicketDataHandler.getAllTicketNumberForEvent(eventId) ?: 0
+//        )
 
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken != null) {
@@ -38,19 +41,25 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                             ticketsDS.createOrUpdateTicketList(tickets)
                         }
 
+                        val localBroadcastManagerIntent = Intent("loading_tickets_process$eventId")
                         // If the loaded ticket list isn't empty, proceed with loading of another page
                         if (!tickets.isNullOrEmpty()) {
                             loadPageOfTickets(page + 1)
                             val bundle = Bundle()
                             bundle.putInt("page", page + 1)
                             SharedPrefs.setProperty("isLoadingInProgress$eventId", "TRUE")
-                            receiver.send(LOADING_IN_PROGRESS, bundle)
+//                            receiver.send(LOADING_IN_PROGRESS, bundle)
+
+                            localBroadcastManagerIntent.putExtra("page", page + 1)
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
                         } else {
                             syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false)
                             val bundle = Bundle()
                             bundle.putInt("page", page + 1)
                             SharedPrefs.setProperty("isLoadingInProgress$eventId", "FALSE")
-                            receiver.send(LOADING_COMPLETE, bundle)
+//                            receiver.send(LOADING_COMPLETE, bundle)
+                            localBroadcastManagerIntent.putExtra("page", 0)
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
                         }
                     }
 
@@ -71,4 +80,28 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
         }
         RestAPI.accessToken(::setAccessTokenForEvent)
     }
+//
+//    inner class LoadingTicketsResultReceiver(
+//        handler: Handler,
+//        private val allTicketNumberForEvent: Int
+//    ) :
+//        ResultReceiver(handler) {
+//
+//        override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
+//            when (resultCode) {
+//                LOADING_IN_PROGRESS -> {
+//                    val page = resultData.getInt("page")
+////                    loadingProgressBar.progress = (page * AppConstants.SYNC_PAGE_LIMIT * 100) / allTicketNumberForEvent
+////                    loadingText.text =
+////                        "${page * AppConstants.SYNC_PAGE_LIMIT} tickets loaded. (${loading_progress_bar.progress}%)"
+//                }
+//
+//                LOADING_COMPLETE -> {
+////                    loadingProgressBar.progress = 100
+////                    loadingText.text = "All $allTicketNumberForEvent has been loaded."
+//                }
+//            }
+//            super.onReceiveResult(resultCode, resultData)
+//        }
+//    }
 }

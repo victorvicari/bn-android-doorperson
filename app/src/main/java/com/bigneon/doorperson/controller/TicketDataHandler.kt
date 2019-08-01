@@ -6,7 +6,6 @@ import android.util.Log
 import com.bigneon.doorperson.BigNeonApplication.Companion.context
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.db.ds.TicketsDS
-import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.EventDashboardModel
 import com.bigneon.doorperson.rest.model.TicketModel
@@ -95,9 +94,13 @@ class TicketDataHandler {
             }
         }
 
-        fun getAllTicketNumberForEvent(context: Context, eventId: String): Int? {
+        fun getAllTicketNumberForEvent(eventId: String): Int? {
+            return getAllTicketNumberForEvent(null, eventId)
+        }
+
+        fun getAllTicketNumberForEvent(context: Context?, eventId: String): Int? {
             when {
-                isNetworkAvailable(context) -> {
+                context == null || isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -118,10 +121,9 @@ class TicketDataHandler {
             return ticketsDS.getCheckedTicketNumberForEvent(eventId)
         }
 
-        fun storeTickets(eventId: String, loadingTicketsResultReceiver: LoadingTicketsResultReceiver) {
+        fun storeTickets(eventId: String) {
             val intent = Intent(context, StoreTicketsService::class.java)
             intent.putExtra("eventId", eventId)
-            intent.putExtra("receiver", loadingTicketsResultReceiver)
             context?.startService(intent)
         }
 

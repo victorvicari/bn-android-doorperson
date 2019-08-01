@@ -1,22 +1,23 @@
 package com.bigneon.doorperson.activity
 
-//import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
+import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
-import com.bigneon.doorperson.receiver.LoadingTicketsResultReceiver
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
@@ -32,7 +33,7 @@ class ScanningEventActivity : AppCompatActivity() {
     private var eventId = ""
     private var eventDataHandler: EventDataHandler? = null
     private var searchGuestText: String = ""
-    private lateinit var loadingTicketsResultReceiver: LoadingTicketsResultReceiver
+    private var allTicketNumberForEvent = 0
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -56,6 +57,27 @@ class ScanningEventActivity : AppCompatActivity() {
             }
         }
 
+    private var loadingMessageReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, int: Intent?) {
+
+                when (val page = int!!.getIntExtra("page", 0)) {
+                    0 -> {
+                        loading_progress_bar.progress = 100
+                        loading_text.text = "All $allTicketNumberForEvent have been loaded."
+                    }
+                    else -> {
+                        if (allTicketNumberForEvent > 0) {
+                            loading_progress_bar.progress =
+                                (page * AppConstants.SYNC_PAGE_LIMIT * 100) / allTicketNumberForEvent
+                            loading_text.text =
+                                "${page * AppConstants.SYNC_PAGE_LIMIT} tickets loaded. (${loading_progress_bar.progress}%)"
+                        }
+                    }
+                }
+            }
+        }
+
     private fun getContext(): Context {
         return this
     }
@@ -70,17 +92,18 @@ class ScanningEventActivity : AppCompatActivity() {
 
         eventId = intent.getStringExtra("eventId")
 
+        allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId) ?: 0
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            loadingMessageReceiver,
+            IntentFilter("loading_tickets_process$eventId")
+        )
+
         var isLoadingInProgress = "FALSE"
         if (SharedPrefs.getProperty("isLoadingInProgress$eventId") == "TRUE") {
             isLoadingInProgress = "TRUE"
         }
         if (isLoadingInProgress == "FALSE") {
-            loadingTicketsResultReceiver = LoadingTicketsResultReceiver(
-                Handler(),
-                TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId) ?: 0,
-                loading_progress_bar, loading_text
-            )
-            storeTickets(eventId, loadingTicketsResultReceiver) // download sync (create/update tickets)
+            storeTickets(eventId) // download sync (create/update tickets)
         }
 
         searchGuestText = intent.getStringExtra("searchGuestText") ?: ""
@@ -164,5 +187,12 @@ class ScanningEventActivity : AppCompatActivity() {
     override fun onBackPressed() {
         startActivity(Intent(getContext(), EventListActivity::class.java))
         finish()
+    }
+
+    override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            loadingMessageReceiver
+        )
+        super.onDestroy()
     }
 }
