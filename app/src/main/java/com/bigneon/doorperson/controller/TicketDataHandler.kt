@@ -21,13 +21,9 @@ import org.jetbrains.anko.doAsync
  * Created by SRKI-ST on 28.06.2019..
  ****************************************************/
 class TicketDataHandler {
-
-
     companion object {
         private val TAG = TicketDataHandler::class.java.simpleName
-
         private var listeners: MutableList<RefreshTickets> = ArrayList()
-
         private var ticketsDS: TicketsDS = TicketsDS()
 
         fun getTicket(context: Context, ticketId: String): TicketModel? {
@@ -92,10 +88,6 @@ class TicketDataHandler {
                     return null
                 }
             }
-        }
-
-        fun getAllTicketNumberForEvent(eventId: String): Int? {
-            return getAllTicketNumberForEvent(null, eventId)
         }
 
         fun getAllTicketNumberForEvent(context: Context?, eventId: String): Int? {

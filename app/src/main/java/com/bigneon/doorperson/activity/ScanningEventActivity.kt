@@ -167,9 +167,7 @@ class ScanningEventActivity : AppCompatActivity() {
                     getEventSummary()
                 }
             }.showDialog(getContext())
-
         }
-
     }
 
     override fun onStart() {

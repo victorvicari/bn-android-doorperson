@@ -11,24 +11,14 @@ import com.bigneon.doorperson.db.ds.TicketsDS
 import com.bigneon.doorperson.rest.RestAPI
 import com.bigneon.doorperson.rest.model.TicketModel
 
-
-
 /****************************************************
  * Copyright (c) 2016 - 2019.
  * All right reserved!
  * Created by SRKI-ST on 04.07.2019..
  ****************************************************/
 class StoreTicketsService : IntentService("StoreTicketsService") {
-    companion object {
-        const val LOADING_IN_PROGRESS = 1
-        const val LOADING_COMPLETE = 2
-    }
-
     override fun onHandleIntent(intent: Intent?) {
         val eventId = intent?.getStringExtra("eventId") ?: return
-//        val receiver: ResultReceiver = LoadingTicketsResultReceiver(
-//            Handler(), TicketDataHandler.getAllTicketNumberForEvent(eventId) ?: 0
-//        )
 
         fun setAccessTokenForEvent(accessToken: String?) {
             if (accessToken != null) {
@@ -48,8 +38,8 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                             val bundle = Bundle()
                             bundle.putInt("page", page + 1)
                             SharedPrefs.setProperty("isLoadingInProgress$eventId", "TRUE")
-//                            receiver.send(LOADING_IN_PROGRESS, bundle)
 
+                            // Sending broadcast to update loader
                             localBroadcastManagerIntent.putExtra("page", page + 1)
                             LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
                         } else {
@@ -57,7 +47,8 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                             val bundle = Bundle()
                             bundle.putInt("page", page + 1)
                             SharedPrefs.setProperty("isLoadingInProgress$eventId", "FALSE")
-//                            receiver.send(LOADING_COMPLETE, bundle)
+
+                            // Sending broadcast to finish loader
                             localBroadcastManagerIntent.putExtra("page", 0)
                             LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
                         }
@@ -80,28 +71,4 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
         }
         RestAPI.accessToken(::setAccessTokenForEvent)
     }
-//
-//    inner class LoadingTicketsResultReceiver(
-//        handler: Handler,
-//        private val allTicketNumberForEvent: Int
-//    ) :
-//        ResultReceiver(handler) {
-//
-//        override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
-//            when (resultCode) {
-//                LOADING_IN_PROGRESS -> {
-//                    val page = resultData.getInt("page")
-////                    loadingProgressBar.progress = (page * AppConstants.SYNC_PAGE_LIMIT * 100) / allTicketNumberForEvent
-////                    loadingText.text =
-////                        "${page * AppConstants.SYNC_PAGE_LIMIT} tickets loaded. (${loading_progress_bar.progress}%)"
-//                }
-//
-//                LOADING_COMPLETE -> {
-////                    loadingProgressBar.progress = 100
-////                    loadingText.text = "All $allTicketNumberForEvent has been loaded."
-//                }
-//            }
-//            super.onReceiveResult(resultCode, resultData)
-//        }
-//    }
 }
