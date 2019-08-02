@@ -92,8 +92,7 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/colorBlack"
-                    android:gravity="center"
-                    android:text="@string/loading_tickets_is_about_to_begin"/>
+                    android:gravity="center"/>
         </LinearLayout>
     </ScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

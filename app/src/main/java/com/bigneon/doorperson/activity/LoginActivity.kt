@@ -208,7 +208,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-//        stopService(Intent(getContext(), RedeemCheckedService::class.java))
         finish()
         moveTaskToBack(true)
     }

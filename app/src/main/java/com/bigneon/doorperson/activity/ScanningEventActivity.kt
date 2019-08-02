@@ -103,6 +103,7 @@ class ScanningEventActivity : AppCompatActivity() {
             isLoadingInProgress = "TRUE"
         }
         if (isLoadingInProgress == "FALSE") {
+            loading_text.text = getString(R.string.loading_tickets_is_about_to_begin)
             storeTickets(eventId) // download sync (create/update tickets)
         }
 
