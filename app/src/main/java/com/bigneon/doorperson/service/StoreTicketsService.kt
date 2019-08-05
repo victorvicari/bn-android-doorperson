@@ -3,6 +3,7 @@ package com.bigneon.doorperson.service
 import android.app.IntentService
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.content.LocalBroadcastManager
 import com.bigneon.doorperson.config.AppConstants
 import com.bigneon.doorperson.config.SharedPrefs
@@ -27,30 +28,40 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
 
                 fun loadPageOfTickets(page: Int) {
                     fun setTickets(tickets: ArrayList<TicketModel>?) {
-                        if (!tickets.isNullOrEmpty()) {
-                            ticketsDS.createOrUpdateTicketList(tickets)
-                        }
-
-                        val localBroadcastManagerIntent = Intent("loading_tickets_process$eventId")
-                        // If the loaded ticket list isn't empty, proceed with loading of another page
-                        if (!tickets.isNullOrEmpty()) {
-                            loadPageOfTickets(page + 1)
-                            val bundle = Bundle()
-                            bundle.putInt("page", page + 1)
-                            SharedPrefs.setProperty("isLoadingInProgress$eventId", "TRUE")
-
-                            // Sending broadcast to update loader
-                            localBroadcastManagerIntent.putExtra("page", page + 1)
-                            LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
+                        // If loading failed, try again after 3s
+                        if (tickets == null) {
+                            SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.STOPPED.name)
+                            Handler().postDelayed(
+                                {
+                                    loadPageOfTickets(page)
+                                }, 3000
+                            )
                         } else {
-                            syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false)
-                            val bundle = Bundle()
-                            bundle.putInt("page", page + 1)
-                            SharedPrefs.setProperty("isLoadingInProgress$eventId", "FALSE")
+                            val localBroadcastManagerIntent = Intent("loading_tickets_process")
+                            // If the loaded ticket list isn't empty, proceed with loading of another page
+                            if (tickets.isNotEmpty()) {
+                                ticketsDS.createOrUpdateTicketList(tickets)
 
-                            // Sending broadcast to finish loader
-                            localBroadcastManagerIntent.putExtra("page", 0)
-                            LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
+                                loadPageOfTickets(page + 1)
+                                val bundle = Bundle()
+                                bundle.putInt("page", page + 1)
+                                SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.LOADING.name)
+
+                                // Sending broadcast to update loader
+                                localBroadcastManagerIntent.putExtra("eventId", eventId)
+                                localBroadcastManagerIntent.putExtra("page", page + 1)
+                                LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
+                            } else {
+                                syncDS.setLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false)
+                                val bundle = Bundle()
+                                bundle.putInt("page", page + 1)
+                                SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.FINISHED.name)
+
+                                // Sending broadcast to finish loader
+                                localBroadcastManagerIntent.putExtra("eventId", eventId)
+                                localBroadcastManagerIntent.putExtra("page", 0)
+                                LocalBroadcastManager.getInstance(this).sendBroadcast(localBroadcastManagerIntent)
+                            }
                         }
                     }
 
@@ -71,4 +82,8 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
         }
         RestAPI.accessToken(::setAccessTokenForEvent)
     }
+}
+
+enum class LoadingStatus {
+    LOADING, STOPPED, FINISHED
 }

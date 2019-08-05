@@ -19,6 +19,7 @@ import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshT
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
+import com.bigneon.doorperson.service.LoadingStatus
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
 import com.bigneon.doorperson.util.ConnectionDialog
@@ -60,8 +61,11 @@ class ScanningEventActivity : AppCompatActivity() {
     private var loadingMessageReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, int: Intent?) {
+                // Check if received broadcast from the proper event that is just being loaded
+                if (int!!.getStringExtra("eventId") != eventId)
+                    return
 
-                when (val page = int!!.getIntExtra("page", 0)) {
+                when (val page = int.getIntExtra("page", 0)) {
                     0 -> {
                         loading_progress_bar.progress = 100
                         loading_text.text = "All $allTicketNumberForEvent have been loaded."
@@ -95,14 +99,14 @@ class ScanningEventActivity : AppCompatActivity() {
         allTicketNumberForEvent = TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId) ?: 0
         LocalBroadcastManager.getInstance(this).registerReceiver(
             loadingMessageReceiver,
-            IntentFilter("loading_tickets_process$eventId")
+            IntentFilter("loading_tickets_process")
         )
 
-        var isLoadingInProgress = "FALSE"
-        if (SharedPrefs.getProperty("isLoadingInProgress$eventId") == "TRUE") {
-            isLoadingInProgress = "TRUE"
+        var isLoadingInProgress = false
+        if (SharedPrefs.getProperty("loadingStatus$eventId") == LoadingStatus.LOADING.name) {
+            isLoadingInProgress = true
         }
-        if (isLoadingInProgress == "FALSE") {
+        if (!isLoadingInProgress) {
             loading_text.text = getString(R.string.loading_tickets_is_about_to_begin)
             storeTickets(eventId) // download sync (create/update tickets)
         }
