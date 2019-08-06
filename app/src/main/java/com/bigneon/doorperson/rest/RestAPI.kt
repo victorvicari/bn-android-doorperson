@@ -327,5 +327,15 @@ class RestAPI private constructor() {
             }
             return null
         }
+
+        // Synchronous call
+        fun sendFirebaseRegistrationToken(
+            accessToken: String,
+            fbToken: String
+        ): Boolean? {
+            val sendFirebaseRegistrationTokenCall =
+                client().sendFirebaseRegistrationToken(accessToken, fbToken)
+            return sendFirebaseRegistrationTokenCall.execute().body()
+        }
     }
 }

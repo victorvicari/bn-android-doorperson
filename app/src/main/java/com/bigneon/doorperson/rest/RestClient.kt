@@ -65,4 +65,10 @@ interface RestClient {
         @Header("Authorization") token: String,
         @Path("ticket_id") ticketId: String
     ): Call<TicketResponse>
+
+    @POST("firebase/registration/{fb_token}")
+    fun sendFirebaseRegistrationToken(
+        @Header("Authorization") token: String,
+        @Path("token") fbToken: String
+    ): Call<Boolean>
 }
