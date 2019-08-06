@@ -44,6 +44,24 @@
                 android:contentDescription="@string/event_right_arrow"
                 android:src="@drawable/right_arrow"
                 android:layout_alignParentEnd="true"/>
+        <TextView
+                android:id="@+id/event_loading_progress_bar_percent"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:textSize="12sp"
+                android:layout_alignParentEnd="true"
+                android:gravity="center"
+                android:visibility="gone"/>
+        <ProgressBar
+                android:id="@+id/event_loading_progress_bar"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:progress="20"
+                android:padding="2dp"
+                android:contentDescription="@string/event_right_arrow"
+                android:layout_alignParentEnd="true"
+                android:visibility="gone"/>
+
     </RelativeLayout>
 
 </RelativeLayout>

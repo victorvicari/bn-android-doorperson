@@ -14,4 +14,6 @@ class EventModel {
 
     @SerializedName("promo_image_url")
     internal var promoImageURL: String? = null
+
+    var progress: Int = 0
 }

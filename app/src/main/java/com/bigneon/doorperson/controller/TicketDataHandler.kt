@@ -21,13 +21,9 @@ import org.jetbrains.anko.doAsync
  * Created by SRKI-ST on 28.06.2019..
  ****************************************************/
 class TicketDataHandler {
-
-
     companion object {
         private val TAG = TicketDataHandler::class.java.simpleName
-
         private var listeners: MutableList<RefreshTickets> = ArrayList()
-
         private var ticketsDS: TicketsDS = TicketsDS()
 
         fun getTicket(context: Context, ticketId: String): TicketModel? {
@@ -94,9 +90,9 @@ class TicketDataHandler {
             }
         }
 
-        fun getAllTicketNumberForEvent(context: Context, eventId: String): Int? {
+        fun getAllTicketNumberForEvent(context: Context?, eventId: String): Int? {
             when {
-                isNetworkAvailable(context) -> {
+                context == null || isNetworkAvailable(context) -> {
                     var eventDashboardModel: EventDashboardModel? = null
                     doAsync {
                         val accessToken: String? = RestAPI.accessToken()
@@ -118,16 +114,10 @@ class TicketDataHandler {
         }
 
         fun storeTickets(eventId: String) {
-            val i = Intent(context, StoreTicketsService::class.java)
-            i.putExtra("eventId", eventId)
-            context?.startService(i)
+            val intent = Intent(context, StoreTicketsService::class.java)
+            intent.putExtra("eventId", eventId)
+            context?.startService(intent)
         }
-
-//        fun redeemCheckedTickets() {
-//            if (isNetworkAvailable(context!!)) {
-//                context?.startService(Intent(context, RedeemCheckedService::class.java))
-//            }
-//        }
 
         fun completeCheckIn(context: Context, ticketModel: TicketModel): TicketState? {
             var ticketState: TicketState? = null

@@ -185,11 +185,13 @@ class RestAPI private constructor() {
                     if (response.body() != null) {
                         setTickets(response.body()?.data)
                     } else {
+                        setTickets(null)
                         Log.e(TAG, "Getting tickets for event $eventId failed")
                     }
                 }
 
                 override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
+                    setTickets(null)
                     Log.e(TAG, "Getting tickets for event $eventId failed")
                 }
             }
