@@ -218,7 +218,7 @@ class TicketsDS {
         }
         db.setTransactionSuccessful()
         db.endTransaction()
-        SQLiteHelper.closeDB(db)
+//        SQLiteHelper.closeDB(db)
     }
 
 //    fun getAllCheckedTickets(): ArrayList<TicketModel>? {

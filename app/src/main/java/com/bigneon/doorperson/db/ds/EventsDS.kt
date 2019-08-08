@@ -80,7 +80,7 @@ class EventsDS {
 
         val db = SQLiteHelper.getDB()
         db.insert(TABLE_EVENTS, null, values)
-        SQLiteHelper.closeDB(db)
+//        SQLiteHelper.closeDB(db)
     }
 
     fun updateEvent(
@@ -94,7 +94,7 @@ class EventsDS {
 
         val db = SQLiteHelper.getDB()
         db.update(TABLE_EVENTS, values, "$EVENT_ID = '$eventId'", null)
-        SQLiteHelper.closeDB(db)
+//        SQLiteHelper.closeDB(db)
     }
 
     private fun cursorToEvent(cursor: Cursor): EventModel {

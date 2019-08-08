@@ -6,20 +6,19 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.bigneon.doorperson.R
 import com.bigneon.doorperson.config.AppConstants
-import com.bigneon.doorperson.config.SharedPrefs
 import com.bigneon.doorperson.controller.EventDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.addRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.removeRefreshTicketsListener
 import com.bigneon.doorperson.controller.TicketDataHandler.Companion.storeTickets
 import com.bigneon.doorperson.receiver.NetworkStateReceiver
-import com.bigneon.doorperson.service.LoadingStatus
 import com.bigneon.doorperson.util.AppUtils
 import com.bigneon.doorperson.util.AppUtils.Companion.checkLogged
 import com.bigneon.doorperson.util.ConnectionDialog
@@ -35,6 +34,7 @@ class ScanningEventActivity : AppCompatActivity() {
     private var eventDataHandler: EventDataHandler? = null
     private var searchGuestText: String = ""
     private var allTicketNumberForEvent = 0
+    private var isLoadingInProgress = false
 
     private var networkStateReceiverListener: NetworkStateReceiver.NetworkStateReceiverListener =
         object : NetworkStateReceiver.NetworkStateReceiverListener {
@@ -68,7 +68,9 @@ class ScanningEventActivity : AppCompatActivity() {
                 when (val page = int.getIntExtra("page", 0)) {
                     0 -> {
                         loading_progress_bar.progress = 100
-                        loading_text.text = "All $allTicketNumberForEvent have been loaded."
+                        loading_text.text =
+                            if (allTicketNumberForEvent == 0) "Event has no tickets to load." else "All $allTicketNumberForEvent have been loaded."
+                        isLoadingInProgress = false
                     }
                     else -> {
                         if (allTicketNumberForEvent > 0) {
@@ -76,6 +78,7 @@ class ScanningEventActivity : AppCompatActivity() {
                                 (page * AppConstants.SYNC_PAGE_LIMIT * 100) / allTicketNumberForEvent
                             loading_text.text =
                                 "${page * AppConstants.SYNC_PAGE_LIMIT} tickets loaded. (${loading_progress_bar.progress}%)"
+                            isLoadingInProgress = true
                         }
                     }
                 }
@@ -102,10 +105,10 @@ class ScanningEventActivity : AppCompatActivity() {
             IntentFilter("loading_tickets_process")
         )
 
-        var isLoadingInProgress = false
-        if (SharedPrefs.getProperty("loadingStatus$eventId") == LoadingStatus.LOADING.name) {
-            isLoadingInProgress = true
-        }
+
+//        if (SharedPrefs.getProperty("loadingStatus$eventId") == LoadingStatus.LOADING.name) {
+//            isLoadingInProgress = true
+//        }
         if (!isLoadingInProgress) {
             loading_text.text = getString(R.string.loading_tickets_is_about_to_begin)
             storeTickets(eventId) // download sync (create/update tickets)
@@ -124,7 +127,13 @@ class ScanningEventActivity : AppCompatActivity() {
         )
 
         scanning_events_toolbar.setNavigationOnClickListener {
-            startActivity(Intent(getContext(), EventListActivity::class.java))
+            if (!isLoadingInProgress) {
+                startActivity(Intent(getContext(), EventListActivity::class.java))
+            } else {
+                Snackbar
+                    .make(scanning_event_layout, "Loading tickets in progress. Please wait...", Snackbar.LENGTH_SHORT)
+                    .setDuration(2000).show()
+            }
         }
 
         scanning_events_button.setOnClickListener {
@@ -188,8 +197,14 @@ class ScanningEventActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(getContext(), EventListActivity::class.java))
-        finish()
+        if (!isLoadingInProgress) {
+            startActivity(Intent(getContext(), EventListActivity::class.java))
+            finish()
+        }  else {
+            Snackbar
+                .make(scanning_event_layout, "Loading tickets in progress. Please wait...", Snackbar.LENGTH_SHORT)
+                .setDuration(2000).show()
+        }
     }
 
     override fun onDestroy() {

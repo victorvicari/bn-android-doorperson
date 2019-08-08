@@ -27,9 +27,9 @@ class SQLiteHelper : SQLiteOpenHelper(
             return instance.writableDatabase
         }
 
-        fun closeDB(db: SQLiteDatabase) {
-            db.close()
-        }
+//        fun closeDB(db: SQLiteDatabase) {
+//            db.close()
+//        }
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
