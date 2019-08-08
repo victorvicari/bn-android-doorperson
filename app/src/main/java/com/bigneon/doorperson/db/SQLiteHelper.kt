@@ -26,10 +26,6 @@ class SQLiteHelper : SQLiteOpenHelper(
         fun getDB(): SQLiteDatabase {
             return instance.writableDatabase
         }
-
-//        fun closeDB(db: SQLiteDatabase) {
-//            db.close()
-//        }
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -39,8 +35,6 @@ class SQLiteHelper : SQLiteOpenHelper(
 
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_D)
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_U)
-//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_D)
-//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_U)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

@@ -69,7 +69,10 @@ class ScanningEventActivity : AppCompatActivity() {
                     0 -> {
                         loading_progress_bar.progress = 100
                         loading_text.text =
-                            if (allTicketNumberForEvent == 0) "Event has no tickets to load." else "All $allTicketNumberForEvent have been loaded."
+                            if (allTicketNumberForEvent == 0)
+                                "Event has no tickets to load."
+                            else
+                                "All $allTicketNumberForEvent have been loaded."
                         isLoadingInProgress = false
                     }
                     else -> {
@@ -105,10 +108,6 @@ class ScanningEventActivity : AppCompatActivity() {
             IntentFilter("loading_tickets_process")
         )
 
-
-//        if (SharedPrefs.getProperty("loadingStatus$eventId") == LoadingStatus.LOADING.name) {
-//            isLoadingInProgress = true
-//        }
         if (!isLoadingInProgress) {
             loading_text.text = getString(R.string.loading_tickets_is_about_to_begin)
             storeTickets(eventId) // download sync (create/update tickets)
@@ -200,7 +199,7 @@ class ScanningEventActivity : AppCompatActivity() {
         if (!isLoadingInProgress) {
             startActivity(Intent(getContext(), EventListActivity::class.java))
             finish()
-        }  else {
+        } else {
             Snackbar
                 .make(scanning_event_layout, "Loading tickets in progress. Please wait...", Snackbar.LENGTH_SHORT)
                 .setDuration(2000).show()

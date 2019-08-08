@@ -38,30 +38,6 @@ class EventListActivity : AppCompatActivity() {
             }
         }
 
-//    private var loadingMessageReceiver: BroadcastReceiver =
-//        object : BroadcastReceiver() {
-//            override fun onReceive(ctx: Context?, int: Intent?) {
-//                val eventId = int!!.getStringExtra("eventId") ?: ""
-//                val event = (eventsListView?.adapter as EventListAdapter).getItemByEventId(eventId)
-//
-//                when (val page = int.getIntExtra("page", 0)) {
-//                    0 -> {
-//                        event.progress = 100
-//                    }
-//                    else -> {
-//                        val allTicketNumberForEvent =
-//                            TicketDataHandler.getAllTicketNumberForEvent(getContext(), eventId) ?: 0
-//                        if (allTicketNumberForEvent > 0) {
-//                            event.progress =
-//                                (page * AppConstants.SYNC_PAGE_LIMIT * 100) / allTicketNumberForEvent
-//                        }
-//                    }
-//                }
-//                refreshList()
-//            }
-//        }
-
-
     private fun getContext(): Context {
         return this
     }
@@ -72,11 +48,6 @@ class EventListActivity : AppCompatActivity() {
         eventDataHandler = EventDataHandler()
 
         AppUtils.checkLogged()
-
-//        LocalBroadcastManager.getInstance(getContext()).registerReceiver(
-//            loadingMessageReceiver,
-//            IntentFilter("loading_tickets_process")
-//        )
 
         eventsListView = events_layout.findViewById(com.bigneon.doorperson.R.id.events_list_view)
 
@@ -180,13 +151,6 @@ class EventListActivity : AppCompatActivity() {
     override fun onBackPressed() {
         finish()
         moveTaskToBack(true)
-    }
-
-    override fun onDestroy() {
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(
-//            loadingMessageReceiver
-//        )
-        super.onDestroy()
     }
 }
 

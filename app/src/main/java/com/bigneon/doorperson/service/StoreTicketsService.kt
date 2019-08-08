@@ -35,8 +35,7 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                 var tickets: ArrayList<TicketModel>? = null
 
                 if (!isNetworkAvailable(getContext())) {
-                    Log.d(Companion.TAG, "Network is not available!")
-//                    SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.STOPPED.name)
+                    Log.d(TAG, "Network is not available!")
                     Thread.sleep(3000)
                     loadPageOfTickets(page)
                 }
@@ -44,7 +43,6 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
                 RestAPI.getTicketsForEvent(
                     accessToken!!,
                     eventId,
-                    //syncDS.getLastSyncTime(AppConstants.SyncTableName.TICKETS, eventId, false),
                     AppConstants.MIN_TIMESTAMP,
                     AppConstants.SYNC_PAGE_LIMIT,
                     "",
@@ -58,7 +56,6 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
 
                     val bundle = Bundle()
                     bundle.putInt("page", page + 1)
-//                        SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.LOADING.name)
 
                     // Sending broadcast to update loader
                     localBroadcastManagerIntent.putExtra("eventId", eventId)
@@ -72,7 +69,6 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
 
                     val bundle = Bundle()
                     bundle.putInt("page", page + 1)
-//                        SharedPrefs.setProperty("loadingStatus$eventId", LoadingStatus.FINISHED.name)
 
                     // Sending broadcast to finish loader
                     localBroadcastManagerIntent.putExtra("eventId", eventId)
@@ -89,7 +85,3 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
         private const val TAG = "StoreTicketsService"
     }
 }
-
-//enum class LoadingStatus {
-//    LOADING, STOPPED, FINISHED
-//}

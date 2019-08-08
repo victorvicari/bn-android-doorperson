@@ -3,6 +3,8 @@ package com.bigneon.doorperson.db.ds
 import android.content.ContentValues
 import android.database.Cursor
 import com.bigneon.doorperson.config.AppConstants
+import com.bigneon.doorperson.config.AppConstants.Companion.MAX_TIMESTAMP
+import com.bigneon.doorperson.config.AppConstants.Companion.MIN_TIMESTAMP
 import com.bigneon.doorperson.db.SQLiteHelper
 import com.bigneon.doorperson.db.dml.TableSyncDML.EVENT_ID
 import com.bigneon.doorperson.db.dml.TableSyncDML.LAST_SYNC_TIME
@@ -25,29 +27,29 @@ class SyncDS {
         LAST_SYNC_TIME
     )
 
-//    fun getLastSyncTime(syncTableName: AppConstants.SyncTableName, eventId: String, upload: Boolean): String? {
-//        SQLiteHelper.getDB().query(
-//            TABLE_SYNC,
-//            allColumns,
-//            (TABLE_NAME + " = \"" + syncTableName + "\" and " + EVENT_ID + " = \"" + eventId + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
-//            null,
-//            null,
-//            null,
-//            null
-//        )?.use {
-//            return if (it.moveToFirst()) {
-//                val syncModel = cursorToSync(it)
-//                it.close()
-//                syncModel.lastSyncTime
-//            } else {
-//                if (upload) {
-//                    MAX_TIMESTAMP
-//                } else {
-//                    MIN_TIMESTAMP
-//                }
-//            }
-//        } ?: return null
-//    }
+    fun getLastSyncTime(syncTableName: AppConstants.SyncTableName, eventId: String, upload: Boolean): String? {
+        SQLiteHelper.getDB().query(
+            TABLE_SYNC,
+            allColumns,
+            (TABLE_NAME + " = \"" + syncTableName + "\" and " + EVENT_ID + " = \"" + eventId + "\" and " + SYNC_DIRECTION + " = \"" + (if (upload) "U" else "D") + "\""),
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            return if (it.moveToFirst()) {
+                val syncModel = cursorToSync(it)
+                it.close()
+                syncModel.lastSyncTime
+            } else {
+                if (upload) {
+                    MAX_TIMESTAMP
+                } else {
+                    MIN_TIMESTAMP
+                }
+            }
+        } ?: return null
+    }
 
     fun setLastSyncTime(syncTableName: AppConstants.SyncTableName, eventId: String, upload: Boolean) {
         SQLiteHelper.getDB().query(

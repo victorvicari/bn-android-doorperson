@@ -13,7 +13,6 @@ import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
-import com.bigneon.doorperson.rest.response.TicketsResponse
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -46,7 +45,7 @@ class RestAPI private constructor() {
         }
 
         val logging = HttpLoggingInterceptor()
-        // set your desired log level
+
         logging.level = HttpLoggingInterceptor.Level.BODY
 
         val okHttpClient = OkHttpClient().newBuilder()
@@ -76,6 +75,9 @@ class RestAPI private constructor() {
             context = con
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Asynchronous calls                                                                                         //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         fun authenticate(email: String, password: String, setAccessToken: (accessToken: String?) -> Unit) {
             val authRequest = AuthRequest()
             authRequest.email = email
@@ -138,7 +140,9 @@ class RestAPI private constructor() {
             }
         }
 
-        // Synchronous call
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Synchronous calls                                                                                          //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         fun accessToken(): String? {
             if (isNetworkAvailable(context)) {
                 val refreshToken = SharedPrefs.getProperty(AppConstants.REFRESH_TOKEN) ?: ""
@@ -164,42 +168,11 @@ class RestAPI private constructor() {
             }
         }
 
-        // Synchronous call
         fun getScannableEvents(accessToken: String): ArrayList<EventModel>? {
             val getScannableEventsCall = client().getScannableEvents(accessToken)
             return getScannableEventsCall.execute().body()?.data
         }
 
-        fun getTicketsForEvent(
-            accessToken: String,
-            eventId: String,
-            changesSince: String?,
-            limit: Int?,
-            page: Int?,
-            setTickets: (ArrayList<TicketModel>?) -> Unit
-        ) {
-            val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, null)
-            val getTicketsForEventCallback = object : Callback<TicketsResponse> {
-                override fun onResponse(call: Call<TicketsResponse>, response: Response<TicketsResponse>) {
-                    if (response.body() != null) {
-                        setTickets(response.body()?.data)
-                    } else {
-                        setTickets(null)
-                        Log.e(TAG, "Getting tickets for event $eventId failed")
-                    }
-                }
-
-                override fun onFailure(call: Call<TicketsResponse>, t: Throwable) {
-                    setTickets(null)
-                    Log.e(TAG, "Getting tickets for event $eventId failed")
-                }
-            }
-
-            getTicketsForEventCall.enqueue(getTicketsForEventCallback)
-        }
-
-        // Synchronous call
         fun getTicketsForEvent(
             accessToken: String,
             eventId: String,
@@ -213,44 +186,6 @@ class RestAPI private constructor() {
             return getTicketsForEventCall.execute().body()?.data
         }
 
-//        fun redeemTicketForEvent(
-//            accessToken: String,
-//            eventId: String,
-//            ticketId: String,
-//            redeemKey: String,
-//            redeemTicketResult: ((isDuplicateTicket: Boolean) -> Unit)?
-//        ) {
-//            try {
-//                val redeemRequest = RedeemRequest()
-//                redeemRequest.redeemKey = redeemKey
-//                val redeemTicketForEventCall = client()
-//                    .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
-//                val callbackRedeemTicketForEvent = object : Callback<TicketModel> {
-//                    override fun onResponse(call: Call<TicketModel>, response: Response<TicketModel>) {
-//                        if (response.body() != null) {
-//                            Log.e(TAG, "Redeem ticket for event $eventId succeeded")
-//                            redeemTicketResult?.invoke(false)
-//                        } else {
-//                            if (response.code() == 409) {
-//                                redeemTicketResult?.invoke(true)
-//                            } else {
-//                                redeemTicketResult?.invoke(false)
-//                            }
-//                        }
-//                    }
-//
-//                    override fun onFailure(call: Call<TicketModel>, t: Throwable) {
-//                        Log.e(TAG, "Redeem ticket for event $eventId failed")
-//                        redeemTicketResult?.invoke(false)
-//                    }
-//                }
-//                redeemTicketForEventCall.enqueue(callbackRedeemTicketForEvent)
-//            } catch (e: Exception) {
-//                Log.e(TAG, e.message)
-//            }
-//        }
-
-        // Synchronous call
         fun redeemTicketForEvent(
             accessToken: String,
             eventId: String,
@@ -281,7 +216,6 @@ class RestAPI private constructor() {
             return null
         }
 
-        // Synchronous call
         fun getEvent(
             accessToken: String,
             eventId: String
@@ -290,7 +224,6 @@ class RestAPI private constructor() {
             return getEventCall.execute().body()
         }
 
-        // Synchronous call
         fun getEventDashboard(
             accessToken: String,
             eventId: String
@@ -299,7 +232,6 @@ class RestAPI private constructor() {
             return getEventDashboardCall.execute().body()?.event
         }
 
-        // Synchronous call
         fun getTicket(
             accessToken: String,
             ticketId: String

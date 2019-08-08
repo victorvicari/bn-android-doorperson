@@ -131,10 +131,6 @@ class TicketsDS {
         db.insert(TABLE_TICKETS, null, values)
     }
 
-//    fun updateTicket(ticketModel: TicketModel) {
-//        updateTicket(SQLiteHelper.getDB(), ticketModel)
-//    }
-
     private fun updateTicket(db: SQLiteDatabase, ticketModel: TicketModel) {
         updateTicket(
             db,
@@ -195,17 +191,6 @@ class TicketsDS {
         )
     }
 
-//    fun createTicketList(tickets: ArrayList<TicketModel>) {
-//        val db = SQLiteHelper.getDB()
-//        db.beginTransaction()
-//        tickets.forEach {
-//            createTicket(db, it)
-//        }
-//        db.setTransactionSuccessful()
-//        db.endTransaction()
-//        SQLiteHelper.closeDB(db)
-//    }
-
     fun createOrUpdateTicketList(tickets: ArrayList<TicketModel>) {
         val db = SQLiteHelper.getDB()
         db.beginTransaction()
@@ -218,33 +203,7 @@ class TicketsDS {
         }
         db.setTransactionSuccessful()
         db.endTransaction()
-//        SQLiteHelper.closeDB(db)
     }
-
-//    fun getAllCheckedTickets(): ArrayList<TicketModel>? {
-//        val ticketModels = ArrayList<TicketModel>()
-//
-//        SQLiteHelper.getDB().query(
-//            TABLE_TICKETS,
-//            allColumns,
-//            "$STATUS = 'CHECKED'",
-//            null,
-//            null,
-//            null,
-//            null
-//        )?.use {
-//            if (it.moveToFirst()) {
-//                while (!it.isAfterLast) {
-//                    val ticket = cursorToTicket(it)
-//                    ticketModels.add(ticket)
-//                    it.moveToNext()
-//                }
-//                it.close()
-//                return ticketModels
-//            }
-//        } ?: return null
-//        return null
-//    }
 
     fun setDuplicateTicket(ticketId: String): TicketModel? {
         val values = ContentValues()
