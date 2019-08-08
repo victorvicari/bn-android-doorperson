@@ -65,4 +65,9 @@ interface RestClient {
         @Header("Authorization") token: String,
         @Path("ticket_id") ticketId: String
     ): Call<TicketResponse>
+
+    @GET("users/me")
+    fun getUserInfo(
+        @Header("Authorization") token: String
+    ): Call<UserInfoResponse>
 }

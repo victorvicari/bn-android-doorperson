@@ -26,6 +26,11 @@ class SQLiteHelper : SQLiteOpenHelper(
         fun getDB(): SQLiteDatabase {
             return instance.writableDatabase
         }
+
+        fun deleteDB() {
+            instance.writableDatabase.close()
+            BigNeonApplication.context?.deleteDatabase(AppConstants.DATABASE_NAME)
+        }
     }
 
     override fun onCreate(db: SQLiteDatabase?) {

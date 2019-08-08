@@ -13,6 +13,7 @@ import com.bigneon.doorperson.rest.request.AuthRequest
 import com.bigneon.doorperson.rest.request.RedeemRequest
 import com.bigneon.doorperson.rest.request.RefreshTokenRequest
 import com.bigneon.doorperson.rest.response.AuthTokenResponse
+import com.bigneon.doorperson.rest.response.UserInfoResponse
 import com.bigneon.doorperson.util.NetworkUtils.Companion.isNetworkAvailable
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -29,43 +30,36 @@ import retrofit2.converter.gson.GsonConverterFactory
  * Created by SRKI-ST on 20.03.2019..
  ****************************************************/
 class RestAPI private constructor() {
-    private val client: RestClient
-
-    private object Loader {
-        @SuppressLint("StaticFieldLeak")
-        @Volatile
-        internal var INSTANCE = RestAPI()
-    }
-
-    init {
-        val interceptor = Interceptor { chain ->
-            val originalRequest = chain.request()
-            val builder = originalRequest.newBuilder()
-            chain.proceed(builder.build())
-        }
-
-        val logging = HttpLoggingInterceptor()
-
-        logging.level = HttpLoggingInterceptor.Level.BODY
-
-        val okHttpClient = OkHttpClient().newBuilder()
-            .addInterceptor(logging)
-            .addInterceptor(interceptor)
-            .build()
-
-        val builder = Retrofit.Builder()
-        builder.baseUrl(BASE_URL)
-        builder.client(okHttpClient)
-        builder.addConverterFactory(GsonConverterFactory.create())
-        val retrofit = builder.build()
-        client = retrofit.create(RestClient::class.java)
-    }
-
     companion object {
         private val TAG = RestAPI::class.java.simpleName
+        private lateinit var client: RestClient
 
-        private fun client(): RestClient {
-            return Loader.INSTANCE.client
+        fun setBaseURL() {
+            val interceptor = Interceptor { chain ->
+                val originalRequest = chain.request()
+                val builder = originalRequest.newBuilder()
+                chain.proceed(builder.build())
+            }
+
+            val logging = HttpLoggingInterceptor()
+
+            logging.level = HttpLoggingInterceptor.Level.BODY
+
+            val okHttpClient = OkHttpClient().newBuilder()
+                .addInterceptor(logging)
+                .addInterceptor(interceptor)
+                .build()
+
+            val builder = Retrofit.Builder()
+            var baseURL = SharedPrefs.getProperty("BASE_URL")
+            if (baseURL.isNullOrBlank()) {
+                baseURL = BASE_URL
+            }
+            builder.baseUrl(baseURL)
+            builder.client(okHttpClient)
+            builder.addConverterFactory(GsonConverterFactory.create())
+            val retrofit = builder.build()
+            client = retrofit.create(RestClient::class.java)
         }
 
         @SuppressLint("StaticFieldLeak")
@@ -83,7 +77,7 @@ class RestAPI private constructor() {
             authRequest.email = email
             authRequest.password = password
 
-            val authTokenCall = client().authenticate(authRequest)
+            val authTokenCall = client.authenticate(authRequest)
 
             val authTokenCallback = object : Callback<AuthTokenResponse> {
                 override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
@@ -111,7 +105,7 @@ class RestAPI private constructor() {
 
                 val refreshTokenRequest = RefreshTokenRequest()
                 refreshTokenRequest.refreshToken = refreshToken
-                val refreshTokenCall = client().refreshToken(refreshTokenRequest)
+                val refreshTokenCall = client.refreshToken(refreshTokenRequest)
 
                 val refreshTokenCallback = object : Callback<AuthTokenResponse> {
                     override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
@@ -150,7 +144,7 @@ class RestAPI private constructor() {
 
                 val refreshTokenRequest = RefreshTokenRequest()
                 refreshTokenRequest.refreshToken = refreshToken
-                val refreshTokenCall = client().refreshToken(refreshTokenRequest)
+                val refreshTokenCall = client.refreshToken(refreshTokenRequest)
 
                 val accessToken = refreshTokenCall.execute().body()
                 return if (accessToken != null) {
@@ -169,7 +163,7 @@ class RestAPI private constructor() {
         }
 
         fun getScannableEvents(accessToken: String): ArrayList<EventModel>? {
-            val getScannableEventsCall = client().getScannableEvents(accessToken)
+            val getScannableEventsCall = client.getScannableEvents(accessToken)
             return getScannableEventsCall.execute().body()?.data
         }
 
@@ -182,7 +176,7 @@ class RestAPI private constructor() {
             page: Int?
         ): ArrayList<TicketModel>? {
             val getTicketsForEventCall =
-                client().getTicketsForEvent(accessToken, eventId, changesSince, limit, page, filter)
+                client.getTicketsForEvent(accessToken, eventId, changesSince, limit, page, filter)
             return getTicketsForEventCall.execute().body()?.data
         }
 
@@ -195,7 +189,7 @@ class RestAPI private constructor() {
             try {
                 val redeemRequest = RedeemRequest()
                 redeemRequest.redeemKey = redeemKey
-                val redeemTicketForEventCall = client()
+                val redeemTicketForEventCall = client
                     .redeemTicketForEvent(accessToken, eventId, ticketId, redeemRequest)
 
                 val response = redeemTicketForEventCall.execute()
@@ -211,7 +205,7 @@ class RestAPI private constructor() {
                         response?.body()
                     }
             } catch (e: Exception) {
-                Log.e(TAG, e.message)
+                Log.e(TAG, e.message!!)
             }
             return null
         }
@@ -220,7 +214,7 @@ class RestAPI private constructor() {
             accessToken: String,
             eventId: String
         ): EventModel? {
-            val getEventCall = client().getEvent(accessToken, eventId)
+            val getEventCall = client.getEvent(accessToken, eventId)
             return getEventCall.execute().body()
         }
 
@@ -228,7 +222,7 @@ class RestAPI private constructor() {
             accessToken: String,
             eventId: String
         ): EventDashboardModel? {
-            val getEventDashboardCall = client().getEventDashboard(accessToken, eventId)
+            val getEventDashboardCall = client.getEventDashboard(accessToken, eventId)
             return getEventDashboardCall.execute().body()?.event
         }
 
@@ -237,7 +231,7 @@ class RestAPI private constructor() {
             ticketId: String
         ): TicketModel? {
             try {
-                val getTicketCall = client().getTicket(accessToken, ticketId)
+                val getTicketCall = client.getTicket(accessToken, ticketId)
                 val response = getTicketCall.execute()
                 return if (response.body() != null) {
                     val ticket = response.body()!!.ticket!!
@@ -255,7 +249,23 @@ class RestAPI private constructor() {
                     null
                 }
             } catch (e: Exception) {
-                Log.e(TAG, e.message)
+                Log.e(TAG, e.message!!)
+            }
+            return null
+        }
+
+        fun getUserInfo(
+            accessToken: String
+        ): UserInfoResponse? {
+            try {
+                val getUserInfoCall = client.getUserInfo(accessToken)
+                val response = getUserInfoCall.execute()
+                return if (response.body() != null) response.body() else {
+                    Log.e(TAG, "getting user info failed")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e.message!!)
             }
             return null
         }
