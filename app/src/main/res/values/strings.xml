@@ -60,6 +60,7 @@
     <string name="zxscan_ok_image">Scan OK image</string>
     <string name="zxscan_error_image">Scan ERROR image</string>
     <string name="loading_tickets_is_about_to_begin">Loading tickets is about to begin...</string>
+    <string name="loading_tickets_waiting_for_network">Loading tickets is waiting for network...</string>
     <string name="base_url">Base URL:</string>
     <string name="change_base_url">Change Base URL</string>
 </resources>

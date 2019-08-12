@@ -34,10 +34,9 @@ class StoreTicketsService : IntentService("StoreTicketsService") {
             fun loadPageOfTickets(page: Int) {
                 var tickets: ArrayList<TicketModel>? = null
 
-                if (!isNetworkAvailable(getContext())) {
-                    Log.d(TAG, "Network is not available!")
+                while (!isNetworkAvailable(getContext())) {
+                    Log.e(TAG, "Network is not available!")
                     Thread.sleep(3000)
-                    loadPageOfTickets(page)
                 }
 
                 RestAPI.getTicketsForEvent(
