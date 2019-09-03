@@ -27,8 +27,9 @@ class SQLiteHelper : SQLiteOpenHelper(
             return instance.writableDatabase
         }
 
-        fun closeDB(db: SQLiteDatabase) {
-            db.close()
+        fun deleteDB() {
+            instance.writableDatabase.close()
+            BigNeonApplication.context?.deleteDatabase(AppConstants.DATABASE_NAME)
         }
     }
 
@@ -39,8 +40,6 @@ class SQLiteHelper : SQLiteOpenHelper(
 
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_D)
         db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_EVENTS_U)
-//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_D)
-//        db?.execSQL(TableSyncDML.TABLE_SYNC_INSERT_TICKETS_U)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

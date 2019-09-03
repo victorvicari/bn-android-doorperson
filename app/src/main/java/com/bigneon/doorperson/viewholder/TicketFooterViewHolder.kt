@@ -19,6 +19,4 @@ class TicketFooterViewHolder internal constructor(itemView: View) : TicketBaseVi
     override fun bind(position: Int) {
 
     }
-
-
 }

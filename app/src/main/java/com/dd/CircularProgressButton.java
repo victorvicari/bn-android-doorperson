@@ -52,28 +52,11 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
     private int mMaxProgress;
     private int mProgress;
     private boolean mMorphingInProgress;
-    private OnAnimationEndListener mErrorStateListener = new OnAnimationEndListener() {
+    private OnAnimationEndListener mProgressStateListener = new OnAnimationEndListener() {
         @Override
         public void onAnimationEnd() {
-            if (mIconError != 0) {
-                setText(null);
-                setIcon(mIconError);
-            } else {
-                setText(mErrorText);
-            }
             mMorphingInProgress = false;
-            mState = State.ERROR;
-
-            mStateManager.checkState(CircularProgressButton.this);
-        }
-    };
-    private OnAnimationEndListener mIdleStateListener = new OnAnimationEndListener() {
-        @Override
-        public void onAnimationEnd() {
-            removeIcon();
-            setText(mIdleText);
-            mMorphingInProgress = false;
-            mState = State.IDLE;
+            mState = State.PROGRESS;
 
             mStateManager.checkState(CircularProgressButton.this);
         }
@@ -93,11 +76,28 @@ public class CircularProgressButton extends android.support.v7.widget.AppCompatB
             mStateManager.checkState(CircularProgressButton.this);
         }
     };
-    private OnAnimationEndListener mProgressStateListener = new OnAnimationEndListener() {
+    private OnAnimationEndListener mIdleStateListener = new OnAnimationEndListener() {
         @Override
         public void onAnimationEnd() {
+            removeIcon();
+            setText(mIdleText);
             mMorphingInProgress = false;
-            mState = State.PROGRESS;
+            mState = State.IDLE;
+
+            mStateManager.checkState(CircularProgressButton.this);
+        }
+    };
+    private OnAnimationEndListener mErrorStateListener = new OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd() {
+            if (mIconError != 0) {
+                setText(null);
+                setIcon(mIconError);
+            } else {
+                setText(mErrorText);
+            }
+            mMorphingInProgress = false;
+            mState = State.ERROR;
 
             mStateManager.checkState(CircularProgressButton.this);
         }

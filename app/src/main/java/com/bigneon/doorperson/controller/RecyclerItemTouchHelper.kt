@@ -122,7 +122,7 @@ class RecyclerItemTouchHelper :
                                 TicketDataHandler.TicketState.REDEEMED -> {
                                     Snackbar
                                         .make(
-                                            viewHolder.itemView,
+                                            parentLayout!!,
                                             "Redeemed ${"${ticketModel.lastName!!}, ${ticketModel.firstName!!}"}",
                                             Snackbar.LENGTH_LONG
                                         )
@@ -133,7 +133,7 @@ class RecyclerItemTouchHelper :
                                 TicketDataHandler.TicketState.CHECKED -> {
                                     Snackbar
                                         .make(
-                                            viewHolder.itemView,
+                                            parentLayout!!,
                                             "Checked in ${"${ticketModel.lastName!!}, ${ticketModel.firstName!!}"}",
                                             Snackbar.LENGTH_LONG
                                         )
@@ -154,7 +154,7 @@ class RecyclerItemTouchHelper :
 
                                     Snackbar
                                         .make(
-                                            viewHolder.itemView,
+                                            parentLayout!!,
                                             "Warning: Ticket redeemed by ${ticketModel.redeemedBy} ${AppUtils.getTimeAgo(
                                                 ticketModel.redeemedAt!!
                                             )}",

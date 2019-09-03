@@ -39,8 +39,8 @@
     <string name="log_out">Log out</string>
     <string name="enable_offline_mode">Enable offline mode</string>
     <string name="disable_offline_mode">Disable offline mode</string>
-    <string name="offline_mode_enabled">Offline mode is enabled</string>
-    <string name="offline_mode_disabled">Offline mode is disabled</string>
+    <string name="offline_mode_enabled">Offline mode is ENABLED</string>
+    <string name="offline_mode_disabled">Offline mode is DISABLED</string>
     <string name="warning">WARNING!</string>
     <string name="duplicate_ticket_msg">Duplicate ticket detected!!!\nTicket has already been redeemed!\n\nTicket: %1$s\nUser: %2$s\nRedeemed by: %3$s\nRedeemed at: %4$s</string>
     <string name="go_back">GO BACK</string>
@@ -60,4 +60,7 @@
     <string name="zxscan_ok_image">Scan OK image</string>
     <string name="zxscan_error_image">Scan ERROR image</string>
     <string name="loading_tickets_is_about_to_begin">Loading tickets is about to begin...</string>
+    <string name="loading_tickets_waiting_for_network">Loading tickets is waiting for network...</string>
+    <string name="base_url">Base URL:</string>
+    <string name="change_base_url">Change Base URL</string>
 </resources>

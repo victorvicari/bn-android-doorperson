@@ -24,8 +24,4 @@ class EventListAdapter(private val list: ArrayList<EventModel>) : RecyclerView.A
     }
 
     override fun getItemCount(): Int = list.size
-
-    fun getItemByEventId(eventId: String): EventModel{
-        return list.stream().filter { e -> e.id == eventId }.findAny().orElse(null)
-    }
 }

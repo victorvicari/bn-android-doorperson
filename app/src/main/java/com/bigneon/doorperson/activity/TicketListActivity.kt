@@ -247,12 +247,14 @@ class TicketListActivity : AppCompatActivity() {
                 ticket.status = status ?: ""
         }
 
-        mAdapter?.list = recyclerItemTouchHelper.ticketList
+        if (recyclerItemTouchHelper.ticketList != null) {
+            mAdapter?.list = recyclerItemTouchHelper.ticketList
 
-        // Removing placeholder it there is any tickets on the list
-        if (mAdapter?.list?.size!! > 0) {
-            no_guests_found_placeholder.visibility = View.GONE
-            ticket_list_view.visibility = View.VISIBLE
+            // Removing placeholder it there is any tickets on the list
+            if (mAdapter?.list?.size!! > 0) {
+                no_guests_found_placeholder.visibility = View.GONE
+                ticket_list_view.visibility = View.VISIBLE
+            }
         }
 
         // Setting up previous scroll position

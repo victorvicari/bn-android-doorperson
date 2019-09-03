@@ -23,10 +23,6 @@ object TableSyncDML {
         "insert into $TABLE_SYNC($TABLE_NAME, $EVENT_ID, $SYNC_DIRECTION, $LAST_SYNC_TIME) values('$TABLE_EVENTS', null,  'D', '$MIN_TIMESTAMP')"
     const val TABLE_SYNC_INSERT_EVENTS_U =
         "insert into $TABLE_SYNC($TABLE_NAME, $EVENT_ID, $SYNC_DIRECTION, $LAST_SYNC_TIME) values('$TABLE_EVENTS', null, 'U', '$MAX_TIMESTAMP')"
-//    const val TABLE_SYNC_INSERT_TICKETS_D =
-//        "insert into $TABLE_SYNC($TABLE_NAME, $SYNC_DIRECTION, $LAST_SYNC_TIME) values('${TableTicketsDML.TABLE_TICKETS}', 'D', '$MIN_TIMESTAMP')"
-//    const val TABLE_SYNC_INSERT_TICKETS_U =
-//        "insert into $TABLE_SYNC($TABLE_NAME, $SYNC_DIRECTION, $LAST_SYNC_TIME) values('${TableTicketsDML.TABLE_TICKETS}', 'U', '$MAX_TIMESTAMP')"
 
     const val TABLE_SYNC_DELETE = "drop table if exists $TABLE_SYNC"
 }

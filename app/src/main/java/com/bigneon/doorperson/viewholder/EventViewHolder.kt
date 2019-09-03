@@ -41,7 +41,7 @@ class EventViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
             .load(event.promoImageURL) // load the image
             .into(imageImageView) // select the ImageView to load it into
 
-        when(event.progress) {
+        when (event.progress) {
             0 -> {
                 eventRightArrow?.visibility = View.VISIBLE
                 eventLoadingProgressBarPercent?.visibility = View.GONE

@@ -99,6 +99,7 @@ class LoginActivity : AppCompatActivity() {
 
         SharedPrefs.setContext(this)
         RestAPI.setContext(this)
+        RestAPI.setBaseURL()
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

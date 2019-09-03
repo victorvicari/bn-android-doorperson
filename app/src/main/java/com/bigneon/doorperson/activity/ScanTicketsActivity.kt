@@ -214,7 +214,7 @@ class ScanTicketsActivity : AppCompatActivity(), ZXingScannerView.ResultHandler 
                         Snackbar
                             .make(
                                 scan_tickets_layout,
-                                "The ticket isn't belong to the current event!",
+                                "The ticket doesn't belong to the current event!",
                                 Snackbar.LENGTH_LONG
                             )
                             .setDuration(3000).show()

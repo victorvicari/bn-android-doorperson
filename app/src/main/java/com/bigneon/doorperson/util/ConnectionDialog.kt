@@ -12,8 +12,6 @@ import android.support.v7.app.AlertDialog
 abstract class ConnectionDialog {
 
     fun showDialog(context: Context) {
-        // build alert dialog
-        // set message of alert dialog
         AlertDialog.Builder(context)
             .setTitle("Error in connection!")
             .setMessage("User ticket is NOT redeemed because offline mode has been disabled and there is no internet connection")
