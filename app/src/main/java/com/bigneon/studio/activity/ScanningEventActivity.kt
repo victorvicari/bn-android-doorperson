@@ -234,7 +234,7 @@ class ScanningEventActivity : AppCompatActivity() {
     private fun isLoadingInProgress(): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.bigneon.doorperson.service.StoreTicketsService" == service.service.className) {
+            if ("com.bigneon.studio.service.StoreTicketsService" == service.service.className) {
                 return true
             }
         }

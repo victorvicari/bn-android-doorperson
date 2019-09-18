@@ -23,7 +23,7 @@ repositories {
 android {
     compileSdkVersion 29
     defaultConfig {
-        applicationId "com.bigneon.doorperson"
+        applicationId "com.bigneon.studio"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 2
