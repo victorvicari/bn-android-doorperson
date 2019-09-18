@@ -105,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         login_email_address.setText(intent.getStringExtra("email"))
-        login_password.setText(intent.getStringExtra("password"))
+        //login_password.setText(intent.getStringExtra("password"))
 
         turn_on_wifi.isIndeterminateProgressMode = true
         turn_on_wifi.setOnClickListener {
@@ -176,7 +176,7 @@ class LoginActivity : AppCompatActivity() {
                                         // refreshes the activity
                                         finish()
                                         intent.putExtra("email", login_email_address.text.toString())
-                                        intent.putExtra("password", login_password.text.toString())
+                                        //intent.putExtra("password", login_password.text.toString())
                                         startActivity(intent)
                                     }, 3000)
                                 } else {
