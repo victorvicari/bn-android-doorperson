@@ -210,14 +210,6 @@ class RestAPI private constructor() {
             return null
         }
 
-        fun getEvent(
-            accessToken: String,
-            eventId: String
-        ): EventModel? {
-            val getEventCall = client.getEvent(accessToken, eventId)
-            return getEventCall.execute().body()
-        }
-
         fun getEventDashboard(
             accessToken: String,
             eventId: String

@@ -1,6 +1,5 @@
 package com.bigneon.studio.rest
 
-import com.bigneon.studio.rest.model.EventModel
 import com.bigneon.studio.rest.model.TicketModel
 import com.bigneon.studio.rest.request.AuthRequest
 import com.bigneon.studio.rest.request.RedeemRequest
@@ -47,12 +46,6 @@ interface RestClient {
         @Path("ticket_id") ticketId: String,
         @Body redeemRequest: RedeemRequest
     ): Call<TicketModel>
-
-    @GET("events/{event_id}")
-    fun getEvent(
-        @Header("Authorization") token: String,
-        @Path("event_id") eventId: String
-    ): Call<EventModel>
 
     @GET("events/{event_id}/dashboard")
     fun getEventDashboard(
