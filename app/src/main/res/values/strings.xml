@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
     <string name="app_name">Big Neon Studio</string>
-    <string name="welcome_back">Welcome back!</string>
+    <string name="big_neon_studio">Big Neon Studio</string>
     <string name="email_address">Email Address</string>
     <string name="password">Password (at least 6 characters)</string>
     <string name="reset_your_password"><![CDATA[Reset your password >]]></string>
