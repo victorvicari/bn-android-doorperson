@@ -55,7 +55,10 @@ class EventDataHandler {
                 var event: EventModel? = null
                 doAsync {
                     val accessToken: String? = RestAPI.accessToken()
-                    RestAPI.getEvent(accessToken!!, eventId)?.let { event = it }
+                    //RestAPI.getEvent(accessToken!!, eventId)?.let { event = it }
+                    RestAPI.getScannableEvents(accessToken!!)?.let {
+                        event = it.firstOrNull { e -> e.id == eventId }
+                    }
                 }.get() // get() is important to wait until doAsync is finished
                 return event
             }
