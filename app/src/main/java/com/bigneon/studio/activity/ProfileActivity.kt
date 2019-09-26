@@ -12,7 +12,7 @@ import com.bigneon.studio.config.SharedPrefs
 import com.bigneon.studio.db.SQLiteHelper
 import com.bigneon.studio.rest.RestAPI
 import com.bigneon.studio.rest.response.UserInfoResponse
-import com.bigneon.studio.util.AppUtils
+import com.bigneon.studio.util.AppUtils.Companion.checkLogged
 import com.bigneon.studio.util.AppUtils.Companion.disableOfflineMode
 import com.bigneon.studio.util.AppUtils.Companion.enableOfflineMode
 import com.bigneon.studio.util.AppUtils.Companion.isOfflineModeEnabled
@@ -31,7 +31,7 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(com.bigneon.studio.R.layout.activity_profile)
         setSupportActionBar(profile_settings_toolbar)
 
-        AppUtils.checkLogged()
+        checkLogged()
 
         //this line shows back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

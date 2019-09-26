@@ -13,6 +13,7 @@ import com.bigneon.studio.adapter.addOnItemClickListener
 import com.bigneon.studio.controller.EventDataHandler
 import com.bigneon.studio.receiver.NetworkStateReceiver
 import com.bigneon.studio.util.AppUtils
+import com.bigneon.studio.util.AppUtils.Companion.checkLogged
 import com.bigneon.studio.util.AppUtils.Companion.eventListItemOffset
 import com.bigneon.studio.util.AppUtils.Companion.eventListItemPosition
 import com.bigneon.studio.util.ConnectionDialog
@@ -47,7 +48,7 @@ class EventListActivity : AppCompatActivity() {
         setContentView(com.bigneon.studio.R.layout.activity_event_list)
         eventDataHandler = EventDataHandler()
 
-        AppUtils.checkLogged()
+        checkLogged()
 
         eventsListView = events_layout.findViewById(com.bigneon.studio.R.id.events_list_view)
 
