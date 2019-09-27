@@ -8,8 +8,6 @@ import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
-import android.text.method.HideReturnsTransformationMethod
-import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils.loadAnimation
@@ -136,27 +134,12 @@ class LoginActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable) {}
         })
 
-        show_hide_password.setOnClickListener {
-            show_hide_password.text =
-                if (show_hide_password.text == getString(R.string.show)) getString(R.string.hide) else getString(
-                    R.string.show
-                )
-
-            showPassword = show_hide_password.text == getString(R.string.show)
-            login_password.transformationMethod =
-                if (showPassword) PasswordTransformationMethod.getInstance() else HideReturnsTransformationMethod.getInstance()
-        }
-
         loginBtn.isIndeterminateProgressMode = true
         loginBtn.setOnClickListener {
             when {
                 login_email_address.text.toString().isEmpty() -> {
                     email_address_message.visibility = View.VISIBLE
                     login_email_address.startAnimation(loadAnimation(this, R.anim.shake))
-                }
-                login_password.text.toString().isEmpty() || login_password.text?.length!! < 7 -> {
-                    password_message.visibility = View.VISIBLE
-                    password_with_show_hide.startAnimation(loadAnimation(this, R.anim.shake))
                 }
                 else -> {
                     if (loginBtn.progress == 0) {
