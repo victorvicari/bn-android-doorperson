@@ -43,8 +43,9 @@ class EventViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     fun bind(event: EventModel) {
         eventNameTextView?.text = event.name
 
-        val dateFormat = SimpleDateFormat(AppConstants.DATE_FORMAT, Locale.US)
-        val eventDateFormat = SimpleDateFormat(AppConstants.EVENT_DATE_FORMAT, Locale.US)
+        val dateFormat = SimpleDateFormat(AppConstants.DATE_FORMAT, Locale.getDefault())
+        val eventDateFormat = SimpleDateFormat(AppConstants.EVENT_DATE_FORMAT, Locale.getDefault())
+        eventDateFormat.timeZone = TimeZone.getTimeZone(event.venue?.timezone ?: "UTC")
         eventDoorTimeTextView?.text = eventDateFormat.format(dateFormat.parse(event.doorTime!!)!!)
 
         eventVenueNameTextView?.text = event.venue?.name
