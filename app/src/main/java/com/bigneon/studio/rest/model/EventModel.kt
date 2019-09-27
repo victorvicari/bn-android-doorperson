@@ -15,5 +15,11 @@ class EventModel {
     @SerializedName("promo_image_url")
     internal var promoImageURL: String? = null
 
+    @SerializedName("door_time")
+    internal var doorTime: String? = null
+
+    internal var venue: VenueModel? = null
+
+
     var progress: Int = 0
 }

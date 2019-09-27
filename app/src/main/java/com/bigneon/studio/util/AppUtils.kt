@@ -4,7 +4,7 @@ import android.content.Intent
 import com.bigneon.studio.BigNeonApplication.Companion.context
 import com.bigneon.studio.activity.LoginActivity
 import com.bigneon.studio.config.AppConstants
-import com.bigneon.studio.config.AppConstants.Companion.DATE_FORMAT
+import com.bigneon.studio.config.AppConstants.Companion.DATE_FORMAT_MS
 import com.bigneon.studio.config.SharedPrefs
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,15 +37,15 @@ class AppUtils {
         }
 
         fun getCurrentTimestamp(): String {
-            val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
+            val dateFormat = SimpleDateFormat(DATE_FORMAT_MS, Locale.US)
             dateFormat.timeZone = TimeZone.getTimeZone("CET")
             val date = Date()
             return dateFormat.format(date)
         }
 
         fun getTimeAgo(redeemedAt: String): String {
-            val formatLocal = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
-            val formatUTC = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            val formatLocal = SimpleDateFormat(DATE_FORMAT_MS, Locale.ENGLISH)
+            val formatUTC = SimpleDateFormat(DATE_FORMAT_MS, Locale.ENGLISH)
             formatUTC.timeZone = TimeZone.getTimeZone("UTC")
 
             val redeemedDate = formatLocal.parse(redeemedAt)

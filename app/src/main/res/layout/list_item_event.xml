@@ -1,69 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:background="@color/colorGray">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorGray"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
 
-    <RelativeLayout
+    <com.jcminarro.roundkornerlayout.RoundKornerRelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/event_item_bg"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp">
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/event_item_bg"
+            app:corner_radius="16dp">
 
         <ImageView
                 android:id="@+id/event_image"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@color/colorBlack"
-                android:contentDescription="@string/event_image"/>
+                android:contentDescription="@string/event_image"
+                android:src="@color/colorBlack" />
 
-        <TextView
-                android:id="@+id/event_name"
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_toEndOf="@+id/event_image"
                 android:layout_toStartOf="@+id/event_right_arrow"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="10dp"
-                android:gravity="center_vertical"/>
+                android:layout_toEndOf="@+id/event_image"
+                android:orientation="vertical"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+            <TextView
+                    android:id="@+id/event_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Puddle of Mud"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+            <TextView
+                    android:id="@+id/event_door_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="13/12/19"
+                    android:textColor="@color/colorDarkGray"
+                    android:textSize="16sp"/>
+
+            <TextView
+                    android:id="@+id/event_venue_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Test venue"
+                    android:textColor="@color/colorDarkGray"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+        </LinearLayout>
+
 
         <ImageView
                 android:id="@+id/event_right_arrow"
                 android:layout_width="50dp"
                 android:layout_height="100dp"
-                android:padding="15dp"
+                android:layout_alignParentEnd="true"
                 android:contentDescription="@string/event_right_arrow"
-                android:src="@drawable/right_arrow"
-                android:layout_alignParentEnd="true"/>
+                android:padding="15dp"
+                android:src="@drawable/right_arrow" />
 
         <TextView
                 android:id="@+id/event_loading_progress_bar_percent"
                 android:layout_width="50dp"
                 android:layout_height="100dp"
-                android:textSize="12sp"
                 android:layout_alignParentEnd="true"
                 android:gravity="center"
-                android:visibility="gone"/>
+                android:textSize="12sp"
+                android:visibility="gone" />
 
         <ProgressBar
                 android:id="@+id/event_loading_progress_bar"
                 android:layout_width="50dp"
                 android:layout_height="100dp"
-                android:progress="20"
-                android:padding="2dp"
-                android:contentDescription="@string/event_right_arrow"
                 android:layout_alignParentEnd="true"
-                android:visibility="gone"/>
+                android:contentDescription="@string/event_right_arrow"
+                android:padding="2dp"
+                android:progress="20"
+                android:visibility="gone" />
 
-    </RelativeLayout>
+    </com.jcminarro.roundkornerlayout.RoundKornerRelativeLayout>
 
 </RelativeLayout>
